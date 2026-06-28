@@ -64,7 +64,7 @@ function Knob({ id, label, bipolar = false, big = false }) {
   const ref = useRef(null);
   const drag = useRef(null);
   const A0 = -135, SWEEP = 270;
-  const D = big ? 64 : 52, c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
+  const D = big ? 52 : 42, c = D / 2, sw = big ? 3.6 : 3, R = c - sw - 1;
   const ang = A0 + v * SWEEP;
   const rad = (d) => d * Math.PI / 180;
   const pt = (r, a) => [c + r * Math.sin(rad(a)), c - r * Math.cos(rad(a))];
@@ -224,18 +224,39 @@ function EnvViz({ n }) {
   );
 }
 
+// Draw the LFO's actual waveform shape (two cycles) from its wave type — exact at
+// any rate, unlike a 30 Hz rolling scope which aliases. A live playhead dot rides
+// the curve at the engine-reported phase so motion is still visible and correct.
 function LfoScope({ n }) {
-  const meters = B.useEvent("meters", { lfo: [0, 0, 0] });
-  const lv = (meters.lfo && meters.lfo[n - 1]) || 0;
-  const hist = useRef(new Array(64).fill(0));
-  useEffect(() => { hist.current.push(lv); if (hist.current.length > 64) hist.current.shift(); }, [lv]);
-  const W = 140, H = 34;
-  const pts = hist.current.map((y, i) =>
-    ((i / 63) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 2)).toFixed(1)).join(" ");
+  const [wave] = B.useChoice("lfo" + n + "Wave");
+  const meters = B.useEvent("meters", { lfoPhase: [0, 0, 0] });
+  const ph = (meters.lfoPhase && meters.lfoPhase[n - 1]) || 0;
+  const W = 140, H = 26, cy = H / 2, amp = H / 2 - 2.5;
+  const shape = (t) => {
+    t = t - Math.floor(t);
+    switch (wave) {
+      case 0: return Math.sin(2 * Math.PI * t);
+      case 1: return t < 0.5 ? 4 * t - 1 : 3 - 4 * t;
+      case 2: return 2 * t - 1;
+      case 3: return 1 - 2 * t;
+      case 4: return t < 0.5 ? 1 : -1;
+      case 5: { const k = Math.floor(t * 6); const r = Math.sin(k * 12.9898) * 43758.5; return (r - Math.floor(r)) * 2 - 1; }
+      default: return 0;
+    }
+  };
+  const N = 96, cycles = 2;
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * cycles;
+    pts.push(((i / N) * W).toFixed(1) + "," + (cy - shape(t) * amp).toFixed(1));
+  }
+  const phx = ((ph * cycles) % cycles) / cycles * W;
+  const phy = cy - shape(ph * cycles) * amp;
   return (
     <svg className="viz scope" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-      <line x1="0" y1={H / 2} x2={W} y2={H / 2} className="mid" />
-      <polyline points={pts} />
+      <line x1="0" y1={cy} x2={W} y2={cy} className="mid" />
+      <polyline points={pts.join(" ")} />
+      <circle cx={phx.toFixed(1)} cy={phy.toFixed(1)} r="2" className="scope-dot" />
     </svg>
   );
 }
@@ -610,6 +631,7 @@ function App() {
           <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
           <EnvPanel n={3} name="AUX ENV" accent="#5a9ae0" />
           <MasterPanel />
+          <ReverbPanel />
         </div>
         <div className="col">
           <LfoPanel n={1} accent="#c08ae0" />
@@ -621,7 +643,6 @@ function App() {
           <ModMatrix />
           <FxPanel />
           <DelayPanel />
-          <ReverbPanel />
         </div>
       </div>
       <footer className="foot">

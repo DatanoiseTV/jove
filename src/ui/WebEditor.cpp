@@ -226,10 +226,14 @@ void JoveWebEditor::emitMeters()
     o->setProperty("outL", processor.getOutputLevel(0));
     o->setProperty("outR", processor.getOutputLevel(1));
     o->setProperty("note", processor.getLastMidiNote());
-    juce::Array<juce::var> lfos;
+    juce::Array<juce::var> lfos, lfoPh;
     for(int i = 0; i < jove::kNumLfo; ++i)
+    {
         lfos.add(processor.getLfoValue(i));
+        lfoPh.add(processor.getLfoPhase(i));
+    }
     o->setProperty("lfo", juce::var(lfos));
+    o->setProperty("lfoPhase", juce::var(lfoPh));
     webView->emitEventIfBrowserIsVisible("meters", juce::var(o));
 }
 

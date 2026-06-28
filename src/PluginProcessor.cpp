@@ -205,7 +205,10 @@ void JoveAudioProcessor::publishMeters(const float* l, const float* r, int n) no
     outputLevel[1].store(r != nullptr ? peakR : peakL, std::memory_order_relaxed);
     activeVoices.store(engine.activeVoices(), std::memory_order_relaxed);
     for(int i = 0; i < kNumLfo; ++i)
+    {
         lfoValueUI[(size_t) i].store(engine.lfoValue(i), std::memory_order_relaxed);
+        lfoPhaseUI[(size_t) i].store(engine.lfoPhase(i), std::memory_order_relaxed);
+    }
 }
 
 juce::AudioProcessorEditor* JoveAudioProcessor::createEditor()

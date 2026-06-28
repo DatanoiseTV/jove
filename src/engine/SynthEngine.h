@@ -63,6 +63,7 @@ class SynthEngine
     // ---- UI / metering -----------------------------------------------------
     int   activeVoices() const noexcept;
     float lfoValue(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].value() : 0.0f; }
+    float lfoPhase(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].phase() : 0.0f; }
     // Monotonic count of note triggers — bumps on every voice start (keyboard or
     // arp step). The UI uses the delta as an "arp pulse"; tests use it to confirm
     // the arp is actually stepping.
