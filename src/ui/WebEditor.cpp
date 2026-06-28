@@ -234,6 +234,10 @@ void JoveWebEditor::emitMeters()
     }
     o->setProperty("lfo", juce::var(lfos));
     o->setProperty("lfoPhase", juce::var(lfoPh));
+    juce::Array<juce::var> vl;
+    for(int i = 0; i < jove::kMaxVoices; ++i)
+        vl.add(processor.getVoiceLevel(i));
+    o->setProperty("voiceLevels", juce::var(vl));
     webView->emitEventIfBrowserIsVisible("meters", juce::var(o));
 }
 

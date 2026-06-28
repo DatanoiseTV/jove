@@ -69,6 +69,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
 
     // ---- UI metering (lock-free atomics, published once per processBlock) ----
     int   getActiveVoices() const { return activeVoices.load(std::memory_order_relaxed); }
+    float getVoiceLevel(int i) const { return (i >= 0 && i < jove::kMaxVoices) ? voiceLevelUI[(size_t) i].load(std::memory_order_relaxed) : 0.0f; }
     float getOutputLevel(int ch) const { return outputLevel[(size_t) juce::jlimit(0, 1, ch)].load(std::memory_order_relaxed); }
     float getLfoValue(int i) const { return (i >= 0 && i < jove::kNumLfo) ? lfoValueUI[(size_t) i].load(std::memory_order_relaxed) : 0.0f; }
     float getLfoPhase(int i) const { return (i >= 0 && i < jove::kNumLfo) ? lfoPhaseUI[(size_t) i].load(std::memory_order_relaxed) : 0.0f; }
@@ -115,6 +116,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     std::array<std::atomic<float>, 2> outputLevel {};
     std::array<std::atomic<float>, jove::kNumLfo> lfoValueUI {};
     std::array<std::atomic<float>, jove::kNumLfo> lfoPhaseUI {};
+    std::array<std::atomic<float>, jove::kMaxVoices> voiceLevelUI {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JoveAudioProcessor)
 };

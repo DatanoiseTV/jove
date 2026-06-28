@@ -62,6 +62,11 @@ class SynthEngine
 
     // ---- UI / metering -----------------------------------------------------
     int   activeVoices() const noexcept;
+    // Per-voice amp-envelope level (0 if the voice is idle) for the voice LEDs.
+    float voiceLevel(int i) const noexcept
+    {
+        return (i >= 0 && i < kMaxVoices && voice_[i].active()) ? voice_[i].ampEnvLevel() : 0.0f;
+    }
     float lfoValue(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].value() : 0.0f; }
     float lfoPhase(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].phase() : 0.0f; }
     // Monotonic count of note triggers — bumps on every voice start (keyboard or

@@ -522,6 +522,24 @@ function MasterPanel() {
 }
 
 /* ============================ top bar ============================ */
+function VoiceLeds() {
+  const meters = B.useEvent("meters", { voiceLevels: [] });
+  const [mv] = B.useSlider("maxVoices");
+  const n = Math.round(1 + mv * 7); // maxVoices 1..8
+  const lv = meters.voiceLevels || [];
+  const leds = [];
+  for (let i = 0; i < n; i++) {
+    const g = Math.max(0, Math.min(1, lv[i] || 0));
+    leds.push(<span key={i} className={"vled" + (g > 0.02 ? " on" : "")} style={{ "--g": g.toFixed(3) }} />);
+  }
+  return (
+    <div className="tb-voices" title={n + " voices"}>
+      <div className="vleds">{leds}</div>
+      <span className="vl">VOICES</span>
+    </div>
+  );
+}
+
 function TopBar() {
   const preset = B.useEvent("preset", { name: "INIT", category: 1, index: -1 });
   const meters = B.useEvent("meters", { voices: 0, note: -1 });
@@ -547,7 +565,7 @@ function TopBar() {
       <div className="tb-global">
         <Seg id="quality" options={QUALITY} label="QUALITY" />
       </div>
-      <div className="tb-voices"><span className="v">{meters.voices}</span><span className="vl">ACTIVE</span></div>
+      <VoiceLeds />
       {browse && <Browser onClose={() => setBrowse(false)} />}
       {saving && <SaveDialog onClose={() => setSaving(false)} cat={preset.category} />}
     </header>
