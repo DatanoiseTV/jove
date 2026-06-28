@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jove</title>
+  <link rel="stylesheet" href="jove.css" />
+  <style>
+    #diag {
+      position: fixed; inset: 8px 8px auto 8px; z-index: 99999;
+      background: #14161d; color: #cdd3e0; border: 1px solid #262a36;
+      border-radius: 10px; padding: 12px 14px;
+      font: 12px/1.5 ui-sans-serif, system-ui, sans-serif;
+      display: grid; gap: 3px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.8);
+    }
+    #diag .row { display: flex; gap: 8px; opacity: .45; }
+    #diag .row.ok { opacity: 1; }
+    #diag .row.ok .tick { color: #7ee0a0; }
+    #diag .tick { width: 13px; text-align: center; }
+    #diag .row.ok .tick::before { content: "\2713"; }
+    #diag .row:not(.ok) .tick::before { content: "\00b7"; }
+    #diag .err { margin-top: 6px; color: #ff9d9d; font-family: ui-monospace, monospace;
+      font-size: 11px; white-space: pre-wrap; display: none; }
+    #diag .err.on { display: block; }
+    body:has(#app) #diag { display: none; }
+  </style>
+</head>
+<body>
+  <div id="diag" aria-live="polite">
+    <div class="row ok"><span class="tick"></span>HTML</div>
+    <div class="row" id="d-juce"><span class="tick"></span>JUCE bridge</div>
+    <div class="row" id="d-react"><span class="tick"></span>React</div>
+    <div class="row" id="d-babel"><span class="tick"></span>Babel</div>
+    <div class="err" id="d-err"></div>
+  </div>
+  <div id="root"></div>
+
+  <script>
+    var ok = (id) => { var e = document.getElementById(id); if (e) e.classList.add('ok'); };
+    var fail = (m) => { var e = document.getElementById('d-err'); if (e) { e.textContent = m; e.classList.add('on'); } };
+    window.addEventListener('error', (e) => fail('JS error: ' + (e.message||e.error) + ' @ ' + (e.filename||'?') + ':' + (e.lineno||'?')));
+    window.addEventListener('unhandledrejection', (e) => fail('rejection: ' + e.reason));
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('dragstart', (e) => e.preventDefault());
+  </script>
+
+  <script src="juce-framework-frontend.js"></script>
+  <script>ok('d-juce');</script>
+  <script src="react.production.min.js"></script>
+  <script src="react-dom.production.min.js"></script>
+  <script>ok('d-react');</script>
+  <script src="babel.min.js"></script>
+  <script>
+    ok('d-babel');
+    window.useState = React.useState; window.useEffect = React.useEffect;
+    window.useRef = React.useRef; window.useCallback = React.useCallback;
+    window.useMemo = React.useMemo;
+  </script>
+
+  <script type="text/babel" data-presets="react" src="jove-bridge.jsx"></script>
+  <script type="text/babel" data-presets="react" src="app.jsx"></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+/*
+  Jove — analog-inspired polysynth  (Keinedelay/DFM hardware)
+  Copyright (C) 2026 DatanoiseTV
+
+  GPL-3.0-or-later, WITHOUT ANY WARRANTY. Retain attribution to DatanoiseTV.
+*/
+
+#pragma once
+
+#include <algorithm>
+#include <cmath>
+#include <vector>
+
+namespace jove
+{
+// Clean Schroeder-Moorer (Freeverb-style) stereo reverb: 8 damped comb filters
+// in parallel into 4 allpass filters in series, per channel, with the right
+// channel's delays offset for stereo width. There is NO modulation anywhere, so
+// the tail is perfectly pitch-stable — the opposite of the tape engine's
+// pitch-wobbling spring/plate. Buffers live in SDRAM. mix 0 = true bypass.
+class SynthReverb
+{
+  public:
+    void prepare(float sampleRate) noexcept
+    {
+        sr_         = sampleRate;
+        const float k = sampleRate / 44100.0f; // Freeverb tunings are for 44.1 kHz
+        static const int combTune[kNumComb] = {1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617};
+        static const int apTune[kNumAp]     = {556, 441, 341, 225};
+        const int        spread             = (int)(23 * k);
+        for(int c = 0; c < kNumComb; ++c)
+        {
+            int nL = (int)(combTune[c] * k);
+            int nR = nL + spread;
+            combL_[c].init(nL);
+            combR_[c].init(nR);
+        }
+        for(int a = 0; a < kNumAp; ++a)
+        {
+            int nL = (int)(apTune[a] * k);
+            int nR = nL + spread;
+            apL_[a].init(nL);
+            apR_[a].init(nR);
+        }
+        reset();
+    }
+
+    void reset() noexcept
+    {
+        for(int c = 0; c < kNumComb; ++c) { combL_[c].clear(); combR_[c].clear(); }
+        for(int a = 0; a < kNumAp; ++a)   { apL_[a].clear();   apR_[a].clear(); }
+    }
+
+    // size 0..1 -> room feedback; damp 0..1 -> HF absorption; mix 0..1 wet.
+    void setSize(float s) noexcept { roomfb_ = 0.7f + 0.28f * clamp01(s); }
+    void setDamp(float d) noexcept { damp_ = clamp01(d); }
+    void setMix(float m) noexcept { mix_ = clamp01(m); }
+
+    void process(float* L, float* R, int n) noexcept
+    {
+        if(mix_ < 0.001f)
+            return;
+        const float d1 = damp_ * 0.4f;       // comb damping
+        const float d2 = 1.0f - d1;
+        const float in_gain = 0.015f;        // Freeverb fixed input scale
+        for(int i = 0; i < n; ++i)
+        {
+            const float input = (L[i] + R[i]) * in_gain;
+            float wl = 0.0f, wr = 0.0f;
+            for(int c = 0; c < kNumComb; ++c)
+            {
+                wl += combL_[c].process(input, roomfb_, d1, d2);
+                wr += combR_[c].process(input, roomfb_, d1, d2);
+            }
+            for(int a = 0; a < kNumAp; ++a)
+            {
+                wl = apL_[a].process(wl);
+                wr = apR_[a].process(wr);
+            }
+            L[i] = L[i] * (1.0f - mix_) + wl * mix_;
+            R[i] = R[i] * (1.0f - mix_) + wr * mix_;
+        }
+    }
+
+  private:
+    static constexpr int kNumComb = 8;
+    static constexpr int kNumAp   = 4;
+
+    static inline float clamp01(float v) noexcept { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+    struct Comb
+    {
+        std::vector<float> buf;
+        int    len = 0, pos = 0;
+        float  store = 0.0f;
+        void   init(int n)
+        {
+            len = n < 1 ? 1 : n;
+            buf.assign((size_t)len, 0.0f);
+            pos = 0;
+            store = 0.0f;
+        }
+        void clear()
+        {
+            std::fill(buf.begin(), buf.end(), 0.0f);
+            store = 0.0f;
+        }
+        inline float process(float in, float fb, float d1, float d2) noexcept
+        {
+            float out = buf[pos];
+            store = out * d2 + store * d1; // damping low-pass
+            buf[pos] = in + store * fb;
+            if(++pos >= len) pos = 0;
+            return out;
+        }
+    };
+
+    struct Allpass
+    {
+        std::vector<float> buf;
+        int    len = 0, pos = 0;
+        void   init(int n)
+        {
+            len = n < 1 ? 1 : n;
+            buf.assign((size_t)len, 0.0f);
+            pos = 0;
+        }
+        void clear() { std::fill(buf.begin(), buf.end(), 0.0f); }
+        inline float process(float in) noexcept
+        {
+            const float bufout = buf[pos];
+            const float out    = -in + bufout;
+            buf[pos] = in + bufout * 0.5f; // fixed allpass feedback
+            if(++pos >= len) pos = 0;
+            return out;
+        }
+    };
+
+    float   sr_     = 48000.0f;
+    Comb    combL_[kNumComb], combR_[kNumComb];
+    Allpass apL_[kNumAp], apR_[kNumAp];
+    float   roomfb_ = 0.84f;
+    float   damp_   = 0.4f;
+    float   mix_    = 0.0f;
+};
+} // namespace jove
