@@ -17,6 +17,7 @@ JoveAudioProcessor::JoveAudioProcessor()
 {
     binding.connect(apvts);
     presetManager.init(apvts, binding);
+    presetManager.setLoadCallback([this] { panicPending.store(true, std::memory_order_relaxed); });
     InitDefaultPatch(patch);
     apvts.addParameterListener(jID::quality, this);
 }
@@ -152,6 +153,11 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         if(auto pos = ph->getPosition())
             if(auto bpm = pos->getBpm())
                 engine.setTempo((float) *bpm);
+
+    // a preset just loaded -> gate every voice off so held/stuck notes don't
+    // bleed into the new patch.
+    if(panicPending.exchange(false, std::memory_order_relaxed))
+        engine.allNotesOff();
 
     binding.readInto(patch);
     engine.setPatch(&patch);

@@ -77,14 +77,15 @@ if(JOVE_TESTS)
     target_sources(jove_param_roundtrip PRIVATE
         tests/param_roundtrip.cpp
         src/PluginProcessor.cpp
+        src/ui/WebEditor.cpp
         src/engine/SynthEngine.cpp
         src/engine/SynthPresets.cpp
         src/presets/PresetManager.cpp)
     target_include_directories(jove_param_roundtrip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_compile_definitions(jove_param_roundtrip PRIVATE
-        JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
+        JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(jove_param_roundtrip PRIVATE
-        juce::juce_audio_utils juce::juce_dsp
+        JoveUI juce::juce_audio_utils juce::juce_dsp juce::juce_gui_extra
         juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
     add_test(NAME param_roundtrip COMMAND jove_param_roundtrip)
 

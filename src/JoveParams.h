@@ -81,6 +81,16 @@ namespace jID
     inline constexpr auto fxDelay    = "fxDelay";
     inline constexpr auto fxReverb   = "fxReverb";
     inline constexpr auto fxDrive    = "fxDrive";
+    // delay voicing
+    inline constexpr auto delaySync     = "delaySync";
+    inline constexpr auto delayDiv      = "delayDiv";
+    inline constexpr auto delayTimeMs   = "delayTimeMs";
+    inline constexpr auto delayFeedback = "delayFeedback";
+    inline constexpr auto delayTone     = "delayTone";
+    inline constexpr auto delayPing     = "delayPing";
+    // reverb voicing
+    inline constexpr auto reverbSize    = "reverbSize";
+    inline constexpr auto reverbTone    = "reverbTone";
 
     // indexed groups
     inline juce::String osc (int i, const char* f)  { return "osc"  + juce::String(i + 1) + f; }
@@ -248,7 +258,15 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     cparam(jID::chorusMode, "Chorus Mode", {"Chorus I", "Chorus II", "Ensemble"}, 0);
     fparam(jID::fxPhaser, "Phaser", lin01, 0.0f);
     fparam(jID::fxDelay, "Delay", lin01, 0.2f);
+    bparam(jID::delaySync, "Delay Sync", true);
+    cparam(jID::delayDiv, "Delay Division", arpDivs, 9); // 1/8.
+    fparam(jID::delayTimeMs, "Delay Time", [] { auto r = FR(20.0f, 2000.0f); r.setSkewForCentre(350.0f); return r; }(), 350.0f, "ms");
+    fparam(jID::delayFeedback, "Delay Feedback", lin01, 0.42f);
+    fparam(jID::delayTone, "Delay Tone", lin01, 0.45f);
+    bparam(jID::delayPing, "Delay Ping-Pong", true);
     fparam(jID::fxReverb, "Reverb", lin01, 0.25f);
+    fparam(jID::reverbSize, "Reverb Size", lin01, 0.6f);
+    fparam(jID::reverbTone, "Reverb Tone", lin01, 0.4f);
 
     return { p.begin(), p.end() };
 }
@@ -354,6 +372,14 @@ class PatchBinding
         p.fxPhaser   = get(fxPhaser);
         p.fxDelay    = get(fxDelay);
         p.fxReverb   = get(fxReverb);
+        p.delaySync     = get(delaySync) > 0.5f;
+        p.delayDiv      = (int)get(delayDiv);
+        p.delayTimeMs   = get(delayTimeMs);
+        p.delayFeedback = get(delayFeedback);
+        p.delayTone     = get(delayTone);
+        p.delayPing     = get(delayPing) > 0.5f;
+        p.reverbSize    = get(reverbSize);
+        p.reverbTone    = get(reverbTone);
     }
 
     // Message thread: push a patch's values out to the parameters (preset load).
@@ -441,6 +467,14 @@ class PatchBinding
         set(fxPhaser, p.fxPhaser);
         set(fxDelay, p.fxDelay);
         set(fxReverb, p.fxReverb);
+        set(delaySync, p.delaySync ? 1.0f : 0.0f);
+        set(delayDiv, (float)p.delayDiv);
+        set(delayTimeMs, p.delayTimeMs);
+        set(delayFeedback, p.delayFeedback);
+        set(delayTone, p.delayTone);
+        set(delayPing, p.delayPing ? 1.0f : 0.0f);
+        set(reverbSize, p.reverbSize);
+        set(reverbTone, p.reverbTone);
     }
 
   private:

@@ -502,18 +502,31 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         }
     }
 
-    // delay time = dotted 1/8 of the current tempo (ping-pong: R a touch longer)
+    // delay time: tempo-synced division, or a free time in ms.
     const float secPerQuarter = 60.0f / (tempoBpm_ < 1.0f ? 120.0f : tempoBpm_);
-    const float eighthDot      = 0.75f * secPerQuarter; // dotted eighth
-    delay_.setTime(eighthDot * sr_, 0.5f * secPerQuarter * sr_); // L dotted-8, R 1/8
-    delay_.setPingPong(true);
-    delay_.setFeedback(0.42f);
-    delay_.setDamp(0.45f);
+    float delaySec;
+    if(p.delaySync)
+    {
+        int di = p.delayDiv;
+        if(di < 0) di = 0;
+        if(di >= kNumArpDiv) di = kNumArpDiv - 1;
+        delaySec = (float)(secPerQuarter * kArpDivQuarters[di]);
+    }
+    else
+    {
+        float ms = p.delayTimeMs < 20.0f ? 20.0f : (p.delayTimeMs > 2000.0f ? 2000.0f : p.delayTimeMs);
+        delaySec = ms * 0.001f;
+    }
+    const float dS = delaySec * sr_;
+    delay_.setTime(dS, dS);
+    delay_.setPingPong(p.delayPing);
+    delay_.setFeedback(p.delayFeedback);
+    delay_.setDamp(p.delayTone);
     delay_.setMix(p.fxDelay);
     delay_.process(outL, outR, n);
 
-    reverb_.setSize(0.6f);
-    reverb_.setDamp(0.4f);
+    reverb_.setSize(p.reverbSize);
+    reverb_.setDamp(p.reverbTone);
     reverb_.setMix(p.fxReverb);
     reverb_.process(outL, outR, n);
 

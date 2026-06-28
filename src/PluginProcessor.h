@@ -104,6 +104,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     int osFactor = 1;
     juce::CriticalSection renderLock;
     std::atomic<int> pendingQuality { -1 };
+    std::atomic<bool> panicPending { false }; // set on preset load -> kill voices
 
     double sampleRate = 44100.0;
     int    hostBlockSize = 512;

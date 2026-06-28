@@ -19,6 +19,38 @@ const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble"];
 const QUALITY     = ["Eco", "HQ", "Ultra"];
 const CATEGORIES  = ["PAD","LEAD","BASS","ARP","STAB","KEYS","PLUCK","FX","DRONE","PERC","AMB","SEQ"];
 
+/* ModDest index -> the knob param id it drives (index-aligned to MOD_DST). null
+   for destinations without a single knob (e.g. global PITCH). Used to paint a
+   live modulation arc + dot on the affected knob, Doobie-style. */
+const DEST_PARAM = [
+  null, null, "osc2Detune", "osc3Detune", "osc1Morph", "osc2Morph", "osc3Morph",
+  "osc1Pw", "osc2Pw", "osc3Pw", "oscMix", "subLevel", "noiseLevel", "cutoff",
+  "resonance", "filterDrive", "ampGain", "pan", "lfo1Rate", "lfo2Rate", "lfo3Rate",
+  "lfo1Depth", "lfo2Depth", "lfo3Depth", null, null, "fm2to1", "ringMod",
+  "envFilterAmt", null];
+const MOD_SCALE = 0.25; // visual: mod amount 1.0 -> a quarter of the knob's travel
+
+const ModContext = React.createContext({ map: {}, lfo: [0, 0, 0] });
+
+/* Read all 10 mod slots and build paramId -> [{src, amt}] for the indicators. */
+function useModMap() {
+  const slots = [];
+  for (let i = 1; i <= 10; i++) {
+    const [src] = B.useChoice("mod" + i + "Src");
+    const [dst] = B.useChoice("mod" + i + "Dst");
+    const [amtN] = B.useSlider("mod" + i + "Amt"); // 0..1 of the -2..+2 range
+    slots.push({ src, dst, amt: amtN * 4 - 2 });
+  }
+  const map = {};
+  slots.forEach((s) => {
+    if (s.src <= 0 || Math.abs(s.amt) < 0.001) return;
+    const pid = DEST_PARAM[s.dst];
+    if (!pid) return;
+    (map[pid] = map[pid] || []).push({ src: s.src, amt: s.amt });
+  });
+  return map;
+}
+
 /* ============================ atoms ============================ */
 function fmt(v) {
   const a = Math.abs(v);
@@ -60,14 +92,31 @@ function Knob({ id, label, bipolar = false, big = false }) {
   };
   const wheel = (e) => { e.preventDefault(); set(v + (e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? 0.01 : 0.03)); };
   let val = v; try { val = scaled(); } catch (_) {}
+
+  // modulation indicators (range band + live moving dot), Doobie-style
+  const mc = React.useContext(ModContext);
+  const minfo = id && mc.map[id];
+  let mrange = 0, mlive = 0;
+  if (minfo) {
+    minfo.forEach((m) => { mrange += Math.abs(m.amt); if (m.src >= 1 && m.src <= 3) mlive += mc.lfo[m.src - 1] * m.amt; });
+    mrange = Math.min(0.5, mrange * MOD_SCALE);
+    mlive = Math.max(-0.5, Math.min(0.5, mlive * MOD_SCALE));
+  }
+  const modA0 = A0 + Math.max(0, v - mrange) * SWEEP;
+  const modA1 = A0 + Math.min(1, v + mrange) * SWEEP;
+  const liveAng = A0 + Math.max(0, Math.min(1, v + mlive)) * SWEEP;
+  const [mx, my] = pt(R, liveAng);
+
   return (
-    <div className={"knob" + (big ? " big" : "")} onMouseDown={down} onTouchStart={down}
-         onWheel={wheel} onDoubleClick={() => set(bipolar ? 0.5 : 0)} title={label}>
+    <div className={"knob" + (big ? " big" : "") + (minfo ? " modded" : "")} onMouseDown={down}
+         onTouchStart={down} onWheel={wheel} onDoubleClick={() => set(bipolar ? 0.5 : 0)} title={label}>
       <svg width={D} height={D} viewBox={`0 0 ${D} ${D}`}>
         <path d={arc(A0, A0 + SWEEP)} className="k-track" strokeWidth={sw} />
+        {minfo && <path d={arc(modA0, modA1)} className="k-mod" strokeWidth={sw + 2.5} />}
         <path d={arc(Math.min(fillFrom, ang), Math.max(fillFrom, ang))} className="k-fill" strokeWidth={sw} />
         <circle cx={c} cy={c} r={R - sw - 1.5} className="k-body" />
         <line x1={c} y1={c} x2={px} y2={py} className="k-ptr" />
+        {minfo && <circle cx={mx} cy={my} r={2.2} className="k-moddot" />}
       </svg>
       <div className="k-lab">{label}</div>
       <div className="k-val">{fmt(val)}</div>
@@ -109,12 +158,114 @@ function Sel({ id, options, label }) {
   );
 }
 
+/* Integer params (AudioParameterInt) are backed by a SLIDER relay, not a combo —
+   so they need slider-based controls, not <Seg>/<Sel> (which use combo relays). */
+function IntSeg({ id, label, min, max }) {
+  const [v, set] = B.useSlider(id);
+  const cur = Math.round(min + v * (max - min));
+  const opts = []; for (let i = min; i <= max; i++) opts.push(i);
+  return (
+    <div className="seg-wrap">
+      {label && <div className="cl">{label}</div>}
+      <div className="seg">
+        {opts.map((i) =>
+          <button key={i} className={i === cur ? "on" : ""}
+                  onClick={() => set((i - min) / (max - min))}>{i}</button>)}
+      </div>
+    </div>
+  );
+}
+
+function IntPick({ id, label, min, max }) {
+  const [v, set] = B.useSlider(id);
+  const cur = Math.round(min + v * (max - min));
+  const opts = []; for (let i = min; i <= max; i++) opts.push(i);
+  return (
+    <div className="sel-wrap">
+      {label && <div className="cl">{label}</div>}
+      <select className="sel" value={cur} onChange={(e) => set((+e.target.value - min) / (max - min))}>
+        {opts.map((i) => <option key={i} value={i}>{i}</option>)}
+      </select>
+    </div>
+  );
+}
+
 function Panel({ title, accent, children, wide, tall }) {
   return (
-    <section className={"panel" + (wide ? " wide" : "") + (tall ? " tall" : "")}>
-      <header className="ph" style={accent ? { "--accent": accent } : null}><span className="dot" />{title}</header>
+    <section className={"panel" + (wide ? " wide" : "") + (tall ? " tall" : "")}
+             style={accent ? { "--accent": accent } : null}>
+      <header className="ph"><span className="dot" />{title}</header>
       <div className="pbody">{children}</div>
     </section>
+  );
+}
+
+/* ============================ visualizers ============================ */
+function EnvViz({ n }) {
+  const [a] = B.useSlider("env" + n + "Attack");
+  const [d] = B.useSlider("env" + n + "Decay");
+  const [s] = B.useSlider("env" + n + "Sustain");
+  const [r] = B.useSlider("env" + n + "Release");
+  const W = 140, H = 40, pad = 3;
+  const aw = 0.05 + a, dw = 0.05 + d, sw = 0.34, rw = 0.05 + r;
+  const tot = aw + dw + sw + rw, uw = (W - 2 * pad) / tot;
+  const sy = pad + (H - 2 * pad) * (1 - s);
+  let x = pad;
+  const pts = [[x, H - pad]];
+  x += aw * uw; pts.push([x, pad]);
+  x += dw * uw; pts.push([x, sy]);
+  x += sw * uw; pts.push([x, sy]);
+  x += rw * uw; pts.push([x, H - pad]);
+  return (
+    <svg className="viz env" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <polyline points={pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")} />
+      <polygon className="fillz" points={`${pad},${H - pad} ${pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")} ${(x).toFixed(1)},${H - pad}`} />
+    </svg>
+  );
+}
+
+function LfoScope({ n }) {
+  const meters = B.useEvent("meters", { lfo: [0, 0, 0] });
+  const lv = (meters.lfo && meters.lfo[n - 1]) || 0;
+  const hist = useRef(new Array(64).fill(0));
+  useEffect(() => { hist.current.push(lv); if (hist.current.length > 64) hist.current.shift(); }, [lv]);
+  const W = 140, H = 34;
+  const pts = hist.current.map((y, i) =>
+    ((i / 63) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 2)).toFixed(1)).join(" ");
+  return (
+    <svg className="viz scope" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <line x1="0" y1={H / 2} x2={W} y2={H / 2} className="mid" />
+      <polyline points={pts} />
+    </svg>
+  );
+}
+
+function FilterCurve() {
+  const [cut] = B.useSlider("cutoff");
+  const [res] = B.useSlider("resonance");
+  const [mode] = B.useChoice("filterMode");
+  const W = 180, H = 46, N = 60;
+  const fc = 0.06 + cut * 0.88;            // corner position (0..1 across the view)
+  const q = 0.5 + res * 7;                  // resonance peak height
+  const lp = mode === 0 || mode === 1, hp = mode === 2, bp = mode === 3, notch = mode === 4;
+  const mag = (x) => {
+    const d = (x - fc);
+    const bump = res > 0.01 ? (q * 0.16) * Math.exp(-(d * d) / 0.0016) : 0;
+    let base;
+    if (lp) base = 1 / (1 + Math.pow(Math.max(0, (x - fc)) / 0.16, 2));
+    else if (hp) base = 1 / (1 + Math.pow(Math.max(0, (fc - x)) / 0.16, 2));
+    else if (bp) base = Math.exp(-(d * d) / 0.01);
+    else if (notch) base = 1 - Math.exp(-(d * d) / 0.0009) * 0.95;
+    else base = 0.5;
+    return Math.max(0, Math.min(1.15, base + bump));
+  };
+  const pts = [];
+  for (let i = 0; i <= N; i++) { const x = i / N; pts.push(((x) * W).toFixed(1) + "," + (H - 3 - mag(x) * (H - 8)).toFixed(1)); }
+  return (
+    <svg className="viz filter" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <polyline points={pts.join(" ")} />
+      <line x1={fc * W} y1="0" x2={fc * W} y2={H} className="mark" />
+    </svg>
   );
 }
 
@@ -159,7 +310,10 @@ function MixerPanel() {
 function FilterPanel() {
   return (
     <Panel title="FILTER" accent="#5ad0e0">
-      <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
+      <div className="row">
+        <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
+        <FilterCurve />
+      </div>
       <div className="knobs">
         <Knob id="cutoff" label="CUTOFF" big />
         <Knob id="resonance" label="RESO" big />
@@ -175,6 +329,7 @@ function EnvPanel({ n, name, accent }) {
   const p = "env" + n;
   return (
     <Panel title={name} accent={accent}>
+      <EnvViz n={n} />
       <div className="knobs">
         <Knob id={p + "Attack"} label="A" />
         <Knob id={p + "Decay"} label="D" />
@@ -193,6 +348,7 @@ function LfoPanel({ n, accent }) {
   const lv = (meters.lfo && meters.lfo[n - 1]) || 0;
   return (
     <Panel title={"LFO " + n} accent={accent}>
+      <LfoScope n={n} />
       <div className="row">
         <Sel id={p + "Wave"} options={LFO_WAVES} />
         <Switch id={p + "Sync"} label="SYNC" />
@@ -252,8 +408,8 @@ function ArpPanel() {
       <div className={"knobs" + (on ? "" : " dim")}>
         <Knob id="arpGate" label="GATE" />
         <Knob id="arpSwing" label="SWING" />
-        <Seg id="arpOctaves" options={["1", "2", "3", "4"]} label="OCT" />
-        <Seg id="arpRatchet" options={["1", "2", "3", "4"]} label="RATCH" />
+        <IntSeg id="arpOctaves" label="OCT" min={1} max={4} />
+        <IntSeg id="arpRatchet" label="RATCH" min={1} max={4} />
       </div>
     </Panel>
   );
@@ -261,15 +417,44 @@ function ArpPanel() {
 
 function FxPanel() {
   return (
-    <Panel title="FX" accent="#8ae0a8" wide>
+    <Panel title="DRIVE / CHORUS / PHASER" accent="#8ae0a8">
       <div className="knobs">
         <Knob id="fxDrive" label="DRIVE" />
         <Knob id="fxChorus" label="CHORUS" />
         <Knob id="fxPhaser" label="PHASER" />
-        <Knob id="fxDelay" label="DELAY" />
-        <Knob id="fxReverb" label="REVERB" />
       </div>
       <Seg id="chorusMode" options={CHORUS_MODES} label="CHORUS MODE" />
+    </Panel>
+  );
+}
+
+function DelayPanel() {
+  const [sync] = B.useToggle("delaySync");
+  return (
+    <Panel title="DELAY" accent="#6ac0d0">
+      <div className="knobs">
+        <Knob id="fxDelay" label="MIX" />
+        {sync ? <Sel id="delayDiv" options={DIVISIONS} label="TIME" />
+              : <Knob id="delayTimeMs" label="TIME" />}
+        <Knob id="delayFeedback" label="FBK" />
+        <Knob id="delayTone" label="TONE" />
+      </div>
+      <div className="row">
+        <Switch id="delaySync" label="SYNC" />
+        <Switch id="delayPing" label="PING-PONG" />
+      </div>
+    </Panel>
+  );
+}
+
+function ReverbPanel() {
+  return (
+    <Panel title="REVERB" accent="#7a9ad0">
+      <div className="knobs">
+        <Knob id="fxReverb" label="MIX" />
+        <Knob id="reverbSize" label="SIZE" />
+        <Knob id="reverbTone" label="TONE" />
+      </div>
     </Panel>
   );
 }
@@ -278,7 +463,10 @@ function VoicingPanel() {
   const [mode] = B.useChoice("voiceMode");
   return (
     <Panel title="VOICING" accent="#9aa6e0">
-      <Seg id="voiceMode" options={VOICE_MODES} label="MODE" />
+      <div className="row">
+        <Seg id="voiceMode" options={VOICE_MODES} label="MODE" />
+        <IntPick id="maxVoices" label="MAX POLY" min={1} max={8} />
+      </div>
       <div className="knobs">
         <Knob id="glideTime" label="GLIDE" />
         <Knob id="drift" label="DRIFT" />
@@ -287,7 +475,7 @@ function VoicingPanel() {
       </div>
       <div className="row">
         <Seg id="glideMode" options={GLIDE_MODES} label="GLIDE" />
-        {mode === 2 && <Seg id="unisonCount" options={["1","2","3","4","5","6","7"]} label="VOICES" />}
+        {mode === 2 && <IntSeg id="unisonCount" label="UNISON" min={1} max={7} />}
       </div>
     </Panel>
   );
@@ -337,9 +525,8 @@ function TopBar() {
       </div>
       <div className="tb-global">
         <Seg id="quality" options={QUALITY} label="QUALITY" />
-        <Seg id="maxVoices" options={["1","2","3","4","5","6","7","8"]} label="POLY" />
       </div>
-      <div className="tb-voices"><span className="v">{meters.voices}</span><span className="vl">VOICES</span></div>
+      <div className="tb-voices"><span className="v">{meters.voices}</span><span className="vl">ACTIVE</span></div>
       {browse && <Browser onClose={() => setBrowse(false)} />}
       {saving && <SaveDialog onClose={() => setSaving(false)} cat={preset.category} />}
     </header>
@@ -397,7 +584,12 @@ function SaveDialog({ onClose, cat }) {
 
 /* ============================ app ============================ */
 function App() {
+  const modMap = useModMap();
+  const meters = B.useEvent("meters", { lfo: [0, 0, 0] });
+  const modCtx = useMemo(() => ({ map: modMap, lfo: meters.lfo || [0, 0, 0] }),
+                         [modMap, meters.lfo]);
   return (
+    <ModContext.Provider value={modCtx}>
     <div id="app">
       <TopBar />
       <div className="grid">
@@ -416,6 +608,8 @@ function App() {
         <ModMatrix />
         <ArpPanel />
         <FxPanel />
+        <DelayPanel />
+        <ReverbPanel />
         <MasterPanel />
       </div>
       <footer className="foot">
@@ -423,6 +617,7 @@ function App() {
         <span>DatanoiseTV</span>
       </footer>
     </div>
+    </ModContext.Provider>
   );
 }
 

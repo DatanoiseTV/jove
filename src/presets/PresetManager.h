@@ -10,6 +10,7 @@
 #include "../JoveParams.h"
 #include "../engine/SynthPresets.h"
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <functional>
 
 // Preset bank for Jove. Factory patches come from the engine's sound-designed
 // bank (jove::LoadFactoryPreset); user patches are stored as XML param dumps in
@@ -30,6 +31,10 @@ class PresetManager
     };
 
     void init(juce::AudioProcessorValueTreeState& s, jove::PatchBinding& b);
+
+    // Called (on the message thread) whenever a preset is loaded — the processor
+    // uses it to flag a voice panic so held/stuck notes don't survive the swap.
+    void setLoadCallback(std::function<void()> f) { onLoad = std::move(f); }
 
     // ---- catalogue -------------------------------------------------------
     void rescan();                                   // rebuild the user-preset list
@@ -66,4 +71,5 @@ class PresetManager
     jove::PatchBinding*                 binding = nullptr;
     std::vector<Entry>                  catalogue;
     int                                 current = -1;
+    std::function<void()>               onLoad;
 };

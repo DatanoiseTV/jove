@@ -77,6 +77,7 @@ void PresetManager::applyPatch(const SynthPatch& p, const juce::String& name, in
         return;
     binding->writeFrom(p);
     setNameCat(name, category);
+    if(onLoad) onLoad();
 }
 
 void PresetManager::loadFactory(int factoryIndex)
@@ -126,6 +127,7 @@ void PresetManager::load(int catalogueIndex)
 
             setNameCat(e.name, e.category);
             current = catalogueIndex;
+            if(onLoad) onLoad();
         }
     }
 }

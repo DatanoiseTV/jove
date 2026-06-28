@@ -11,6 +11,10 @@
 #include <JoveUIData.h>
 #include <optional>
 
+#ifndef JOVE_VERSION
+ #define JOVE_VERSION "dev"
+#endif
+
 namespace jove
 {
 namespace

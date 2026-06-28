@@ -42,6 +42,40 @@
     window.addEventListener('unhandledrejection', (e) => fail('rejection: ' + e.reason));
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('dragstart', (e) => e.preventDefault());
+
+    /* Fit-to-window: scale the fixed 1440px-wide #app design canvas to fill
+       whatever bounds the host gives us, centred, so the whole UI is always
+       visible without scrolling. offsetHeight is the natural (pre-transform)
+       layout height, so this self-adjusts when content reflows (e.g. unison
+       knobs appearing). Re-fit on resize, on a ResizeObserver of #app, and a
+       cheap watchdog for the case where JUCE sets WebView bounds from C++
+       without bubbling a DOM resize event. */
+    (function () {
+      var DW = 1440, lastKey = '';
+      function fit() {
+        var el = document.getElementById('app'); if (!el) return;
+        var w = window.innerWidth || document.documentElement.clientWidth;
+        var h = window.innerHeight || document.documentElement.clientHeight;
+        var nh = el.offsetHeight; if (!w || !h || !nh) return;
+        var s = Math.min(w / DW, h / nh);
+        var sw = DW * s, sh = nh * s;
+        el.style.transform = 'translate(' + ((w - sw) / 2) + 'px,' + ((h - sh) / 2) + 'px) scale(' + s + ')';
+        lastKey = w + 'x' + h + 'x' + nh;
+      }
+      window.addEventListener('resize', fit);
+      window.addEventListener('load', fit);
+      window.fitJove = fit;
+      (function poll(n) {
+        var el = document.getElementById('app');
+        if (el) { fit(); try { new ResizeObserver(fit).observe(el); } catch (_) {} return; }
+        if (n > 0) setTimeout(function () { poll(n - 1); }, 30);
+      })(120);
+      setInterval(function () {
+        var el = document.getElementById('app'); if (!el) return;
+        var w = window.innerWidth, h = window.innerHeight, nh = el.offsetHeight;
+        if (w + 'x' + h + 'x' + nh !== lastKey) fit();
+      }, 400);
+    })();
   </script>
 
   <script src="juce-framework-frontend.js"></script>

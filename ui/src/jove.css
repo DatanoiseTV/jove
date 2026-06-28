@@ -21,10 +21,16 @@ body {
   color: var(--ink);
   font: 13px/1.4 ui-sans-serif, system-ui, "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
-  user-select: none; overflow-x: hidden;
+  user-select: none; overflow: hidden;
 }
 button, select, input { font-family: inherit; color: inherit; }
-#app { display: flex; flex-direction: column; min-height: 100vh; padding: 12px; gap: 12px; }
+/* Fixed-width design canvas; index.html scales it to fit any host window so the
+   whole UI is always visible with no scrolling. */
+#app {
+  position: absolute; top: 0; left: 0; width: 1440px;
+  transform-origin: top left;
+  display: flex; flex-direction: column; padding: 12px; gap: 12px;
+}
 
 /* ---- top bar ---- */
 .topbar {
@@ -107,6 +113,24 @@ button, select, input { font-family: inherit; color: inherit; }
 .k-lab { font-size: 8.5px; letter-spacing: 1px; color: var(--ink2); }
 .k-val { font-size: 9.5px; color: var(--ink3); font-variant-numeric: tabular-nums; }
 .knob.big .k-fill { stroke-width: 4; }
+/* modulation: a faint band over the reachable range + a live moving dot */
+.k-mod { fill: none; stroke: #c08ae0; opacity: .28; stroke-linecap: round; }
+.k-moddot { fill: #e6c2ff; filter: drop-shadow(0 0 4px #c08ae0); }
+.knob.modded .k-lab { color: #c9aef0; }
+
+/* ---- visualizers ---- */
+.viz { width: 100%; display: block; border-radius: 8px;
+  background: #0c0f17; border: 1px solid var(--line); }
+.viz.env { height: 42px; }
+.viz.scope { height: 36px; }
+.viz.filter { height: 48px; }
+.viz polyline { fill: none; stroke: var(--accent, #8a9bff); stroke-width: 1.6;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent, #8a9bff) 55%, transparent)); }
+.viz.env .fillz { fill: color-mix(in srgb, var(--accent, #8a9bff) 14%, transparent); stroke: none; }
+.viz.scope .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viz.filter .mark { stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke; opacity: .6; }
 
 /* ---- chip / switch ---- */
 .chip {
@@ -203,7 +227,3 @@ button, select, input { font-family: inherit; color: inherit; }
 .sheet.small .sel { margin: 0 18px; }
 .sheet.small .save { margin: 14px 18px 0; height: 38px; }
 
-/* ---- responsive ---- */
-@media (max-width: 1180px) { .grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 880px)  { .grid { grid-template-columns: repeat(2, 1fr); } .panel.wide { grid-column: span 2; } }
-@media (max-width: 560px)  { .grid { grid-template-columns: 1fr; } .panel.wide { grid-column: span 1; } }

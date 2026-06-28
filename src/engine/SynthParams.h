@@ -278,6 +278,18 @@ struct SynthPatch
     float fxReverb = 0.25f;
     float fxDrive  = 0.0f;
     float width    = 0.5f;  // master stereo width (0 mono, 0.5 normal, 1 wide)
+
+    // Delay voicing (the built-in clean delay; mix is fxDelay above).
+    bool  delaySync     = true;   // lock time to host tempo
+    int   delayDiv      = 9;      // division index (kArpDivNames; 9 = 1/8 dotted)
+    float delayTimeMs   = 350.0f; // free time when delaySync == false (20..2000)
+    float delayFeedback = 0.42f;
+    float delayTone     = 0.45f;  // feedback-path damping (0 bright .. 1 dark)
+    bool  delayPing     = true;   // cross feedback L<->R
+
+    // Reverb voicing (mix is fxReverb above).
+    float reverbSize    = 0.6f;   // tail length / room feedback
+    float reverbTone    = 0.4f;   // HF damping (0 bright .. 1 dark)
 };
 
 inline constexpr const char* kCategoryNames[] = {

@@ -127,6 +127,14 @@ int main()
         F(i, "fxPhaser", r.fxPhaser, g.fxPhaser);
         F(i, "fxDelay", r.fxDelay, g.fxDelay);
         F(i, "fxReverb", r.fxReverb, g.fxReverb);
+        I(i, "delaySync", r.delaySync, g.delaySync);
+        I(i, "delayDiv", r.delayDiv, g.delayDiv);
+        F(i, "delayTimeMs", r.delayTimeMs, g.delayTimeMs);
+        F(i, "delayFeedback", r.delayFeedback, g.delayFeedback);
+        F(i, "delayTone", r.delayTone, g.delayTone);
+        I(i, "delayPing", r.delayPing, g.delayPing);
+        F(i, "reverbSize", r.reverbSize, g.reverbSize);
+        F(i, "reverbTone", r.reverbTone, g.reverbTone);
     }
 
     printf("\nROUND-TRIP: %d field mismatches across %d presets\n", totalMismatch, kNumFactoryPresets);
