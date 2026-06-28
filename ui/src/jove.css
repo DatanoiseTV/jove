@@ -24,12 +24,13 @@ body {
   user-select: none; overflow: hidden;
 }
 button, select, input { font-family: inherit; color: inherit; }
-/* Fixed-width design canvas; index.html scales it to fit any host window so the
-   whole UI is always visible with no scrolling. */
+/* Fixed design canvas; index.html scales it to fill the (aspect-locked) host
+   window. The columns + panels flex-grow to fill the canvas exactly, so there's
+   no scrolling and no dead space. */
 #app {
-  position: absolute; top: 0; left: 0; width: 1440px;
+  position: absolute; top: 0; left: 0; width: 1500px; height: 1000px;
   transform-origin: top left;
-  display: flex; flex-direction: column; padding: 12px; gap: 12px;
+  display: flex; flex-direction: column; padding: 14px; gap: 12px;
 }
 
 /* ---- top bar ---- */
@@ -77,18 +78,17 @@ button, select, input { font-family: inherit; color: inherit; }
 .tb-voices .v { font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1; }
 .tb-voices .vl { font-size: 8px; letter-spacing: 2px; color: var(--ink3); }
 
-/* ---- grid of panels ---- */
-.grid {
-  display: grid; gap: 12px; flex: 1;
-  grid-template-columns: repeat(4, 1fr);
+/* ---- columns of panels (fill the canvas) ---- */
+.cols { display: flex; gap: 12px; flex: 1; min-height: 0; }
+.col {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px;
 }
 .panel {
   background: linear-gradient(180deg, var(--panel), #131722);
   border: 1px solid var(--line); border-radius: 14px;
   box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden;
+  flex: 1 1 auto; min-height: 0; /* panels grow to share the column height */
 }
-.panel.wide { grid-column: span 2; }
-.panel.tall { grid-row: span 2; }
 .ph {
   display: flex; align-items: center; gap: 8px; padding: 9px 14px;
   font-size: 10.5px; letter-spacing: 2px; font-weight: 700; color: var(--ink2);
@@ -113,10 +113,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .k-lab { font-size: 8.5px; letter-spacing: 1px; color: var(--ink2); }
 .k-val { font-size: 9.5px; color: var(--ink3); font-variant-numeric: tabular-nums; }
 .knob.big .k-fill { stroke-width: 4; }
-/* modulation: a faint band over the reachable range + a live moving dot */
-.k-mod { fill: none; stroke: #c08ae0; opacity: .28; stroke-linecap: round; }
-.k-moddot { fill: #e6c2ff; filter: drop-shadow(0 0 4px #c08ae0); }
-.knob.modded .k-lab { color: #c9aef0; }
+/* modulation: a band over the reachable range + a live moving dot, in the
+   distinct mod colour (purple) so it reads apart from the value fill. */
+.k-mod { fill: none; stroke: #c592ff; opacity: .55; stroke-linecap: round; }
+.k-moddot { fill: #f0e0ff; r: 2.6; filter: drop-shadow(0 0 5px #c592ff); }
+.knob.modded .k-lab { color: #d9c4ff; }
+.knob.modded .k-body { stroke: #5a3a78; }     /* tint the modded knob body */
+.knob.modded { filter: drop-shadow(0 0 6px rgba(180,130,255,.18)); }
 
 /* ---- visualizers ---- */
 .viz { width: 100%; display: block; border-radius: 8px;

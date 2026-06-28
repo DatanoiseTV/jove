@@ -216,6 +216,18 @@ class Voice
         osc_[1].setMorph(p.osc[1].morph + m.morphAdd[1]); osc_[1].setPulseWidth(p.osc[1].pw + m.pwAdd[1]);
         osc_[2].setMorph(p.osc[2].morph + m.morphAdd[2]); osc_[2].setPulseWidth(p.osc[2].pw + m.pwAdd[2]);
 
+        // extra oscillators (osc4..oscN): independent detuned layers summed by
+        // level — stack a few slightly-detuned saws here for supersaw width. The
+        // spread direction alternates so an LFO->Detune route fans them outward.
+        for(int i = 3; i < kNumOsc; ++i)
+        {
+            const float sign = (i & 1) ? 1.0f : -1.0f;
+            osc_[i].setFrequency(baseHz * footageMul(p.osc[i].footage)
+                                 * semis(p.osc[i].detune + sign * m.detuneAdd));
+            osc_[i].setMorph(p.osc[i].morph + m.morphAdd[i]);
+            osc_[i].setPulseWidth(p.osc[i].pw + m.pwAdd[i]);
+        }
+
         const bool  o0on = p.osc[0].on, o1on = p.osc[1].on, o2on = p.osc[2].on;
         const float fmAmt = clamp01(p.fm2to1 + m.fmAdd) * 2.0f; // env->FM = e-piano bark
         const float ringG = clamp01(p.ringMod + m.ringAdd);     // osc1 x osc2 metallic
@@ -284,6 +296,9 @@ class Voice
 
             float voice = o1 * g1 + o2 * g2 + o3 * g3
                           + subv * subG + (rngf() * 2.0f - 1.0f) * noiseG;
+            for(int i = 3; i < kNumOsc; ++i)
+                if(p.osc[i].on)
+                { bool wi; voice += osc_[i].process(0.0f, wi) * p.osc[i].level; }
             // ring modulation: blend the osc1 x osc2 product in (bounded by 1, so
             // the master soft-clip never sees more than the dry oscs already give).
             if(ringG > 0.0001f)

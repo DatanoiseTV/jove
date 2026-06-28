@@ -24,8 +24,10 @@ inline constexpr int kMaxVoices = 8;
 // exceed kMaxVoices * ... — the allocator caps total active sub-voices.
 inline constexpr int kMaxUnison = 7;
 
-// Oscillators per voice (osc1/osc2/osc3). Sub + noise are separate sources.
-inline constexpr int kNumOsc = 3;
+// Oscillators per voice. Sub + noise are separate sources. Desktop build runs 5
+// (osc1-3 carry the FM/sync/ring relationships; osc4-5 are extra detuned layers
+// for supersaw width). osc4-5 default OFF so the factory bank is unchanged.
+inline constexpr int kNumOsc = 5;
 
 // LFO count (1 per-voice + 2 global by convention; all selectable destinations).
 inline constexpr int kNumLfo = 3;

@@ -385,7 +385,7 @@ function ModRow({ n }) {
 
 function ModMatrix() {
   return (
-    <Panel title="MOD MATRIX" accent="#c08ae0" wide tall>
+    <Panel title="MOD MATRIX" accent="#c08ae0">
       <div className="modgrid">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => <ModRow key={n} n={n} />)}
       </div>
@@ -592,25 +592,37 @@ function App() {
     <ModContext.Provider value={modCtx}>
     <div id="app">
       <TopBar />
-      <div className="grid">
-        <OscPanel n={1} accent="#e07a7a" />
-        <OscPanel n={2} accent="#e0a05a" />
-        <OscPanel n={3} accent="#e0d05a" />
-        <MixerPanel />
-        <VoicingPanel />
-        <FilterPanel />
-        <EnvPanel n={1} name="AMP ENV" accent="#7ad0a0" />
-        <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
-        <EnvPanel n={3} name="AUX ENV" accent="#5a9ae0" />
-        <LfoPanel n={1} accent="#c08ae0" />
-        <LfoPanel n={2} accent="#b07ae0" />
-        <LfoPanel n={3} accent="#a06ae0" />
-        <ModMatrix />
-        <ArpPanel />
-        <FxPanel />
-        <DelayPanel />
-        <ReverbPanel />
-        <MasterPanel />
+      <div className="cols">
+        <div className="col">
+          <OscPanel n={1} accent="#e07a7a" />
+          <OscPanel n={2} accent="#e0a05a" />
+          <OscPanel n={3} accent="#e0d05a" />
+          <OscPanel n={4} accent="#c8d05a" />
+          <OscPanel n={5} accent="#9ad05a" />
+        </div>
+        <div className="col">
+          <MixerPanel />
+          <VoicingPanel />
+          <FilterPanel />
+        </div>
+        <div className="col">
+          <EnvPanel n={1} name="AMP ENV" accent="#7ad0a0" />
+          <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
+          <EnvPanel n={3} name="AUX ENV" accent="#5a9ae0" />
+          <MasterPanel />
+        </div>
+        <div className="col">
+          <LfoPanel n={1} accent="#c08ae0" />
+          <LfoPanel n={2} accent="#b07ae0" />
+          <LfoPanel n={3} accent="#a06ae0" />
+          <ArpPanel />
+        </div>
+        <div className="col">
+          <ModMatrix />
+          <FxPanel />
+          <DelayPanel />
+          <ReverbPanel />
+        </div>
       </div>
       <footer className="foot">
         <span>{window.JOVE_VERSION_STR || ""}</span>

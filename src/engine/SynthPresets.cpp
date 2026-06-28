@@ -1791,6 +1791,62 @@ void seq_hoover_seq(SynthPatch& p)
     p.fxChorus = 0.30f; p.fxDelay = 0.28f; p.fxReverb = 0.30f;
 }
 
+// ===== showcase presets for the 5-oscillator desktop voice (indices 85-87) =====
+void lead_supersaw(SynthPatch& p)
+{
+    setName(p, "SUPERSAW"); p.category = 1; // LEAD
+    p.width = 0.92f; p.ampGain = 0.6f;
+    const float det[5] = {0.0f, 0.11f, -0.10f, 0.19f, -0.18f};
+    for(int i = 0; i < 5; ++i)
+    { p.osc[i].on = true; p.osc[i].morph = SAW; p.osc[i].detune = det[i]; p.osc[i].level = 0.85f; }
+    p.oscMix = 0.5f; p.drift = 0.30f;
+    p.filterMode = (int)FilterMode::SvfLP; p.cutoff = 0.70f; p.resonance = 0.12f;
+    p.envFilterAmt = 0.25f;
+    p.env[0] = EnvParams{0.01f, 0.6f, 0.9f, 0.4f, 0.0f};
+    p.env[1] = EnvParams{0.02f, 0.5f, 0.5f, 0.4f, 0.0f};
+    p.lfo[0].wave = (int)LfoWave::Triangle; p.lfo[0].rate = 0.30f;
+    mod(p, 0, ModSource::Lfo1, ModDest::Detune, 0.30f); // animate the saw fan
+    mod(p, 1, ModSource::ModWheel, ModDest::Cutoff, 0.35f);
+    p.fxChorus = 0.20f; p.fxReverb = 0.25f; p.fxDelay = 0.15f;
+}
+void pad_fiveosc(SynthPatch& p)
+{
+    setName(p, "PENTA PAD"); p.category = 0; // PAD
+    p.width = 0.86f; p.ampGain = 0.58f; p.chorusMode = 2;
+    p.osc[0].on = true; p.osc[0].morph = SAW;   p.osc[0].footage = 2;
+    p.osc[1].on = true; p.osc[1].morph = SAW;   p.osc[1].detune = 0.12f;
+    p.osc[2].on = true; p.osc[2].morph = TRI;   p.osc[2].footage = 1; p.osc[2].level = 0.6f;
+    p.osc[3].on = true; p.osc[3].morph = SAW;   p.osc[3].detune = -0.13f; p.osc[3].footage = 3; p.osc[3].level = 0.5f;
+    p.osc[4].on = true; p.osc[4].morph = PULSE; p.osc[4].detune = 0.07f; p.osc[4].level = 0.4f;
+    p.subLevel = 0.10f; p.drift = 0.35f;
+    p.filterMode = (int)FilterMode::LadderLP; p.cutoff = 0.45f; p.resonance = 0.10f; p.filterDrive = 0.15f;
+    p.envFilterAmt = 0.30f; p.keyTrack = 0.40f;
+    p.env[0] = EnvParams{0.8f, 1.6f, 0.85f, 1.8f, 0.2f};
+    p.env[1] = EnvParams{1.2f, 1.6f, 0.5f, 1.5f, 0.0f};
+    p.lfo[0].wave = (int)LfoWave::Sine; p.lfo[0].rate = 0.18f;
+    mod(p, 0, ModSource::Lfo1, ModDest::Cutoff, 0.12f);
+    mod(p, 1, ModSource::Lfo1, ModDest::Detune, 0.20f);
+    p.fxChorus = 0.35f; p.fxReverb = 0.40f;
+}
+void bass_reese5(SynthPatch& p)
+{
+    setName(p, "REESE 5"); p.category = 2; // BASS
+    p.width = 0.45f; p.ampGain = 0.7f; p.voiceMode = (int)VoiceMode::Mono;
+    p.glideMode = (int)GlideMode::Legato; p.glideTime = 0.06f;
+    p.osc[0].on = true; p.osc[0].morph = SAW;
+    p.osc[1].on = true; p.osc[1].morph = SAW; p.osc[1].detune = 0.22f;
+    p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].detune = -0.20f; p.osc[2].level = 0.9f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = 0.40f; p.osc[3].level = 0.7f;
+    p.subLevel = 0.40f; p.subOctave = 1; p.drift = 0.20f;
+    p.filterMode = (int)FilterMode::LadderLP; p.cutoff = 0.30f; p.resonance = 0.20f; p.filterDrive = 0.30f;
+    p.envFilterAmt = 0.20f; p.keyTrack = 0.30f;
+    p.env[0] = EnvParams{0.005f, 0.4f, 0.85f, 0.2f, 0.0f};
+    p.env[1] = EnvParams{0.01f, 0.3f, 0.4f, 0.2f, 0.0f};
+    p.lfo[0].wave = (int)LfoWave::Sine; p.lfo[0].rate = 0.25f;
+    mod(p, 0, ModSource::Lfo1, ModDest::Detune, 0.30f); // the classic reese sweep
+    p.fxChorus = 0.15f; p.fxReverb = 0.15f;
+}
+
 using Builder = void (*)(SynthPatch&);
 const Builder kBuilders[kNumFactoryPresets] = {
     pad_warm, pad_strings, pad_glass, pad_vox, pad_unison,
@@ -1810,6 +1866,7 @@ const Builder kBuilders[kNumFactoryPresets] = {
     seq_trancegate, seq_pulse, seq_wobble, seq_sh_motion, seq_arpdrive,
     seq_chordstab, seq_acidseq, seq_blade, seq_dubchord, seq_pluckmotion,
     seq_8bit, seq_rhythmbass, seq_glitch, seq_motionpad, seq_hoover_seq,
+    lead_supersaw, pad_fiveosc, bass_reese5, // 85-87: 5-oscillator showcases
 };
 } // namespace
 

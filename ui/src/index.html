@@ -51,29 +51,28 @@
        cheap watchdog for the case where JUCE sets WebView bounds from C++
        without bubbling a DOM resize event. */
     (function () {
-      var DW = 1440, lastKey = '';
+      var DW = 1500, DH = 1000, lastKey = '';   // fixed design canvas (jove.css #app)
       function fit() {
         var el = document.getElementById('app'); if (!el) return;
         var w = window.innerWidth || document.documentElement.clientWidth;
         var h = window.innerHeight || document.documentElement.clientHeight;
-        var nh = el.offsetHeight; if (!w || !h || !nh) return;
-        var s = Math.min(w / DW, h / nh);
-        var sw = DW * s, sh = nh * s;
+        if (!w || !h) return;
+        var s = Math.min(w / DW, h / DH);
+        var sw = DW * s, sh = DH * s;
         el.style.transform = 'translate(' + ((w - sw) / 2) + 'px,' + ((h - sh) / 2) + 'px) scale(' + s + ')';
-        lastKey = w + 'x' + h + 'x' + nh;
+        lastKey = w + 'x' + h;
       }
       window.addEventListener('resize', fit);
       window.addEventListener('load', fit);
       window.fitJove = fit;
       (function poll(n) {
         var el = document.getElementById('app');
-        if (el) { fit(); try { new ResizeObserver(fit).observe(el); } catch (_) {} return; }
+        if (el) { fit(); try { new ResizeObserver(fit).observe(document.body); } catch (_) {} return; }
         if (n > 0) setTimeout(function () { poll(n - 1); }, 30);
       })(120);
       setInterval(function () {
-        var el = document.getElementById('app'); if (!el) return;
-        var w = window.innerWidth, h = window.innerHeight, nh = el.offsetHeight;
-        if (w + 'x' + h + 'x' + nh !== lastKey) fit();
+        var w = window.innerWidth, h = window.innerHeight;
+        if (w + 'x' + h !== lastKey) fit();
       }, 400);
     })();
   </script>

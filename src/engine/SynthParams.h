@@ -373,6 +373,7 @@ inline void InitDefaultPatch(SynthPatch& p) noexcept
     p.osc[1].detune = 0.08f; // a touch sharp -> analog fatness
     p.osc[1].level = 1.0f;
     p.osc[2].on    = false;
+    for(int i = 3; i < kNumOsc; ++i) p.osc[i].on = false; // osc4-5 off by default
     p.oscMix       = 0.5f;
     p.subLevel     = 0.0f;
     p.noiseLevel   = 0.0f;
