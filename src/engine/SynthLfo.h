@@ -53,15 +53,18 @@ class SynthLfo
     // then fades in over the fade time. Phase holds at its retrigger value during
     // the delay so the wobble grows smoothly from centre (no jump).
     void setDelay(float seconds) noexcept { delayBlocks_ = seconds < 0.0f ? 0.0f : seconds * blockRate_; }
+    // Bipolar DC bias added to the output so the LFO can sweep around a point
+    // other than centre (e.g. an upward-only filter wobble).
+    void setOffset(float o) noexcept { offset_ = o; }
 
-    // Advance one control block; returns the smoothed bipolar value * depth.
+    // Advance one control block; returns the smoothed bipolar value * depth + offset.
     float advance() noexcept
     {
-        if(delayCount_ > 0.0f) // still in the pre-fade delay -> hold at centre
+        if(delayCount_ > 0.0f) // still in the pre-fade delay -> hold at the bias
         {
             delayCount_ -= 1.0f;
-            out_ = 0.0f;
-            return 0.0f;
+            out_ = offset_;
+            return out_;
         }
         const float prev = phase_;
         phase_ += rate_ / blockRate_;
@@ -81,7 +84,7 @@ class SynthLfo
             if(fadeGain_ > 1.0f)
                 fadeGain_ = 1.0f;
         }
-        out_ = smooth_ * depth_ * fadeGain_;
+        out_ = smooth_ * depth_ * fadeGain_ + offset_;
         return out_;
     }
 
@@ -121,6 +124,7 @@ class SynthLfo
     float    phase_     = 0.0f;
     float    held_      = 0.0f;
     float    out_       = 0.0f;
+    float    offset_    = 0.0f;
     float    smooth_    = 0.0f;
     float    fadeGain_  = 1.0f;
     float    fadeInc_   = 1.0f;

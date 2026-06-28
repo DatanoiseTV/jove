@@ -103,6 +103,7 @@ int main()
             I(i, "lfoPerVoice", r.lfo[l].perVoice, g.lfo[l].perVoice);
             F(i, "lfoFade", r.lfo[l].fade, g.lfo[l].fade);
             F(i, "lfoDelay", r.lfo[l].delay, g.lfo[l].delay);
+            F(i, "lfoOffset", r.lfo[l].offset, g.lfo[l].offset);
         }
 
         for(int s = 0; s < kNumModSlots; ++s)

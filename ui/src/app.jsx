@@ -396,6 +396,7 @@ function LfoPanel({ n, accent }) {
         {sync ? <Sel id={p + "Div"} options={DIVISIONS} label="DIV" />
               : <Knob id={p + "Rate"} label="RATE" />}
         <Knob id={p + "Depth"} label="DEPTH" />
+        <Knob id={p + "Offset"} label="OFFSET" bipolar />
         <Knob id={p + "Fade"} label="FADE" />
         <Knob id={p + "Delay"} label="DELAY" />
       </div>

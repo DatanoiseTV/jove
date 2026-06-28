@@ -435,6 +435,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         lfo_[i].setDepth(depth);
         lfo_[i].setFade(lp.fade);
         lfo_[i].setDelay(lp.delay);
+        lfo_[i].setOffset(lp.offset);
         lfo_[i].advance();
     }
 

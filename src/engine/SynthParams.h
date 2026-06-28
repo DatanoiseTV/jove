@@ -193,6 +193,7 @@ struct LfoParams
     bool  perVoice = false; // independent phase per voice vs one global phase
     float fade     = 0.0f;  // fade-in time (seconds) after the delay
     float delay    = 0.0f;  // delay before the fade (seconds) — delayed vibrato
+    float offset   = 0.0f;  // bipolar DC bias added to the output (-1..+1)
 };
 
 // ---- envelope settings ------------------------------------------------------
