@@ -98,9 +98,15 @@ function Knob({ id, label, bipolar = false, big = false }) {
   const minfo = id && mc.map[id];
   let mrange = 0, mlive = 0;
   if (minfo) {
-    minfo.forEach((m) => { mrange += Math.abs(m.amt); if (m.src >= 1 && m.src <= 3) mlive += mc.lfo[m.src - 1] * m.amt; });
+    // live offset driven by EVERY routed source's current value (LFOs,
+    // envelopes, wheel, velocity, ...), so the dot moves at the destination
+    // for any active modulation.
+    minfo.forEach((m) => {
+      mrange += Math.abs(m.amt);
+      mlive += ((mc.src && mc.src[m.src]) || 0) * m.amt;
+    });
     mrange = Math.min(0.5, mrange * MOD_SCALE);
-    mlive = Math.max(-0.5, Math.min(0.5, mlive * MOD_SCALE));
+    mlive = Math.max(-0.6, Math.min(0.6, mlive * MOD_SCALE));
   }
   const modA0 = A0 + Math.max(0, v - mrange) * SWEEP;
   const modA1 = A0 + Math.min(1, v + mrange) * SWEEP;
@@ -116,7 +122,7 @@ function Knob({ id, label, bipolar = false, big = false }) {
         <path d={arc(Math.min(fillFrom, ang), Math.max(fillFrom, ang))} className="k-fill" strokeWidth={sw} />
         <circle cx={c} cy={c} r={R - sw - 1.5} className="k-body" />
         <line x1={c} y1={c} x2={px} y2={py} className="k-ptr" />
-        {minfo && <circle cx={mx} cy={my} r={2.2} className="k-moddot" />}
+        {minfo && <circle cx={mx} cy={my} r={big ? 3.4 : 3} className="k-moddot" />}
       </svg>
       <div className="k-lab">{label}</div>
       <div className="k-val">{fmt(val)}</div>

@@ -121,8 +121,9 @@ button, select, input { font-family: inherit; color: inherit; }
 .knob.big .k-fill { stroke-width: 4; }
 /* modulation: a band over the reachable range + a live moving dot, in the
    distinct mod colour (purple) so it reads apart from the value fill. */
-.k-mod { fill: none; stroke: #c592ff; opacity: .55; stroke-linecap: round; }
-.k-moddot { fill: #f0e0ff; r: 2.6; filter: drop-shadow(0 0 5px #c592ff); }
+.k-mod { fill: none; stroke: #c592ff; opacity: .5; stroke-linecap: round; }
+.k-moddot { fill: #f4ecff; stroke: #c592ff; stroke-width: .6;
+  filter: drop-shadow(0 0 6px #c592ff); }
 .knob.modded .k-lab { color: #d9c4ff; }
 .knob.modded .k-body { stroke: #5a3a78; }     /* tint the modded knob body */
 .knob.modded { filter: drop-shadow(0 0 6px rgba(180,130,255,.18)); }
