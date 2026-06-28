@@ -47,18 +47,20 @@ void pad_warm(SynthPatch& p)
     // Juno/Jupiter warm-saw poly. Two saws + sub through the Moog ladder, a gentle
     // filter-drive bloom for analog thickness, and a very slow filter-env swell.
     setName(p, "WARM ANALOG"); p.category = 0;
-    p.width = 0.80f;
-    p.ampGain = 0.88f;
+    p.width = 0.84f;
+    p.ampGain = 0.74f; // trimmed for the two extra oscillators below
     p.chorusMode = 2; // Ensemble
     p.osc[0].morph = SAW; p.osc[0].level = 1.0f;
     p.osc[1].morph = SAW; p.osc[1].detune = 0.11f; p.osc[1].level = 1.0f;
-    p.oscMix = 0.5f; p.subLevel = 0.18f; p.drift = 0.28f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = -0.07f; p.osc[3].level = 0.55f; // desktop width
+    p.osc[4].on = true; p.osc[4].morph = SAW; p.osc[4].detune = 0.16f; p.osc[4].footage = 1; p.osc[4].level = 0.42f; // octave-down body
+    p.oscMix = 0.5f; p.subLevel = 0.16f; p.drift = 0.28f;
     p.filterMode = (int)FilterMode::LadderLP; p.cutoff = 0.38f; p.resonance = 0.10f;
     p.filterDrive = 0.22f; // 1.9x saturation -> Juno-ish body, not buzz
     p.envFilterAmt = 0.35f; p.keyTrack = 0.40f;
     p.env[0] = EnvParams{0.70f, 1.5f, 0.88f, 1.8f, 0.30f}; // soft attack, high sustain, velocity dynamics
     p.env[1] = EnvParams{1.40f, 1.8f, 0.55f, 1.6f, 0.0f}; // slow cutoff swell
-    p.lfo[0].wave = (int)LfoWave::Sine;     p.lfo[0].rate = 0.20f; // slow cutoff drift
+    p.lfo[0].wave = (int)LfoWave::Sine;     p.lfo[0].rate = 0.20f; p.lfo[0].offset = 0.15f; // one-sided upward cutoff bloom
     p.lfo[1].wave = (int)LfoWave::Triangle; p.lfo[1].rate = 0.12f; // slow timbral axis
     mod(p, 0, ModSource::Lfo1,       ModDest::Cutoff,    0.12f);
     mod(p, 1, ModSource::ModWheel,   ModDest::Cutoff,    0.40f);
@@ -72,12 +74,14 @@ void pad_strings(SynthPatch& p)
     // Solina/string-machine: three saws spread around unison, animated by TWO
     // LFOs on Detune at different rates so the ensemble is never static.
     setName(p, "STRINGS"); p.category = 0;
-    p.width = 0.82f;
-    p.ampGain = 0.85f;
+    p.width = 0.88f;
+    p.ampGain = 0.66f; // five saws -> trim level
     p.chorusMode = 2; // Ensemble
     p.osc[0].morph = SAW;
     p.osc[1].morph = SAW; p.osc[1].detune = 0.13f;
     p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].detune = -0.11f; p.osc[2].level = 0.70f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = 0.21f; p.osc[3].level = 0.6f;  // wider beating
+    p.osc[4].on = true; p.osc[4].morph = SAW; p.osc[4].detune = -0.19f; p.osc[4].level = 0.6f;
     p.oscMix = 0.5f; p.drift = 0.35f;
     p.filterMode = (int)FilterMode::SvfLP; p.cutoff = 0.56f; p.resonance = 0.12f;
     p.envFilterAmt = 0.20f;
@@ -270,12 +274,14 @@ void lead_super(SynthPatch& p)
     p.unisonCount = 5; p.unisonDetune = 0.2f; p.unisonSpread = 0.8f;
     p.osc[0].morph = SAW; p.osc[0].level = 1.0f;
     p.osc[1].morph = SAW; p.osc[1].detune = 0.04f; p.osc[1].level = 1.0f;
+    p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].detune = -0.05f; p.osc[2].level = 0.9f; // 7-saw stack
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = 0.10f; p.osc[3].level = 0.8f;
     p.oscMix = 0.5f; p.subLevel = 0.1f; p.drift = 0.3f;
     p.filterMode = (int)FilterMode::LadderLP; p.cutoff = 0.62f; p.resonance = 0.1f;
     p.envFilterAmt = 0.3f; p.keyTrack = 0.5f;
     p.env[0] = EnvParams{0.01f, 0.6f, 0.85f, 0.5f, 0.0f}; // smooth trance-lead amp
     p.env[1] = EnvParams{0.03f, 0.5f, 0.55f, 0.45f, 0.0f};
-    p.lfo[0].wave = (int)LfoWave::Sine; p.lfo[0].rate = 0.18f;
+    p.lfo[0].wave = (int)LfoWave::Sine; p.lfo[0].rate = 0.18f; p.lfo[0].offset = 0.12f;
     p.lfo[1].wave = (int)LfoWave::Triangle; p.lfo[1].rate = 0.11f;
     mod(p, 0, ModSource::ModWheel, ModDest::Cutoff, 0.45f);
     mod(p, 1, ModSource::Lfo1, ModDest::Cutoff, 0.08f);    // slow filter drift
@@ -285,7 +291,7 @@ void lead_super(SynthPatch& p)
     p.macroDest[0] = (int)MacroDest::Cutoff;
     p.macroDest[1] = (int)MacroDest::Reverb;
     p.macroDest[2] = (int)MacroDest::Delay;
-    p.ampGain = 0.52f; p.fxChorus = 0.35f; p.fxReverb = 0.32f; p.fxDelay = 0.24f;
+    p.ampGain = 0.42f; p.fxChorus = 0.35f; p.fxReverb = 0.32f; p.fxDelay = 0.24f; // 7-saw stack -> lower gain
 }
 void lead_acidld(SynthPatch& p)
 {
@@ -1249,9 +1255,11 @@ void amb_drift(SynthPatch& p)
 void amb_choir(SynthPatch& p)
 {
     setName(p, "VOX CHOIR"); p.category = 10;
-    p.width = 0.88f; p.ampGain = 0.58f; p.chorusMode = 2;
+    p.width = 0.90f; p.ampGain = 0.5f; p.chorusMode = 2;
     p.osc[0].morph = PULSE; p.osc[0].pw = 0.50f;
     p.osc[1].morph = PULSE; p.osc[1].pw = 0.44f; p.osc[1].detune = 0.08f;
+    p.osc[3].on = true; p.osc[3].morph = PULSE; p.osc[3].pw = 0.52f; p.osc[3].detune = -0.10f; p.osc[3].level = 0.7f; // wider choir
+    p.osc[4].on = true; p.osc[4].morph = SAW;   p.osc[4].footage = 3; p.osc[4].detune = 0.13f; p.osc[4].level = 0.35f; // airy octave
     p.oscMix = 0.5f; p.drift = 0.30f;
     p.filterMode = (int)FilterMode::SvfBP; p.cutoff = 0.48f; p.resonance = 0.40f;
     p.envFilterAmt = 0.12f;
@@ -1468,10 +1476,12 @@ void amb_dronechoir(SynthPatch& p)
 void amb_textwash(SynthPatch& p)
 {
     setName(p, "TEXT WASH"); p.category = 10;
-    p.width = 0.92f; p.ampGain = 0.56f; p.chorusMode = 2;
+    p.width = 0.94f; p.ampGain = 0.5f; p.chorusMode = 2;
     p.osc[0].morph = TRI;   p.osc[0].level = 1.0f;
     p.osc[1].morph = PULSE; p.osc[1].pw = 0.45f; p.osc[1].detune = 0.22f; p.osc[1].level = 0.9f;
     p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].footage = 3; p.osc[2].detune = -0.30f; p.osc[2].level = 0.55f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].footage = 1; p.osc[3].detune = 0.18f; p.osc[3].level = 0.5f;  // deep layer
+    p.osc[4].on = true; p.osc[4].morph = TRI; p.osc[4].detune = -0.4f; p.osc[4].level = 0.4f;
     p.oscMix = 0.5f; p.ringMod = 0.10f; p.drift = 0.45f;
     p.filterMode = (int)FilterMode::SvfBP; p.cutoff = 0.52f; p.resonance = 0.30f;
     p.envFilterAmt = 0.10f;
@@ -1642,10 +1652,12 @@ void seq_acidseq(SynthPatch& p)
 void seq_blade(SynthPatch& p)
 {
     setName(p, "BLADE"); p.category = 11;
-    p.width = 0.88f; p.ampGain = 0.66f; p.chorusMode = 2;
+    p.width = 0.90f; p.ampGain = 0.56f; p.chorusMode = 2;
     p.osc[0].morph = PULSE; p.osc[0].pw = 0.5f;
     p.osc[1].morph = SAW;   p.osc[1].detune = 0.12f;
     p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].detune = -0.10f; p.osc[2].level = 0.8f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = 0.22f; p.osc[3].level = 0.6f;  // wider blade
+    p.osc[4].on = true; p.osc[4].morph = SAW; p.osc[4].footage = 1; p.osc[4].detune = -0.05f; p.osc[4].level = 0.5f; // sub-octave body
     p.oscMix = 0.5f; p.subLevel = 0.10f; p.drift = 0.30f;
     p.filterMode = (int)FilterMode::SvfLP; p.cutoff = 0.55f; p.resonance = 0.24f;
     p.envFilterAmt = 0.20f; p.keyTrack = 0.4f;
@@ -1771,10 +1783,12 @@ void seq_motionpad(SynthPatch& p)
 void seq_hoover_seq(SynthPatch& p)
 {
     setName(p, "HOOVERSEQ"); p.category = 11;
-    p.width = 0.7f; p.ampGain = 0.70f;
+    p.width = 0.78f; p.ampGain = 0.6f;
     p.osc[0].morph = SAW; p.osc[0].detune = 0.0f;
     p.osc[1].morph = PULSE; p.osc[1].pw = 0.4f; p.osc[1].detune = 0.18f;
     p.osc[2].on = true; p.osc[2].morph = SAW; p.osc[2].detune = -0.16f; p.osc[2].level = 0.85f;
+    p.osc[3].on = true; p.osc[3].morph = SAW; p.osc[3].detune = 0.30f; p.osc[3].level = 0.7f;   // fatter hoover
+    p.osc[4].on = true; p.osc[4].morph = PULSE; p.osc[4].pw = 0.35f; p.osc[4].detune = -0.28f; p.osc[4].level = 0.6f;
     p.oscMix = 0.5f; p.subLevel = 0.14f; p.drift = 0.30f;
     p.filterMode = (int)FilterMode::LadderLP; p.cutoff = 0.40f; p.resonance = 0.34f;
     p.filterDrive = 0.40f; p.envFilterAmt = 0.35f; p.keyTrack = 0.4f;
@@ -1870,12 +1884,58 @@ const Builder kBuilders[kNumFactoryPresets] = {
 };
 } // namespace
 
+// Desktop voicing pass applied to every factory patch after its builder runs:
+// gives the (now parameterised) delay + reverb a character that fits the patch
+// category instead of the one hard-coded global setting the hardware used. Only
+// the wet FX voicing is touched, so a patch's dry tone, mix levels and mod
+// routing are exactly as designed — but every preset now exercises the new
+// delay/reverb controls.
+void enhanceForDesktop(SynthPatch& p) noexcept
+{
+    switch(p.category)
+    {
+        case 0:  // PAD
+        case 8:  // DRONE
+        case 10: // AMB
+            p.reverbSize = 0.84f; p.reverbTone = 0.32f;
+            p.delaySync = true; p.delayDiv = 10; p.delayFeedback = 0.40f; p.delayTone = 0.55f; p.delayPing = true;
+            break;
+        case 1:  // LEAD
+        case 4:  // STAB
+            p.reverbSize = 0.55f; p.reverbTone = 0.45f;
+            p.delaySync = true; p.delayDiv = 9; p.delayFeedback = 0.45f; p.delayTone = 0.45f; p.delayPing = true;
+            break;
+        case 2:  // BASS
+            p.reverbSize = 0.34f; p.reverbTone = 0.6f;
+            p.delaySync = true; p.delayDiv = 7; p.delayFeedback = 0.24f; p.delayTone = 0.6f; p.delayPing = false;
+            break;
+        case 3:  // ARP
+        case 11: // SEQ
+            p.reverbSize = 0.5f; p.reverbTone = 0.42f;
+            p.delaySync = true; p.delayDiv = 7; p.delayFeedback = 0.5f; p.delayTone = 0.4f; p.delayPing = true;
+            break;
+        case 5:  // KEYS
+        case 6:  // PLUCK
+            p.reverbSize = 0.56f; p.reverbTone = 0.4f;
+            p.delaySync = true; p.delayDiv = 7; p.delayFeedback = 0.3f; p.delayTone = 0.45f; p.delayPing = true;
+            break;
+        case 9:  // PERC
+            p.reverbSize = 0.44f; p.reverbTone = 0.5f;
+            p.delaySync = true; p.delayDiv = 4; p.delayFeedback = 0.32f; p.delayTone = 0.5f; p.delayPing = true;
+            break;
+        default: // FX (7) etc. keep the lush default
+            p.reverbSize = 0.7f; p.reverbTone = 0.35f;
+            break;
+    }
+}
+
 void LoadFactoryPreset(int index, SynthPatch& p) noexcept
 {
     InitDefaultPatch(p);
     if(index < 0 || index >= kNumFactoryPresets)
         return;
     kBuilders[index](p);
+    enhanceForDesktop(p);
 }
 
 const char* FactoryPresetName(int index) noexcept
