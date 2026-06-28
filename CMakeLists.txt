@@ -65,6 +65,40 @@ target_link_libraries(Jove PRIVATE
     juce::juce_recommended_warning_flags)
 
 # -----------------------------------------------------------------------------
+# Ad-hoc re-sign the assembled bundles. JUCE/CMake on recent macOS can leave an
+# inconsistent code signature ("code has no resources but signature indicates
+# they must be present"), which Apple-Silicon hosts reject on load with a
+# CODESIGNING "Invalid Page" SIGKILL — i.e. the DAW crashes when instantiating
+# the plug-in. A clean `codesign --force -s -` after the bundle is finalised
+# (and after JUCE's copy-to-plug-in-folder) fixes it. Runs after JUCE's own
+# POST_BUILD copy because it is registered later on the same targets.
+# -----------------------------------------------------------------------------
+if(APPLE)
+    foreach(_fmt AU VST3)
+        if(TARGET Jove_${_fmt})
+            add_custom_command(TARGET Jove_${_fmt} POST_BUILD
+                COMMAND codesign --force -s - "$<TARGET_BUNDLE_DIR:Jove_${_fmt}>"
+                VERBATIM)
+            if(DOOBIE_INSTALL_LOCAL)
+                if(_fmt STREQUAL AU)
+                    set(_jove_dest "$ENV{HOME}/Library/Audio/Plug-Ins/Components/Jove.component")
+                else()
+                    set(_jove_dest "$ENV{HOME}/Library/Audio/Plug-Ins/VST3/Jove.vst3")
+                endif()
+                add_custom_command(TARGET Jove_${_fmt} POST_BUILD
+                    COMMAND codesign --force -s - "${_jove_dest}"
+                    VERBATIM)
+            endif()
+        endif()
+    endforeach()
+    if(TARGET Jove_Standalone)
+        add_custom_command(TARGET Jove_Standalone POST_BUILD
+            COMMAND codesign --force -s - "$<TARGET_BUNDLE_DIR:Jove_Standalone>"
+            VERBATIM)
+    endif()
+endif()
+
+# -----------------------------------------------------------------------------
 # Tests.
 # -----------------------------------------------------------------------------
 option(JOVE_TESTS "Build Jove engine + parameter audits" ON)
