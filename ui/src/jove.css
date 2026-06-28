@@ -75,10 +75,10 @@ button, select, input { font-family: inherit; color: inherit; }
 
 .tb-global { display: flex; gap: 14px; margin-left: auto; }
 .tb-voices { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.vleds { display: flex; gap: 4px; }
+.vleds { display: flex; flex-wrap: wrap; gap: 4px; width: 92px; justify-content: flex-end; }
 .vled {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: #14171f; border: 1px solid var(--line2);
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1px solid var(--line2);
   background: color-mix(in srgb, var(--accent) calc(var(--g, 0) * 100%), #14171f);
 }
 .vled.on { box-shadow: 0 0 calc(3px + var(--g, 0) * 9px) var(--accent); border-color: var(--accent); }

@@ -153,7 +153,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     const auto arpDivs = namesToArray(kArpDivNames, kNumArpDiv);
 
     // ---- global plugin settings (not patch state) ----
-    iparam(jID::maxVoices, "Max Polyphony", 1, kMaxVoices, kMaxVoices);
+    iparam(jID::maxVoices, "Max Polyphony", 1, kMaxVoices, 8); // up to 16, default 8
     cparam(jID::quality, "Quality", {"Eco", "HQ", "Ultra"}, 1); // default HQ (2x)
 
     // ---- global / voicing ----

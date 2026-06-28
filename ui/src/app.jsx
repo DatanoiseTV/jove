@@ -267,31 +267,42 @@ function LfoScope({ n }) {
   );
 }
 
+// Accurate-ish filter response: the standard 2-pole (biquad) magnitude, drawn in
+// log-frequency / dB. MOOG (4-pole ladder) is approximated by squaring. Shows a
+// flat-then-rolloff LP, rising HP, a BP peak, a notch dip — with a real resonance
+// bump at the cutoff that grows with Resonance.
 function FilterCurve() {
   const [cut] = B.useSlider("cutoff");
   const [res] = B.useSlider("resonance");
   const [mode] = B.useChoice("filterMode");
-  const W = 180, H = 46, N = 60;
-  const fc = 0.06 + cut * 0.88;            // corner position (0..1 across the view)
-  const q = 0.5 + res * 7;                  // resonance peak height
-  const lp = mode === 0 || mode === 1, hp = mode === 2, bp = mode === 3, notch = mode === 4;
-  const mag = (x) => {
-    const d = (x - fc);
-    const bump = res > 0.01 ? (q * 0.16) * Math.exp(-(d * d) / 0.0016) : 0;
-    let base;
-    if (lp) base = 1 / (1 + Math.pow(Math.max(0, (x - fc)) / 0.16, 2));
-    else if (hp) base = 1 / (1 + Math.pow(Math.max(0, (fc - x)) / 0.16, 2));
-    else if (bp) base = Math.exp(-(d * d) / 0.01);
-    else if (notch) base = 1 - Math.exp(-(d * d) / 0.0009) * 0.95;
-    else base = 0.5;
-    return Math.max(0, Math.min(1.15, base + bump));
+  const W = 180, H = 38, N = 72;
+  const fmin = Math.log2(20), fmax = Math.log2(20000);
+  const fc = 20 * Math.pow(2, cut * 9.6);          // engine cutoff mapping (Hz)
+  const Q = 0.5 + res * 11;                          // resonance -> Q
+  const ladder = mode === 0;
+  const mag = (f) => {
+    const w = f / fc, w2 = w * w;
+    const denom = Math.sqrt((1 - w2) * (1 - w2) + (w / Q) * (w / Q)) || 1e-9;
+    let h;
+    if (mode === 0 || mode === 1) h = 1 / denom;        // LP (moog/svf)
+    else if (mode === 2) h = w2 / denom;                 // HP
+    else if (mode === 3) h = (w / Q) / denom;            // BP
+    else h = Math.abs(1 - w2) / denom;                   // notch
+    if (ladder) h *= h;                                  // ~4-pole steepness
+    return h;
   };
   const pts = [];
-  for (let i = 0; i <= N; i++) { const x = i / N; pts.push(((x) * W).toFixed(1) + "," + (H - 3 - mag(x) * (H - 8)).toFixed(1)); }
+  for (let i = 0; i <= N; i++) {
+    const f = Math.pow(2, fmin + (i / N) * (fmax - fmin));
+    const db = 20 * Math.log10(Math.max(1e-3, mag(f)));  // ~-60..+20 dB
+    const y = Math.max(0, Math.min(1, (db + 42) / 54));   // -42dB->0, +12dB->1
+    pts.push(((i / N) * W).toFixed(1) + "," + (H - 2 - y * (H - 4)).toFixed(1));
+  }
+  const fcx = (Math.log2(fc) - fmin) / (fmax - fmin) * W;
   return (
     <svg className="viz filter" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
       <polyline points={pts.join(" ")} />
-      <line x1={fc * W} y1="0" x2={fc * W} y2={H} className="mark" />
+      <line x1={fcx.toFixed(1)} y1="0" x2={fcx.toFixed(1)} y2={H} className="mark" />
     </svg>
   );
 }
@@ -428,18 +439,18 @@ function ModMatrix() {
 function ArpPanel() {
   const [on] = B.useToggle("arpOn");
   return (
-    <Panel title="ARPEGGIATOR" accent="#e07a9a">
+    <Panel title="ARP" accent="#e07a9a">
       <div className="row">
         <Switch id="arpOn" label="ON" />
         <Switch id="arpLatch" label="LATCH" />
+        <Sel id="arpMode" options={ARP_MODES} label="MODE" />
       </div>
       <div className={"row" + (on ? "" : " dim")}>
-        <Sel id="arpMode" options={ARP_MODES} label="MODE" />
         <Sel id="arpSyncDiv" options={DIVISIONS} label="DIV" />
-      </div>
-      <div className={"knobs" + (on ? "" : " dim")}>
         <Knob id="arpGate" label="GATE" />
         <Knob id="arpSwing" label="SWING" />
+      </div>
+      <div className={"row" + (on ? "" : " dim")}>
         <IntSeg id="arpOctaves" label="OCT" min={1} max={4} />
         <IntSeg id="arpRatchet" label="RATCH" min={1} max={4} />
       </div>
@@ -497,7 +508,7 @@ function VoicingPanel() {
     <Panel title="VOICING" accent="#9aa6e0">
       <div className="row">
         <Seg id="voiceMode" options={VOICE_MODES} label="MODE" />
-        <IntPick id="maxVoices" label="MAX POLY" min={1} max={8} />
+        <IntPick id="maxVoices" label="MAX POLY" min={1} max={16} />
       </div>
       <div className="knobs">
         <Knob id="glideTime" label="GLIDE" />
@@ -536,7 +547,7 @@ function MasterPanel() {
 function VoiceLeds() {
   const meters = B.useEvent("meters", { voiceLevels: [] });
   const [mv] = B.useSlider("maxVoices");
-  const n = Math.round(1 + mv * 7); // maxVoices 1..8
+  const n = Math.round(1 + mv * 15); // maxVoices 1..16
   const lv = meters.voiceLevels || [];
   const leds = [];
   for (let i = 0; i < n; i++) {
@@ -666,10 +677,10 @@ function App() {
           <LfoPanel n={1} accent="#c08ae0" />
           <LfoPanel n={2} accent="#b07ae0" />
           <LfoPanel n={3} accent="#a06ae0" />
-          <ArpPanel />
         </div>
         <div className="col">
           <ModMatrix />
+          <ArpPanel />
           <FxPanel />
           <DelayPanel />
         </div>

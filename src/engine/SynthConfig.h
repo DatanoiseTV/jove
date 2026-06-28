@@ -12,12 +12,10 @@
 
 namespace jove
 {
-// Maximum simultaneous voices. The STM32H750 at 480 MHz runs the per-voice
-// engine (3 BLEP oscs + sub + noise + ladder/SVF filter + 3 envelopes) plus the
-// full Doobie FX chain. This is the allocation ceiling; the live polyphony the
-// allocator actually uses can be lower (UNISON spends several voices per note).
-// Tuned to budget in Phase 10 — start generous, profile, then settle.
-inline constexpr int kMaxVoices = 8;
+// Maximum simultaneous voices (allocation ceiling). The desktop build runs up to
+// 16; the live polyphony the allocator uses is set by the Max Polyphony param and
+// can be lower (UNISON spends several voices per note).
+inline constexpr int kMaxVoices = 16;
 
 // Per-voice unison ceiling (UNISON mode stacks this many detuned sub-voices on a
 // single MIDI note; POLY uses 1). Kept modest so a held chord in UNISON can't
