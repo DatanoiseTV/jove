@@ -30,7 +30,7 @@ const DEST_PARAM = [
   "envFilterAmt", null];
 const MOD_SCALE = 0.25; // visual: mod amount 1.0 -> a quarter of the knob's travel
 
-const ModContext = React.createContext({ map: {}, lfo: [0, 0, 0] });
+const ModContext = React.createContext({ map: {}, lfo: [0, 0, 0], src: [] });
 
 /* Read all 10 mod slots and build paramId -> [{src, amt}] for the indicators. */
 function useModMap() {
@@ -393,9 +393,14 @@ function LfoPanel({ n, accent }) {
 function ModRow({ n }) {
   const p = "mod" + n;
   const [src] = B.useChoice(p + "Src");
+  const mc = React.useContext(ModContext);
+  const v = (src > 0 && mc.src) ? (mc.src[src] || 0) : 0;
+  const mag = Math.min(1, Math.abs(v)) * 50;
+  const fill = v >= 0 ? { bottom: "50%", height: mag + "%" } : { top: "50%", height: mag + "%" };
   return (
     <div className={"modrow" + (src > 0 ? " active" : "")}>
       <span className="mn">{n}</span>
+      <div className="smeter"><i style={fill} /></div>
       <Sel id={p + "Src"} options={MOD_SRC} />
       <span className="arr">{"→"}</span>
       <Sel id={p + "Dst"} options={MOD_DST} />
@@ -624,9 +629,9 @@ function SaveDialog({ onClose, cat }) {
 /* ============================ app ============================ */
 function App() {
   const modMap = useModMap();
-  const meters = B.useEvent("meters", { lfo: [0, 0, 0] });
-  const modCtx = useMemo(() => ({ map: modMap, lfo: meters.lfo || [0, 0, 0] }),
-                         [modMap, meters.lfo]);
+  const meters = B.useEvent("meters", { lfo: [0, 0, 0], modSrc: [] });
+  const modCtx = useMemo(() => ({ map: modMap, lfo: meters.lfo || [0, 0, 0], src: meters.modSrc || [] }),
+                         [modMap, meters.lfo, meters.modSrc]);
   return (
     <ModContext.Provider value={modCtx}>
     <div id="app">

@@ -238,6 +238,10 @@ void JoveWebEditor::emitMeters()
     for(int i = 0; i < jove::kMaxVoices; ++i)
         vl.add(processor.getVoiceLevel(i));
     o->setProperty("voiceLevels", juce::var(vl));
+    juce::Array<juce::var> ms;
+    for(int i = 0; i < JoveAudioProcessor::kNumModSources; ++i)
+        ms.add(processor.getModSourceValue(i));
+    o->setProperty("modSrc", juce::var(ms));
     webView->emitEventIfBrowserIsVisible("meters", juce::var(o));
 }
 

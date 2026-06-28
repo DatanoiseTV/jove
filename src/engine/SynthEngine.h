@@ -67,6 +67,40 @@ class SynthEngine
     {
         return (i >= 0 && i < kMaxVoices && voice_[i].active()) ? voice_[i].ampEnvLevel() : 0.0f;
     }
+
+    // Current value of a mod source (by ModSource index) for the live UI meters.
+    // Global sources read directly; per-voice sources use the loudest active
+    // voice as a representative so the meter tracks what you actually hear.
+    float modSourceValue(int s) const noexcept
+    {
+        switch((ModSource) s)
+        {
+            case ModSource::Lfo1:       return lfo_[0].value();
+            case ModSource::Lfo2:       return lfo_[1].value();
+            case ModSource::Lfo3:       return lfo_[2].value();
+            case ModSource::ModWheel:   return wheel_;
+            case ModSource::Aftertouch: return at_;
+            case ModSource::PitchBend:  return bend_;
+            default: break;
+        }
+        int best = -1; float bestAmp = -1.0f;
+        for(int i = 0; i < kMaxVoices; ++i)
+            if(voice_[i].active() && voice_[i].ampEnvValue() > bestAmp)
+            { bestAmp = voice_[i].ampEnvValue(); best = i; }
+        if(best < 0) return 0.0f;
+        const Voice& v = voice_[best];
+        switch((ModSource) s)
+        {
+            case ModSource::EnvAmp:    return v.ampEnvValue();
+            case ModSource::EnvFilter: return v.filterEnvValue();
+            case ModSource::EnvAux:    return v.auxEnvValue();
+            case ModSource::Velocity:  return v.velocity();
+            case ModSource::KeyTrack:  return v.keyTrackSource();
+            case ModSource::Note:      return v.noteSource();
+            case ModSource::Random:    return v.randomSource();
+            default: return 0.0f;
+        }
+    }
     float lfoValue(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].value() : 0.0f; }
     float lfoPhase(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].phase() : 0.0f; }
     // Monotonic count of note triggers — bumps on every voice start (keyboard or

@@ -206,6 +206,8 @@ void JoveAudioProcessor::publishMeters(const float* l, const float* r, int n) no
     activeVoices.store(engine.activeVoices(), std::memory_order_relaxed);
     for(int i = 0; i < kMaxVoices; ++i)
         voiceLevelUI[(size_t) i].store(engine.voiceLevel(i), std::memory_order_relaxed);
+    for(int i = 0; i < kNumModSources; ++i)
+        modSrcUI[(size_t) i].store(engine.modSourceValue(i), std::memory_order_relaxed);
     for(int i = 0; i < kNumLfo; ++i)
     {
         lfoValueUI[(size_t) i].store(engine.lfoValue(i), std::memory_order_relaxed);
