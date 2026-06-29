@@ -414,15 +414,22 @@ function OscWave({ morphId, pwId, crushId, on, wt, tableId, wtMorphId }) {
   const pw = Math.max(0.02, Math.min(0.98, pw0 + pwAdd));
   const levels = crush > 0.01 ? Math.pow(2, 8.5 - crush * 8.0) : 0; // mirror engine bit-crush
   const W = 160, H = 54, cy = H / 2, amp = H / 2 - 4, N = 160, cyc = 2;
-  // wavetable: blend table idx -> idx+1 by morph, normalised to fit
-  const wi0 = Math.round(wtV * (WT_NAMES.length - 1));
-  const wi1 = Math.min(WT_NAMES.length - 1, wi0 + 1);
-  let wtNorm = 1;
-  if (wt) { let pk = 1e-6; for (let i = 0; i < 64; i++) { const s = wtSample(wi0, i / 64) * (1 - wtMorphV) + wtSample(wi1, i / 64) * wtMorphV; pk = Math.max(pk, Math.abs(s)); } wtNorm = 1 / pk; }
+  // wavetable scan (mirrors Voice.h): base table + (wtMorph knob + live MORPH
+  // mod) sweeps the WHOLE bank; blend the two bracketing tables by the fraction.
+  const N1 = WT_NAMES.length - 1;
+  let wi0 = 0, wi1 = 0, frac = 0, wtNorm = 1;
+  if (wt) {
+    let tp = wtV * N1 + (wtMorphV + mAdd) * N1;
+    tp = Math.max(0, Math.min(N1, tp));
+    wi0 = Math.floor(tp); wi1 = Math.min(N1, wi0 + 1); frac = tp - wi0;
+    let pk = 1e-6;
+    for (let i = 0; i < 64; i++) { const s = wtSample(wi0, i / 64) * (1 - frac) + wtSample(wi1, i / 64) * frac; pk = Math.max(pk, Math.abs(s)); }
+    wtNorm = 1 / pk;
+  }
   const pts = [];
   for (let i = 0; i <= N; i++) {
     const t = (i / N) * cyc, tt = t - Math.floor(t);
-    let y = wt ? (wtSample(wi0, tt) * (1 - wtMorphV) + wtSample(wi1, tt) * wtMorphV) * wtNorm
+    let y = wt ? (wtSample(wi0, tt) * (1 - frac) + wtSample(wi1, tt) * frac) * wtNorm
                : oscShape(m, pw, t);
     if (levels) y = Math.round(y * levels) / levels;
     pts.push(((i / N) * W).toFixed(1) + "," + (cy - y * amp).toFixed(1));
@@ -905,14 +912,11 @@ function DrivePanel() {
     <Panel title="DRIVE · MULTIBAND SAT">
       <DriveCurve />
       <div className="knobs spread">
-        <Knob id="fxDrive" label="DRIVE" />
-        <Knob id="driveTone" label="TONE" bipolar />
-      </div>
-      <div className="cl">MULTIBAND SATURATION</div>
-      <div className="knobs spread">
-        <Knob id="mbLow" label="LOW" small />
-        <Knob id="mbMid" label="MID" small />
-        <Knob id="mbHigh" label="HIGH" small />
+        <Knob id="fxDrive" label="DRIVE" small />
+        <Knob id="driveTone" label="TONE" bipolar small />
+        <Knob id="mbLow" label="MB LOW" small />
+        <Knob id="mbMid" label="MB MID" small />
+        <Knob id="mbHigh" label="MB HIGH" small />
       </div>
     </Panel>
   );
@@ -961,6 +965,7 @@ function DelayPanel() {
         <Knob id="delayFltQ" label="FLT Q" small />
       </div>
       <div className="row between">
+        <Seg id="delayMode" options={["DIGI", "ANLG", "TAPE"]} label="MODE" />
         <Seg id="delayFltType" options={["LP", "HP", "BP"]} label="FILTER" />
         <Switch id="delaySync" label="SYNC" />
         <Switch id="delayPing" label="PING" />
