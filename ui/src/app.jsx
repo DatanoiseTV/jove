@@ -507,14 +507,15 @@ function FilterCurve() {
   // Matrix routes use the same data the knobs paint with; the dedicated
   // filter-env -> cutoff path adds envFilterAmt * (live FLT EG) * 6 octaves.
   const mc = React.useContext(ModContext);
-  let cutOct = 0, resAdd = 0;
+  // only the cutoff sweeps live (matrix + filter env); resonance is left static
+  // so the peak height stays steady instead of wiggling with every meter tick.
+  let cutOct = 0;
   (mc.map && mc.map["cutoff"] || []).forEach((m) => { cutOct += ((mc.src && mc.src[m.src]) || 0) * m.amt * 4; });
-  (mc.map && mc.map["resonance"] || []).forEach((m) => { resAdd += ((mc.src && mc.src[m.src]) || 0) * m.amt; });
   cutOct += efa * ((mc.src && mc.src[5]) || 0) * 6; // MOD_SRC[5] = FLT EG
   const W = 180, H = 38, N = 96;
   const fmin = Math.log2(20), fmax = Math.log2(20000);
   const fc = Math.max(20, Math.min(20000, 20 * Math.pow(2, cut * 9.6 + cutOct)));
-  const resL = Math.max(0, Math.min(1, res + resAdd));
+  const resL = Math.max(0, Math.min(1, res));
   const ladder = mode === 0, isLpg = mode === 5, isSteiner = mode === 6;
   // exact engine mappings: SVF damping k = 2 - 1.9*res (Steiner is peakier);
   // ladder feedback k = 4*res with the engine's (1 + 0.5k) output makeup.

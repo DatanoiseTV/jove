@@ -283,7 +283,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     cparam(jID::arpMode, "Arp Mode", namesToArray(kArpModeNames, (int)ArpMode::Count), 0);
     iparam(jID::arpOctaves, "Arp Octaves", 1, 4, 1);
     cparam(jID::arpSyncDiv, "Arp Division", arpDivs, 4); // 1/16
-    fparam(jID::arpGate, "Arp Gate", lin01, 0.5f);
+    fparam(jID::arpGate, "Arp Gate", FR(0.05f, 2.0f), 0.5f); // up to 200% (overlap)
     fparam(jID::arpSwing, "Arp Swing", FR(0.0f, 0.66f), 0.0f);
     bparam(jID::arpLatch, "Arp Latch", false);
     iparam(jID::arpRatchet, "Arp Ratchet", 1, 4, 1);

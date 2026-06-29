@@ -59,7 +59,6 @@ class Arpeggiator
         seqPos_     = 0;
         phase_      = 0.0f;
         soundingCount_ = 0;
-        gateSamplesLeft_ = 0;
         ratchetLeft_ = 0;
         running_    = false;
         bounceDir_  = 1;
@@ -128,12 +127,20 @@ class Arpeggiator
             return ev;
         }
 
-        // gate: release the sounding note(s) once the gate time elapses
-        if(soundingCount_ > 0)
+        // gate: each sounding note has its own remaining gate, so a >100% gate
+        // can ring past the next step (overlapping/legato arps) without stealing
+        // the new note's timer.
+        for(int i = 0; i < soundingCount_; )
         {
-            gateSamplesLeft_ -= n;
-            if(gateSamplesLeft_ <= 0)
-                releaseSounding(ev);
+            soundingGate_[i] -= n;
+            if(soundingGate_[i] <= 0 && ev.offCount < kArpMaxStepNotes)
+            {
+                ev.offNotes[ev.offCount++] = sounding_[i];
+                sounding_[i]     = sounding_[soundingCount_ - 1];
+                soundingGate_[i] = soundingGate_[soundingCount_ - 1];
+                --soundingCount_;
+            }
+            else ++i;
         }
 
         // step clock
@@ -167,21 +174,20 @@ class Arpeggiator
                 ratchetLeft_ = (ap.ratchet > 1 ? ap.ratchet - 1 : 0);
             }
 
-            // release the previous step's notes before triggering the new ones
-            releaseSounding(ev);
-
-            const float g   = ap.gate < 0.05f ? 0.05f : (ap.gate > 1.0f ? 1.0f : ap.gate);
-            gateSamplesLeft_ = (int)(g * thisStepSec * (double)sr_);
+            // gate up to 200%: notes with gate <= 100% release before the next
+            // step (clean), > 100% ring into it (overlap). emitOn handles the
+            // per-note release; no bulk release here.
+            const float g = ap.gate < 0.05f ? 0.05f : (ap.gate > 2.0f ? 2.0f : ap.gate);
+            const int gateSamp = (int)(g * thisStepSec * (double)sr_);
 
             if(isChord_)
             {
-                // play the whole held set this step
                 for(int i = 0; i < seqLen_ && ev.onCount < kArpMaxStepNotes; ++i)
-                    emitOn(ev, seq_[i], seqVel_[i]);
+                    emitOn(ev, seq_[i], seqVel_[i], gateSamp);
             }
             else
             {
-                emitOn(ev, seq_[seqPos_], seqVel_[seqPos_]);
+                emitOn(ev, seq_[seqPos_], seqVel_[seqPos_], gateSamp);
             }
         }
         return ev;
@@ -203,14 +209,27 @@ class Arpeggiator
         soundingCount_ = 0;
     }
 
-    void emitOn(ArpEvent& ev, int note, int vel) noexcept
+    void emitOn(ArpEvent& ev, int note, int vel, int gateSamp) noexcept
     {
+        // if this note is already sounding (overlap/retrigger), release the old
+        // instance first so it can't get stuck as a duplicate.
+        for(int i = 0; i < soundingCount_; ++i)
+            if(sounding_[i] == note)
+            {
+                if(ev.offCount < kArpMaxStepNotes) ev.offNotes[ev.offCount++] = note;
+                sounding_[i]     = sounding_[soundingCount_ - 1];
+                soundingGate_[i] = soundingGate_[soundingCount_ - 1];
+                --soundingCount_;
+                break;
+            }
         if(ev.onCount >= kArpMaxStepNotes || soundingCount_ >= kArpMaxStepNotes)
             return;
         ev.onNotes[ev.onCount] = note;
         ev.onVels[ev.onCount]  = vel;
         ++ev.onCount;
-        sounding_[soundingCount_++] = note;
+        sounding_[soundingCount_]     = note;
+        soundingGate_[soundingCount_] = gateSamp;
+        ++soundingCount_;
     }
 
     inline uint32_t rng() noexcept
@@ -454,8 +473,8 @@ class Arpeggiator
     // notes currently sounding from the last step (1 for normal modes, the whole
     // chord for CHORD mode) — released on the next step or on gate-off.
     int   sounding_[kArpMaxStepNotes];
+    int   soundingGate_[kArpMaxStepNotes] = {0}; // remaining gate samples per note
     int   soundingCount_   = 0;
-    int   gateSamplesLeft_ = 0;
     int   ratchetLeft_     = 0;
 
     int   physicalDown_    = 0;

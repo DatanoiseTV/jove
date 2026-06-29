@@ -93,8 +93,9 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     jove::SynthPatch patch;
     PresetManager presetManager;
 
-    // fixed control-block scratch, carried across callbacks (engine-rate samples)
-    static constexpr int kControlBlock = 64;
+    // fixed control-block scratch, carried across callbacks (engine-rate samples).
+    // 32 (was 64) tightens arp/LFO timing to ~0.7 ms granularity on desktop.
+    static constexpr int kControlBlock = 32;
     std::array<float, kControlBlock> scratchL {};
     std::array<float, kControlBlock> scratchR {};
     int controlRemaining = 0; // unread samples left in the scratch chunk
