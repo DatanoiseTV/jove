@@ -266,10 +266,17 @@ class Voice
         float crushLv[kNumOsc], srStep[kNumOsc];
         for(int i = 0; i < kNumOsc; ++i)
         {
-            // wavetable position = table + morph + matrix MORPH mod (osc1..3),
-            // so MORPH/PW mod destinations sweep the table on WT oscillators too.
-            wt_[i].setTable((float) p.osc[i].wtTable + p.osc[i].wtMorph
-                            + (i < 3 ? m.morphAdd[i] * 4.0f : 0.0f));
+            // WT table scan: the dropdown picks the base table; MORPH (wtMorph)
+            // and the matrix MORPH mod sweep across the WHOLE bank from there
+            // (full kNumWt span), so MORPH actually scans the wavetable instead
+            // of only blending to the next table.
+            {
+                float tp = (float) p.osc[i].wtTable
+                           + (p.osc[i].wtMorph + (i < 3 ? m.morphAdd[i] : 0.0f)) * (float)(kNumWt - 1);
+                if(tp < 0.0f) tp = 0.0f;
+                if(tp > (float)(kNumWt - 1)) tp = (float)(kNumWt - 1);
+                wt_[i].setTable(tp);
+            }
             wtO[i] = (p.osc[i].oscType == 1);
             // per-osc bit-crush: quantisation step count (0 => bypass). ~0.1 is a
             // gentle ~8-bit, 0.5 gritty ~5-bit, 1.0 a near-1-bit destroyed DCO.
