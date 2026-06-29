@@ -44,10 +44,10 @@ class PhaserCore
     void setParams(float rateHz, float depth, float fb, float mix) noexcept
     {
         if(rateHz < 0.01f) rateHz = 0.01f;
-        if(rateHz > 8.0f)  rateHz = 8.0f;
+        if(rateHz > 16.0f) rateHz = 16.0f; // wider speed range
         inc_   = rateHz / sr_;
         depth_ = depth < 0.0f ? 0.0f : (depth > 1.0f ? 1.0f : depth);
-        fb_    = fb < 0.0f ? 0.0f : (fb > 0.9f ? 0.9f : fb);
+        fb_    = fb < 0.0f ? 0.0f : (fb > 0.92f ? 0.92f : fb);
         mix_   = mix < 0.0f ? 0.0f : (mix > 1.0f ? 1.0f : mix);
     }
 
@@ -61,7 +61,7 @@ class PhaserCore
         // triangle LFO (the classic phaser shape) sweeping the all-pass corner
         // around 800 Hz by up to +/-2 octaves (200 Hz .. 3.2 kHz at full depth)
         const float lfo = 4.0f * std::fabs(phase_ - 0.5f) - 1.0f;
-        const float f   = 800.0f * exp2f(depth_ * 2.0f * lfo);
+        const float f   = 800.0f * exp2f(depth_ * 3.5f * lfo); // deeper sweep (+/-3.5 oct)
         const float w   = 3.14159265f * f / sr_;
         coeff_ = (1.0f - w) / (1.0f + w);
         phase_ += inc_ * (float)n;
@@ -112,6 +112,9 @@ class StereoPhaser
     }
 
     void setMix(float mix) noexcept { mix_ = mix; }
+    // user-controllable sweep: rate Hz, depth 0..1, feedback 0..1
+    void setParams(float rateHz, float depth, float fb) noexcept
+    { rate_ = rateHz; depth_ = depth; fb_ = fb; }
 
     void process(float* bl, float* br, int n) noexcept
     {
@@ -121,11 +124,10 @@ class StereoPhaser
             return;
         }
         active_ = true;
-        // slow, fairly deep, moderate feedback — the vintage e-piano/pad sweep.
         // Coefficient is evaluated once per block (the sweep is slow), then held
         // across the sample loop so there's no per-sample exp2f.
-        l_.setParams(0.25f, 0.85f, 0.45f, mix_);
-        r_.setParams(0.25f, 0.85f, 0.45f, mix_);
+        l_.setParams(rate_, depth_, fb_, mix_);
+        r_.setParams(rate_, depth_, fb_, mix_);
         l_.blockCoeff(n);
         r_.blockCoeff(n);
         for(int i = 0; i < n; ++i)
@@ -138,6 +140,9 @@ class StereoPhaser
   private:
     PhaserCore l_, r_;
     float      mix_    = 0.0f;
+    float      rate_   = 0.25f;
+    float      depth_  = 0.85f;
+    float      fb_     = 0.45f;
     bool       active_ = false;
 };
 } // namespace jove

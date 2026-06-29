@@ -78,10 +78,16 @@ namespace jID
     // FX
     inline constexpr auto fxChorus   = "fxChorus";
     inline constexpr auto chorusMode = "chorusMode";
+    inline constexpr auto chorusRate = "chorusRate";
+    inline constexpr auto chorusDepth= "chorusDepth";
     inline constexpr auto fxPhaser   = "fxPhaser";
+    inline constexpr auto phaserRate = "phaserRate";
+    inline constexpr auto phaserDepth= "phaserDepth";
+    inline constexpr auto phaserFeedback = "phaserFeedback";
     inline constexpr auto fxDelay    = "fxDelay";
     inline constexpr auto fxReverb   = "fxReverb";
     inline constexpr auto fxDrive    = "fxDrive";
+    inline constexpr auto driveTone  = "driveTone";
     // delay voicing
     inline constexpr auto delaySync     = "delaySync";
     inline constexpr auto delayDiv      = "delayDiv";
@@ -260,9 +266,15 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
 
     // ---- FX ----
     fparam(jID::fxDrive, "Drive", lin01, 0.0f);
+    fparam(jID::driveTone, "Drive Tone", bip, 0.0f);
     fparam(jID::fxChorus, "Chorus", lin01, 0.3f);
-    cparam(jID::chorusMode, "Chorus Mode", {"Chorus I", "Chorus II", "Ensemble"}, 0);
+    cparam(jID::chorusMode, "Chorus Mode", {"Chorus I", "Chorus II", "Ensemble", "Combine"}, 0);
+    fparam(jID::chorusRate, "Chorus Rate", [] { auto r = FR(0.25f, 4.0f); r.setSkewForCentre(1.0f); return r; }(), 1.0f);
+    fparam(jID::chorusDepth, "Chorus Depth", FR(0.0f, 2.0f), 1.0f);
     fparam(jID::fxPhaser, "Phaser", lin01, 0.0f);
+    fparam(jID::phaserRate, "Phaser Rate", [] { auto r = FR(0.02f, 16.0f); r.setSkewForCentre(0.6f); return r; }(), 0.25f, "Hz");
+    fparam(jID::phaserDepth, "Phaser Depth", lin01, 0.85f);
+    fparam(jID::phaserFeedback, "Phaser Feedback", lin01, 0.45f);
     fparam(jID::fxDelay, "Delay", lin01, 0.2f);
     bparam(jID::delaySync, "Delay Sync", true);
     cparam(jID::delayDiv, "Delay Division", arpDivs, 9); // 1/8.
@@ -377,9 +389,15 @@ class PatchBinding
         p.arp.ratchet = (int)get(arpRatchet);
 
         p.fxDrive    = get(fxDrive);
+        p.driveTone  = get(driveTone);
         p.fxChorus   = get(fxChorus);
         p.chorusMode = (int)get(chorusMode);
+        p.chorusRate = get(chorusRate);
+        p.chorusDepth= get(chorusDepth);
         p.fxPhaser   = get(fxPhaser);
+        p.phaserRate = get(phaserRate);
+        p.phaserDepth= get(phaserDepth);
+        p.phaserFeedback = get(phaserFeedback);
         p.fxDelay    = get(fxDelay);
         p.fxReverb   = get(fxReverb);
         p.delaySync     = get(delaySync) > 0.5f;
@@ -476,9 +494,15 @@ class PatchBinding
         set(arpRatchet, (float)p.arp.ratchet);
 
         set(fxDrive, p.fxDrive);
+        set(driveTone, p.driveTone);
         set(fxChorus, p.fxChorus);
         set(chorusMode, (float)p.chorusMode);
+        set(chorusRate, p.chorusRate);
+        set(chorusDepth, p.chorusDepth);
         set(fxPhaser, p.fxPhaser);
+        set(phaserRate, p.phaserRate);
+        set(phaserDepth, p.phaserDepth);
+        set(phaserFeedback, p.phaserFeedback);
         set(fxDelay, p.fxDelay);
         set(fxReverb, p.fxReverb);
         set(delaySync, p.delaySync ? 1.0f : 0.0f);

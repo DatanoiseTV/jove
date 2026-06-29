@@ -278,11 +278,17 @@ struct SynthPatch
 
     // FX section send levels (the built-in clean chorus/delay/reverb).
     float fxChorus = 0.3f;
-    int   chorusMode = 0;  // 0 Chorus I, 1 Chorus II, 2 Ensemble
+    int   chorusMode = 0;  // 0 Chorus I, 1 Chorus II, 2 Ensemble, 3 Combine
+    float chorusRate = 1.0f;  // global rate multiplier
+    float chorusDepth = 1.0f; // global sweep-depth scaler
     float fxPhaser = 0.0f; // 6-stage all-pass phaser wet mix (0 = bypass)
+    float phaserRate = 0.25f; // Hz
+    float phaserDepth = 0.85f;
+    float phaserFeedback = 0.45f;
     float fxDelay  = 0.2f;
     float fxReverb = 0.25f;
     float fxDrive  = 0.0f;
+    float driveTone = 0.0f; // bipolar pre-drive tilt (-dark .. +bright)
     float width    = 0.5f;  // master stereo width (0 mono, 0.5 normal, 1 wide)
 
     // Delay voicing (the built-in clean delay; mix is fxDelay above).

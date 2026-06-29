@@ -465,11 +465,16 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // Juno-style ensemble chorus on the voice bus (true-bypass at mix 0). A fixed
     // musical rate/depth; the patch's one FX-chorus macro sets the mix.
     chorus_.setMode(p.chorusMode);
+    chorus_.setRate(p.chorusRate);
+    chorus_.setDepth(p.chorusDepth);
     chorus_.setMix(p.fxChorus);
     chorus_.process(outL, outR, n);
 
     // 6-stage all-pass phaser on the voice bus (true-bypass at mix 0). Sits after
-    // the chorus so the notches sweep the ensemble-widened signal.
+    // the chorus so the notches sweep the ensemble-widened signal. Rate/depth/
+    // feedback are patch-controllable for anything from a slow sweep to a fast,
+    // resonant whoosh.
+    phaser_.setParams(p.phaserRate, p.phaserDepth, p.phaserFeedback);
     phaser_.setMix(p.fxPhaser);
     phaser_.process(outL, outR, n);
 
@@ -493,13 +498,16 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // Soft drive (fxDrive), then a tempo-synced clean delay and a pitch-stable
     // reverb. No tape, no wow/flutter, no shimmer — none of the modulation that
     // made the old chain warble out of tune.
-    if(p.fxDrive > 0.001f)
+    if(p.fxDrive > 0.001f || std::fabs(p.driveTone) > 0.001f)
     {
         const float g = 1.0f + p.fxDrive * 4.0f;
+        const float tone = p.driveTone; // -1 dark .. +1 bright, tilt around a LP
         for(int i = 0; i < n; ++i)
         {
-            outL[i] = softSat(outL[i] * g);
-            outR[i] = softSat(outR[i] * g);
+            toneZL_ += 0.25f * (outL[i] - toneZL_);
+            toneZR_ += 0.25f * (outR[i] - toneZR_);
+            outL[i] = softSat((outL[i] + tone * (outL[i] - toneZL_)) * g);
+            outR[i] = softSat((outR[i] + tone * (outR[i] - toneZR_)) * g);
         }
     }
 
