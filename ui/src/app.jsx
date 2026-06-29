@@ -144,6 +144,16 @@ function Switch({ id, label }) {
   );
 }
 
+// compact master-FX enable button for the top bar (lit = on, dim = bypassed)
+function FxBtn({ id, label }) {
+  const [v, set] = B.useToggle(id);
+  return (
+    <button className={"fxbtn" + (v ? " on" : "")} onClick={() => set(!v)} title={label + (v ? " on" : " bypassed")}>
+      {label}
+    </button>
+  );
+}
+
 function Seg({ id, options, label }) {
   const [idx, set] = B.useChoice(id);
   return (
@@ -931,7 +941,7 @@ function ChorusPanel() {
         <Knob id="chorusRate" label="RATE" />
         <Knob id="chorusDepth" label="DEPTH" />
       </div>
-      <Sel id="chorusMode" options={CHORUS_MODES} label="MODE" />
+      <Seg id="chorusMode" options={["I", "II", "ENS", "I+II"]} label="MODE" />
     </Panel>
   );
 }
@@ -1076,6 +1086,16 @@ function TopBar() {
         <button className="tbtn" onClick={() => init()}>INIT</button>
         <button className="tbtn" onClick={() => setSaving(true)}>SAVE</button>
         <button className="tbtn" onClick={() => setBrowse(true)}>BROWSE</button>
+      </div>
+      <div className="tb-fx">
+        <span className="cl">FX</span>
+        <div className="tb-fxrow">
+          <FxBtn id="fxDriveOn" label="DRV" />
+          <FxBtn id="fxChorusOn" label="CHO" />
+          <FxBtn id="fxPhaserOn" label="PHA" />
+          <FxBtn id="fxDelayOn" label="DLY" />
+          <FxBtn id="fxReverbOn" label="REV" />
+        </div>
       </div>
       <div className="tb-global">
         <Seg id="quality" options={QUALITY} label="QUALITY" />

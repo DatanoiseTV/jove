@@ -57,6 +57,12 @@ class SynthEngine
         mpeOn_ = on;
         mpeBendRange_ = bendRangeSemis;
     }
+    // master FX quick-bypass (global; default all on)
+    void setFxEnabled(bool drive, bool chorus, bool phaser, bool delay, bool reverb) noexcept
+    {
+        fxDriveOn_ = drive; fxChorusOn_ = chorus; fxPhaserOn_ = phaser;
+        fxDelayOn_ = delay; fxReverbOn_ = reverb;
+    }
     void noteOnMpe(int channel, int note, float velocity) noexcept;
     void noteOffMpe(int channel, int note) noexcept;
     void channelBend(int channel, float norm) noexcept;      // -1..+1 -> +/- bendRange st
@@ -174,6 +180,8 @@ class SynthEngine
     bool  sustain_   = false;
     bool  mpeOn_        = false; // MPE per-note expression mode
     int   mpeBendRange_ = 48;    // per-note bend range (semitones)
+    bool  fxDriveOn_  = true, fxChorusOn_ = true, fxPhaserOn_ = true;
+    bool  fxDelayOn_  = true, fxReverbOn_ = true; // master FX quick-bypass
 
     // held-note book for MONO last-note priority (and a base for the arp).
     static constexpr int kMaxHeld = 16;

@@ -566,7 +566,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     chorus_.setRate(p.chorusRate);
     chorus_.setDepth(p.chorusDepth);
     chorus_.setMix(p.fxChorus);
-    chorus_.process(outL, outR, n);
+    if(fxChorusOn_) chorus_.process(outL, outR, n);
 
     // 6-stage all-pass phaser on the voice bus (true-bypass at mix 0). Sits after
     // the chorus so the notches sweep the ensemble-widened signal. Rate/depth/
@@ -574,7 +574,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // resonant whoosh.
     phaser_.setParams(p.phaserRate, p.phaserDepth, p.phaserFeedback);
     phaser_.setMix(p.fxPhaser);
-    phaser_.process(outL, outR, n);
+    if(fxPhaserOn_) phaser_.process(outL, outR, n);
 
     // DC blocker on the voice bus. The master soft-clip is an odd nonlinearity,
     // and an odd nonlinearity on a zero-mean but asymmetric waveform (a sawtooth)
@@ -596,7 +596,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // Soft drive (fxDrive), then a tempo-synced clean delay and a pitch-stable
     // reverb. No tape, no wow/flutter, no shimmer — none of the modulation that
     // made the old chain warble out of tune.
-    if(p.fxDrive > 0.001f || std::fabs(p.driveTone) > 0.001f)
+    if(fxDriveOn_ && (p.fxDrive > 0.001f || std::fabs(p.driveTone) > 0.001f))
     {
         const float g = 1.0f + p.fxDrive * 4.0f;
         const float tone = p.driveTone; // -1 dark .. +1 bright, tilt around a LP
@@ -632,12 +632,12 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     delay_.setDamp(p.delayTone);
     delay_.setFilter(p.delayFltType, p.delayFltFreq, p.delayFltQ);
     delay_.setMix(p.fxDelay);
-    delay_.process(outL, outR, n);
+    if(fxDelayOn_) delay_.process(outL, outR, n);
 
     reverb_.setSize(p.reverbSize);
     reverb_.setDamp(p.reverbTone);
     reverb_.setMix(p.fxReverb);
-    reverb_.process(outL, outR, n);
+    if(fxReverbOn_) reverb_.process(outL, outR, n);
 
     // master stereo width (mid/side): 0 = mono-summed, 0.5 = unchanged, 1 = wide.
     // Skip the work at the neutral default. Widening boosts the side signal, which

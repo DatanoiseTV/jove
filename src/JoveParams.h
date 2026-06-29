@@ -34,6 +34,12 @@ namespace jID
     inline constexpr auto quality      = "quality";     // oversampling: Eco/HQ/Ultra
     inline constexpr auto mpeOn        = "mpeOn";        // MPE per-note expression mode
     inline constexpr auto mpeBendRange = "mpeBendRange"; // per-note bend range (st)
+    // master FX enables (global quick-bypass; not patch state)
+    inline constexpr auto fxDriveOn    = "fxDriveOn";
+    inline constexpr auto fxChorusOn   = "fxChorusOn";
+    inline constexpr auto fxPhaserOn   = "fxPhaserOn";
+    inline constexpr auto fxDelayOn    = "fxDelayOn";
+    inline constexpr auto fxReverbOn   = "fxReverbOn";
 
     // global / voicing (patch)
     inline constexpr auto voiceMode    = "voiceMode";
@@ -181,6 +187,13 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     // so they stay out of PatchBinding and never touch param_roundtrip).
     bparam(jID::mpeOn, "MPE", false);
     iparam(jID::mpeBendRange, "MPE Bend Range", 1, 96, 48); // MPE default 48 st
+    // master FX enables — global quick-bypass toggles (default on). Not patch
+    // state, so they persist while auditioning presets and never touch round-trip.
+    bparam(jID::fxDriveOn, "Drive On", true);
+    bparam(jID::fxChorusOn, "Chorus On", true);
+    bparam(jID::fxPhaserOn, "Phaser On", true);
+    bparam(jID::fxDelayOn, "Delay On", true);
+    bparam(jID::fxReverbOn, "Reverb On", true);
 
     // ---- global / voicing ----
     cparam(jID::voiceMode, "Voice Mode", namesToArray(kVoiceModeNames, (int)VoiceMode::Count), 0);

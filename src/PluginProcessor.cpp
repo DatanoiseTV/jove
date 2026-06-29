@@ -184,6 +184,12 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     mpeOn_        = apvts.getRawParameterValue(jID::mpeOn)->load() > 0.5f;
     mpeBendRange_ = (int) apvts.getRawParameterValue(jID::mpeBendRange)->load();
     engine.setMpe(mpeOn_, mpeBendRange_);
+    engine.setFxEnabled(
+        apvts.getRawParameterValue(jID::fxDriveOn)->load()  > 0.5f,
+        apvts.getRawParameterValue(jID::fxChorusOn)->load() > 0.5f,
+        apvts.getRawParameterValue(jID::fxPhaserOn)->load() > 0.5f,
+        apvts.getRawParameterValue(jID::fxDelayOn)->load()  > 0.5f,
+        apvts.getRawParameterValue(jID::fxReverbOn)->load() > 0.5f);
 
     // a preset just loaded -> release orphaned/stuck voices (held notes survive
     // for live audition; see engine.onPresetLoaded). Done after the new patch is
