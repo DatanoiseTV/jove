@@ -908,8 +908,8 @@ function ModGrid() {
 /* modular audio patchbay: rows = audio source nodes, cols = destination buses,
    each cell a bipolar gain (ab{s}_{d}). Reroutes the actual signal topology when
    PATCHBAY ON; off = the classic osc->filter->VCA path. */
-const ANODES = ["OSC1", "OSC2", "OSC3", "OSC4", "OSC5", "SUB", "NOISE", "RING", "FLT1", "FLT2"];
-const ADSTS  = ["FLT1", "FLT2", "RING A", "RING B", "FM1", "OUT"];
+const ANODES = ["OSC1", "OSC2", "OSC3", "OSC4", "OSC5", "SUB", "NOISE", "RING", "SHAPER", "FLT1", "FLT2"];
+const ADSTS  = ["FM1", "FM2", "FM3", "FM4", "FM5", "FLT1", "FLT2", "RING A", "RING B", "SHAPER", "OUT"];
 
 function ABayCell({ s, d }) {
   const [v, set] = B.useSlider("ab" + s + "_" + d); // 0..1 of the -1..+1 range

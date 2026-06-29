@@ -160,15 +160,15 @@ struct ModSlot
 // a bipolar gain from a source node to a destination bus, with 1-sample feedback
 // so filter/ring outputs can loop back. patchbayOn defaults OFF, so the classic
 // path (and every factory preset) is byte-identical unless the user enables it.
-enum class ANode : int { Osc1 = 0, Osc2, Osc3, Osc4, Osc5, Sub, Noise, Ring, Filt1, Filt2, Count };
-enum class ADst  : int { Filt1In = 0, Filt2In, RingA, RingB, Fm1, Out, Count };
-inline constexpr int kNumANode = (int) ANode::Count; // 10 source nodes
-inline constexpr int kNumADst  = (int) ADst::Count;  // 6 destination buses
+enum class ANode : int { Osc1 = 0, Osc2, Osc3, Osc4, Osc5, Sub, Noise, Ring, Shaper, Filt1, Filt2, Count };
+enum class ADst  : int { Fm1 = 0, Fm2, Fm3, Fm4, Fm5, Filt1In, Filt2In, RingA, RingB, ShaperIn, Out, Count };
+inline constexpr int kNumANode = (int) ANode::Count; // 11 source nodes
+inline constexpr int kNumADst  = (int) ADst::Count;  // 11 destination buses
 inline constexpr int kNumABay  = kNumANode * kNumADst; // dense routing matrix
 inline constexpr const char* kANodeNames[] = {
-    "OSC1", "OSC2", "OSC3", "OSC4", "OSC5", "SUB", "NOISE", "RING", "FLT1", "FLT2"};
+    "OSC1", "OSC2", "OSC3", "OSC4", "OSC5", "SUB", "NOISE", "RING", "SHAPER", "FLT1", "FLT2"};
 inline constexpr const char* kADstNames[] = {
-    "FLT1", "FLT2", "RING A", "RING B", "FM1", "OUT"};
+    "FM1", "FM2", "FM3", "FM4", "FM5", "FLT1", "FLT2", "RING A", "RING B", "SHAPER", "OUT"};
 
 // ---- assignable performance macros (the 3 live panel pots) ------------------
 // Each pot writes one curated patch field absolutely (with soft-takeover on

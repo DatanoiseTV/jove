@@ -405,16 +405,29 @@ class Voice
             // the fixed osc2 cross-mod.
             const bool pbOn = p.patchbayOn;
             const float* A = p.abay;
-            bool  w0 = false, w1 = false, w2 = false;
-            float o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(0.0f, w1));
-            float fmIn = fmSm_ * 0.5f * o2;
+            auto pbus = [&](int d) { float a = 0.0f; for(int s2 = 0; s2 < kNumANode; ++s2) a += pbNode_[s2] * A[s2 * kNumADst + d]; return a; };
+            bool  w0 = false, w1 = false, w2 = false, w3 = false, w4 = false;
+            float o1, o2, o3, o4 = 0.0f, o5 = 0.0f;
             if(pbOn)
             {
-                fmIn = 0.0f;
-                for(int s2 = 0; s2 < kNumANode; ++s2) fmIn += pbNode_[s2] * A[s2 * kNumADst + (int)ADst::Fm1];
+                // per-oscillator FM buses from the previous sample's nodes (cross-FM)
+                const float fm0 = pbus((int)ADst::Fm1), fm1b = pbus((int)ADst::Fm2),
+                            fm2b = pbus((int)ADst::Fm3), fm3 = pbus((int)ADst::Fm4),
+                            fm4 = pbus((int)ADst::Fm5);
+                o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fm0, w0));
+                o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(fm1b, w1));
+                o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(fm2b, w2));
+                if(p.osc[3].on) o4 = wtO[3] ? wt_[3].process() : osc_[3].process(fm3, w3);
+                if(p.osc[4].on) o5 = wtO[4] ? wt_[4].process() : osc_[4].process(fm4, w4);
             }
-            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmIn, w0));
-            float o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(0.0f, w2));
+            else
+            {
+                o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(0.0f, w1));
+                o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmSm_ * 0.5f * o2, w0));
+                o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(0.0f, w2));
+                { bool wi; if(p.osc[3].on) o4 = wtO[3] ? wt_[3].process() : osc_[3].process(0.0f, wi); }
+                { bool wi; if(p.osc[4].on) o5 = wtO[4] ? wt_[4].process() : osc_[4].process(0.0f, wi); }
+            }
             if(w0)
             {
                 if(p.sync2Mode == (int)SyncMode::Hard)      osc_[1].hardSync(0.0f);
@@ -427,26 +440,25 @@ class Voice
             const float noiseSamp = rngf() * 2.0f - 1.0f;
 
             o1 = post(0, o1); o2 = post(1, o2); o3 = post(2, o3);
-            float o4 = 0.0f, o5 = 0.0f;
-            { bool wi; if(p.osc[3].on) o4 = post(3, wtO[3] ? wt_[3].process() : osc_[3].process(0.0f, wi)); }
-            { bool wi; if(p.osc[4].on) o5 = post(4, wtO[4] ? wt_[4].process() : osc_[4].process(0.0f, wi)); }
+            if(p.osc[3].on) o4 = post(3, o4);
+            if(p.osc[4].on) o5 = post(4, o5);
 
             float fout;
             if(pbOn)
             {
                 // modular topology: source nodes -> destination buses, with the
-                // previous sample's ring/filter/osc values providing 1-sample
+                // previous sample's ring/filter/shaper values providing 1-sample
                 // feedback. The matrix gains replace the fixed mixer levels.
                 pbNode_[(int)ANode::Osc1] = o1; pbNode_[(int)ANode::Osc2] = o2;
                 pbNode_[(int)ANode::Osc3] = o3; pbNode_[(int)ANode::Osc4] = o4;
                 pbNode_[(int)ANode::Osc5] = o5; pbNode_[(int)ANode::Sub]  = subv;
                 pbNode_[(int)ANode::Noise] = noiseSamp;
-                auto bus = [&](int d) { float a = 0.0f; for(int s2 = 0; s2 < kNumANode; ++s2) a += pbNode_[s2] * A[s2 * kNumADst + d]; return a; };
-                const float rA = bus((int)ADst::RingA), rB = bus((int)ADst::RingB);
+                pbNode_[(int)ANode::Shaper] = std::tanh(2.0f * pbus((int)ADst::ShaperIn)); // wavefolder/drive node
+                const float rA = pbus((int)ADst::RingA), rB = pbus((int)ADst::RingB);
                 pbNode_[(int)ANode::Ring]  = rA * rB;
-                pbNode_[(int)ANode::Filt1] = filter_.process(bus((int)ADst::Filt1In));
-                pbNode_[(int)ANode::Filt2] = filter2_.process(bus((int)ADst::Filt2In));
-                fout = bus((int)ADst::Out);
+                pbNode_[(int)ANode::Filt1] = filter_.process(pbus((int)ADst::Filt1In));
+                pbNode_[(int)ANode::Filt2] = filter2_.process(pbus((int)ADst::Filt2In));
+                fout = pbus((int)ADst::Out);
             }
             else
             {
