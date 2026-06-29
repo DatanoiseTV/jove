@@ -98,6 +98,7 @@ namespace jID
     inline constexpr auto mbMid      = "mbMid";
     inline constexpr auto mbHigh     = "mbHigh";
     // delay voicing
+    inline constexpr auto delayMode     = "delayMode";
     inline constexpr auto delaySync     = "delaySync";
     inline constexpr auto delayDiv      = "delayDiv";
     inline constexpr auto delayTimeMs   = "delayTimeMs";
@@ -305,6 +306,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::phaserDepth, "Phaser Depth", lin01, 0.85f);
     fparam(jID::phaserFeedback, "Phaser Feedback", lin01, 0.45f);
     fparam(jID::fxDelay, "Delay", lin01, 0.2f);
+    cparam(jID::delayMode, "Delay Mode", {"DIGITAL", "ANALOG", "TAPE"}, 0);
     bparam(jID::delaySync, "Delay Sync", true);
     cparam(jID::delayDiv, "Delay Division", arpDivs, 9); // 1/8.
     fparam(jID::delayTimeMs, "Delay Time", [] { auto r = FR(20.0f, 2000.0f); r.setSkewForCentre(350.0f); return r; }(), 350.0f, "ms");
@@ -445,6 +447,7 @@ class PatchBinding
         p.phaserFeedback = get(phaserFeedback);
         p.fxDelay    = get(fxDelay);
         p.fxReverb   = get(fxReverb);
+        p.delayMode     = (int) get(delayMode);
         p.delaySync     = get(delaySync) > 0.5f;
         p.delayDiv      = (int)get(delayDiv);
         p.delayTimeMs   = get(delayTimeMs);
@@ -566,6 +569,7 @@ class PatchBinding
         set(phaserFeedback, p.phaserFeedback);
         set(fxDelay, p.fxDelay);
         set(fxReverb, p.fxReverb);
+        set(delayMode, (float) p.delayMode);
         set(delaySync, p.delaySync ? 1.0f : 0.0f);
         set(delayDiv, (float)p.delayDiv);
         set(delayTimeMs, p.delayTimeMs);

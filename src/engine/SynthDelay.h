@@ -60,13 +60,20 @@ class SynthDelay
     void setDamp(float d) noexcept { damp_ = d < 0.0f ? 0.0f : (d > 1.0f ? 1.0f : d); }
     void setMix(float m) noexcept { mix_ = m < 0.0f ? 0.0f : (m > 1.0f ? 1.0f : m); }
     void setPingPong(bool p) noexcept { ping_ = p; }
+    // colour: 0 DIGITAL (clean), 1 ANALOG (BBD: darker + grittier feedback),
+    // 2 TAPE (darker + soft sat + subtle wow/flutter on the read head).
+    void setMode(int m) noexcept { mode_ = (m < 0 || m > 2) ? 0 : m; }
 
     void process(float* L, float* R, int n) noexcept
     {
         if(bufL_.empty() || mix_ < 0.001f)
             return;
-        // damping coefficient (one-pole LP); more damp = darker repeats
+        // damping coefficient (one-pole LP); more damp = darker repeats. Analog /
+        // tape modes darken the feedback further and drive it a touch harder.
         const float dcoef = 0.05f + 0.9f * (1.0f - damp_);
+        const float dc = (mode_ == 1) ? dcoef * 0.6f : (mode_ == 2 ? dcoef * 0.7f : dcoef);
+        const float satDrive = (mode_ == 1) ? 1.3f : (mode_ == 2 ? 1.18f : 1.0f);
+        constexpr float twoPi = 6.2831853f;
         for(int i = 0; i < n; ++i)
         {
             // glide the delay time slowly toward the target (click-free on a
@@ -74,12 +81,24 @@ class SynthDelay
             curL_ += 0.0008f * (tgtL_ - curL_);
             curR_ += 0.0008f * (tgtR_ - curR_);
 
-            const float dL = readInterp(bufL_.data(), curL_);
-            const float dR = readInterp(bufR_.data(), curR_);
+            // TAPE: a subtle wow (~0.7 Hz) + flutter (~6.3 Hz) on the read head
+            // for tape character. Kept to ~2 samples so it colours without the
+            // audible out-of-tune warble the old tape engine had.
+            float wowL = 0.0f, wowR = 0.0f;
+            if(mode_ == 2)
+            {
+                wowPh_ += 0.7f / sr_;  if(wowPh_ >= 1.0f) wowPh_ -= 1.0f;
+                flPh_  += 6.3f / sr_;  if(flPh_  >= 1.0f) flPh_  -= 1.0f;
+                const float w = std::sin(twoPi * wowPh_) * 1.6f + std::sin(twoPi * flPh_) * 0.4f;
+                wowL = w; wowR = w * 0.92f;
+            }
+
+            const float dL = readInterp(bufL_.data(), curL_ + wowL);
+            const float dR = readInterp(bufR_.data(), curR_ + wowR);
 
             // feedback path: gentle one-pole damp, then the LP/BP/HP pre-filter
-            lpL_ += dcoef * (dL - lpL_);
-            lpR_ += dcoef * (dR - lpR_);
+            lpL_ += dc * (dL - lpL_);
+            lpR_ += dc * (dR - lpR_);
             const float fL = pfL_.process(lpL_, pfType_);
             const float fR = pfR_.process(lpR_, pfType_);
 
@@ -99,8 +118,8 @@ class SynthDelay
             // stable for a bounded input, but a sustained near-self-oscillating
             // resonant voice can pile repeats into a howl; clamping what re-enters
             // the line bounds the loop unconditionally and adds analog-tape feel.
-            bufL_[wr_] = sat(wL);
-            bufR_[wr_] = sat(wR);
+            bufL_[wr_] = sat(wL * satDrive);
+            bufR_[wr_] = sat(wR * satDrive);
             if(++wr_ >= maxLen_) wr_ = 0;
 
             L[i] = L[i] * (1.0f - 0.5f * mix_) + dL * mix_;
@@ -123,6 +142,10 @@ class SynthDelay
     }
     inline float readInterp(const float* buf, float delaySamples) const noexcept
     {
+        // bound the (possibly wow-modulated) read distance into the valid range
+        if(delaySamples < 1.0f) delaySamples = 1.0f;
+        const float maxd = (float)(maxLen_ - 2);
+        if(delaySamples > maxd) delaySamples = maxd;
         float rp = (float)wr_ - delaySamples;
         while(rp < 0.0f) rp += (float)maxLen_;
         const int   i0 = (int)rp;
@@ -145,5 +168,7 @@ class SynthDelay
     float  damp_ = 0.4f;
     float  mix_  = 0.0f;
     bool   ping_ = true;
+    int    mode_ = 0;                  // 0 digital, 1 analog, 2 tape
+    float  wowPh_ = 0.0f, flPh_ = 0.0f; // tape wow/flutter phases
 };
 } // namespace jove

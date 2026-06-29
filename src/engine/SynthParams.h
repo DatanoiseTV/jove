@@ -304,6 +304,7 @@ struct SynthPatch
     float width    = 0.5f;  // master stereo width (0 mono, 0.5 normal, 1 wide)
 
     // Delay voicing (the built-in clean delay; mix is fxDelay above).
+    int   delayMode     = 0;      // colour: 0 digital, 1 analog (BBD), 2 tape
     bool  delaySync     = true;   // lock time to host tempo
     int   delayDiv      = 9;      // division index (kArpDivNames; 9 = 1/8 dotted)
     float delayTimeMs   = 350.0f; // free time when delaySync == false (20..2000)

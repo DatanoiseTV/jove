@@ -566,6 +566,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     }
     const float dS = delaySec * sr_;
     delay_.setTime(dS, dS);
+    delay_.setMode(p.delayMode);
     delay_.setPingPong(p.delayPing);
     delay_.setFeedback(p.delayFeedback);
     delay_.setDamp(p.delayTone);
