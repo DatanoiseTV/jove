@@ -161,22 +161,31 @@ button, select, input { font-family: inherit; color: inherit; }
 .modcol > .panel { flex: 1 1 0; min-height: 0; }
 .modcol .pbody { flex: 1; min-height: 0; }
 .modcol .modgrid { flex: 1; min-height: 0; justify-content: space-between; }
-/* SEQ tab: four full-width sequencer panels stacked, each a 16-step grid + ctl */
+/* SEQ tab: a 2x2 grid of compact sequencer cards (step lane + tight controls) */
 .seqtab { display: flex; flex: 1; min-height: 0; }
 .seqtab.hide { display: none; }
-.seqcol { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
-.seqcol > .panel { flex: 1 1 0; min-height: 0; }
-.seqcol .pbody { flex: 1; gap: 8px; justify-content: space-between; }
-.seqgrid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; flex: 1; min-height: 48px; }
-.sq-cell { position: relative; cursor: ns-resize; border-radius: 3px;
-  background: #0c0d10; border: 1px solid var(--line); overflow: hidden; }
+.seqgrid2 { flex: 1; min-height: 0; display: grid;
+  grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; }
+.seqgrid2 > .panel { min-height: 0; }
+.seqgrid2 .pbody { flex: 1; gap: 12px; justify-content: flex-start; }
+/* the step lane: 16 thin bars in a single sunk track, fills the card height */
+.seqgrid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px;
+  flex: 1 1 auto; min-height: 90px; padding: 4px; border-radius: 7px;
+  background: var(--sunk); border: 1px solid var(--line); }
+.sq-cell { position: relative; cursor: ns-resize; border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent); overflow: hidden; }
+.sq-cell:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); }
 .sq-cell::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
   background: var(--line2); }
-.sq-cell i { position: absolute; left: 2px; right: 2px; border-radius: 1px; }
+.sq-cell i { position: absolute; left: 1px; right: 1px; border-radius: 1px; }
 .sq-cell.pos i { bottom: 50%; height: calc(var(--m, 0) * 50%); background: var(--accent); }
 .sq-cell.neg i { top: 50%; height: calc(var(--m, 0) * 50%); background: var(--hot); }
-.sq-cell.play { border-color: var(--accent); box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 70%, transparent); }
-.seqctl { gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.sq-cell.play { background: color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent); }
+/* tight control cluster under the lane */
+.seqctl { gap: 8px 12px; flex-wrap: wrap; align-items: flex-end; row-gap: 8px; }
+.seqctl .seg-wrap .seg button { padding: 0 7px; height: 22px; font-size: 9px; }
+.seqctl .chip { height: 22px; }
 
 /* FX·ARP tab: a clean 3x2 grid of equal panels */
 .fxtab { display: flex; flex: 1; min-height: 0; }

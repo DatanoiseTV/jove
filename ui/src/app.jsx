@@ -1292,7 +1292,7 @@ function App() {
       </div>
 
       <div className={"seqtab" + (tab === "seq" ? "" : " hide")}>
-        <div className="seqcol">
+        <div className="seqgrid2">
           <SeqPanel n={1} /><SeqPanel n={2} /><SeqPanel n={3} /><SeqPanel n={4} />
         </div>
       </div>
