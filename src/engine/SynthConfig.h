@@ -33,8 +33,8 @@ inline constexpr int kNumLfo = 3;
 // Envelope count: ENV1 amp (hard-wired to VCA), ENV2 filter, ENV3 aux/free.
 inline constexpr int kNumEnv = 3;
 
-// Mod-matrix routable slots shown in the UI.
-inline constexpr int kNumModSlots = 10;
+// Mod-matrix routable slots (sparse routes backing the full source x dest grid).
+inline constexpr int kNumModSlots = 32;
 
 // A4 reference for MIDI-note -> Hz.
 inline constexpr float kA4Hz   = 440.0f;

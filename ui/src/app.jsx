@@ -582,30 +582,93 @@ function LfoPanel({ n, accent }) {
   );
 }
 
-function ModRow({ n }) {
-  const p = "mod" + n;
-  const [src] = B.useChoice(p + "Src");
-  const mc = React.useContext(ModContext);
-  const v = (src > 0 && mc.src) ? (mc.src[src] || 0) : 0;
-  const mag = Math.min(1, Math.abs(v)) * 50;
-  const fill = v >= 0 ? { bottom: "50%", height: mag + "%" } : { top: "50%", height: mag + "%" };
+/* Abbreviated source names for the grid column headers (index-aligned to
+   MOD_SRC; [0] is the unused OFF slot). */
+const SRC_ABBR = ["", "L1", "L2", "L3", "AEG", "FEG", "XEG", "VEL", "KEY", "MW", "AT", "BND", "RND", "NOT"];
+const N_MOD_SLOTS = 32;
+
+/* One grid cell = one (source, destination) intersection. Drag vertically to
+   set a bipolar amount; the fill grows from the centre line and an active cell
+   glows with the live source*amount contribution. */
+function ModCell({ srcI, dstI, amt, live, onSet }) {
+  const drag = useRef(null);
+  const down = (e) => {
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    drag.current = { y: p.clientY, a: amt };
+    const move = (ev) => {
+      const q = ev.touches ? ev.touches[0] : ev;
+      const fine = ev.shiftKey ? 0.25 : 1;
+      onSet(srcI, dstI, drag.current.a + (drag.current.y - q.clientY) / 70 * fine);
+    };
+    const up = () => {
+      window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move); window.removeEventListener("touchend", up);
+    };
+    window.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
+  };
+  const mag = Math.min(1, Math.abs(amt) / 2);
+  const cls = "mg-cell" + (amt > 0.001 ? " pos" : amt < -0.001 ? " neg" : "");
+  const lv = Math.min(1, Math.abs(live) / 1.2);
   return (
-    <div className={"modrow" + (src > 0 ? " active" : "")}>
-      <span className="mn">{n}</span>
-      <div className="smeter"><i style={fill} /></div>
-      <Sel id={p + "Src"} options={MOD_SRC} />
-      <span className="arr">{"→"}</span>
-      <Sel id={p + "Dst"} options={MOD_DST} />
-      <Knob id={p + "Amt"} label="" bipolar />
+    <div className={cls} onMouseDown={down} onTouchStart={down}
+         onDoubleClick={() => onSet(srcI, dstI, 0)}
+         title={MOD_SRC[srcI] + " → " + MOD_DST[dstI] + (amt ? "   " + amt.toFixed(2) : "")}
+         style={{ "--m": mag.toFixed(3), "--lv": lv.toFixed(3) }}>
+      <i />
     </div>
   );
 }
 
-function ModMatrix() {
+function ModGrid() {
+  const mc = React.useContext(ModContext);
+  // read every sparse slot once; build a (src,dst) -> slot lookup
+  const slots = [];
+  for (let i = 1; i <= N_MOD_SLOTS; i++) {
+    const [src, setSrc] = B.useChoice("mod" + i + "Src");
+    const [dst, setDst] = B.useChoice("mod" + i + "Dst");
+    const [amtN, setAmt] = B.useSlider("mod" + i + "Amt");
+    slots.push({ src, dst, amtN, setSrc, setDst, setAmt });
+  }
+  const byPair = {};
+  let used = 0;
+  slots.forEach((s) => { if (s.src > 0 && s.dst > 0) { byPair[s.src + "_" + s.dst] = s; used++; } });
+
+  const setCell = (srcI, dstI, amt) => {
+    amt = Math.max(-2, Math.min(2, amt));
+    const key = srcI + "_" + dstI;
+    let s = byPair[key];
+    if (!s) {
+      if (Math.abs(amt) < 0.01) return;
+      s = slots.find((x) => x.src <= 0); // allocate a free route
+      if (!s) return;                    // matrix full (all 32 used)
+      s.setSrc(srcI); s.setDst(dstI);
+    }
+    s.setAmt((amt + 2) / 4);
+    if (Math.abs(amt) < 0.01) s.setSrc(0); // clearing frees the route
+  };
+
+  const srcCols = SRC_ABBR.slice(1);          // 13 sources
+  const dstRows = MOD_DST.slice(1);           // 29 destinations
   return (
-    <Panel title="MOD MATRIX" accent="#c08ae0">
-      <div className="modgrid">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => <ModRow key={n} n={n} />)}
+    <Panel title={"MOD MATRIX · " + used + "/" + N_MOD_SLOTS}>
+      <div className="mgrid" style={{ "--cols": srcCols.length }}>
+        <div className="mg-corner" />
+        {srcCols.map((s, c) => <div key={c} className="mg-chead" title={MOD_SRC[c + 1]}>{s}</div>)}
+        {dstRows.map((dname, r) => {
+          const dstI = r + 1;
+          return [
+            <div key={"l" + r} className="mg-rlabel">{dname}</div>,
+            ...srcCols.map((_, c) => {
+              const srcI = c + 1;
+              const slot = byPair[srcI + "_" + dstI];
+              const amt = slot ? slot.amtN * 4 - 2 : 0;
+              const live = slot ? ((mc.src && mc.src[srcI]) || 0) * amt : 0;
+              return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} live={live} onSet={setCell} />;
+            }),
+          ];
+        })}
       </div>
     </Panel>
   );
@@ -914,7 +977,7 @@ function App() {
           <LfoPanel n={3} />
         </div>
         <div className="col modcol">
-          <ModMatrix />
+          <ModGrid />
         </div>
       </div>
 

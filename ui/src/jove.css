@@ -273,7 +273,31 @@ button, select, input { font-family: inherit; color: inherit; }
 .viz.scope .scope-dot { fill: #fff; }
 .viz.filter .mark { stroke: var(--ink3); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; opacity: .6; }
 
-/* ---- mod matrix ---- */
+/* ---- mod matrix GRID (sources x destinations heatmap) ---- */
+.mgrid { display: grid; grid-template-columns: 56px repeat(var(--cols), 1fr);
+  gap: 2px; align-content: start; flex: 1; min-height: 0; }
+.mg-corner { }
+.mg-chead { font-size: 7px; font-weight: 700; letter-spacing: .3px; color: var(--ink3);
+  text-align: center; align-self: end; padding-bottom: 2px; }
+.mg-rlabel { font-size: 7.5px; color: var(--ink2); display: flex; align-items: center;
+  justify-content: flex-end; padding-right: 5px; white-space: nowrap; overflow: hidden; }
+.mg-cell { position: relative; min-height: 15px; border-radius: 3px; cursor: ns-resize;
+  background: #0c0d10; border: 1px solid var(--line); overflow: hidden; }
+.mg-cell::after { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+  height: 1px; background: var(--line); }
+.mg-cell:hover { border-color: var(--ink3); z-index: 1; }
+/* full-cell tint shows magnitude; sign by colour; a centre bar gives direction */
+.mg-cell i { position: absolute; left: 1px; right: 1px; }
+.mg-cell.pos i { bottom: 50%; height: calc(var(--m, 0) * 50%); background: var(--accent); }
+.mg-cell.neg i { top: 50%; height: calc(var(--m, 0) * 50%); background: var(--hot); }
+.mg-cell.pos { background: color-mix(in srgb, var(--accent) calc(var(--m) * 55%), #0c0d10);
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--line2));
+  box-shadow: inset 0 0 calc(var(--lv, 0) * 9px) var(--accent); }
+.mg-cell.neg { background: color-mix(in srgb, var(--hot) calc(var(--m) * 55%), #0c0d10);
+  border-color: color-mix(in srgb, var(--hot) 55%, var(--line2));
+  box-shadow: inset 0 0 calc(var(--lv, 0) * 9px) var(--hot); }
+
+/* ---- legacy mod matrix list (unused) ---- */
 .modgrid { display: flex; flex-direction: column; gap: 6px; }
 .modrow {
   display: grid; grid-template-columns: 16px 7px 1fr 14px 1fr 48px; align-items: center; gap: 8px;
