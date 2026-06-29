@@ -61,8 +61,17 @@ void JoveAudioProcessor::rebuildOversampling()
         oversampling.reset();
         setLatencySamples(0);
     }
+    // Preserve the playing chord across the re-prepare: a quality change resets
+    // every voice, which would drop the sound. Snapshot the held keys first and
+    // re-trigger them after, so a quality switch keeps the held notes sounding
+    // (a fresh attack on the new rate) instead of going silent.
+    int hNotes[jove::kMaxVoices], hVels[jove::kMaxVoices];
+    const int held = engine.snapshotHeld(hNotes, hVels, jove::kMaxVoices);
+
     engine.prepare((float) (sampleRate * osFactor), kControlBlock);
     engine.setPatch(&patch);
+    for(int i = 0; i < held; ++i)
+        engine.noteOn(hNotes[i], (float) hVels[i] / 127.0f);
     controlRemaining = 0;
     scratchPos       = 0;
 }

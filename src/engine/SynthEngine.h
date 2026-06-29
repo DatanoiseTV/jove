@@ -45,6 +45,14 @@ class SynthEngine
     void noteOff(int note) noexcept;
     void allNotesOff() noexcept;
     void onPresetLoaded() noexcept; // release orphaned (stuck) voices, keep held
+    // Snapshot the currently-held keys (note + velocity) so the processor can
+    // re-trigger them after a re-prepare (quality change) keeps sound going.
+    int snapshotHeld(int* notes, int* vels, int maxN) const noexcept
+    {
+        int c = 0;
+        for(int i = 0; i < heldCount_ && c < maxN; ++i) { notes[c] = held_[i]; vels[c] = heldVel_[i]; ++c; }
+        return c;
+    }
     void pitchBend(float norm) noexcept;     // -1..+1
     void modWheel(float norm) noexcept;      // 0..1
     void aftertouch(float norm) noexcept;    // 0..1
