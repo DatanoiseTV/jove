@@ -331,9 +331,38 @@ function oscShape(m, pw, t) {
 }
 /* JS mirror of the engine wavetable bank (Wavetables.h) so the scope shows the
    real table; table index + morph blend toward the next table. */
-const WT_NAMES = ["SINE", "TRIANGLE", "SAW", "SQUARE", "PULSE 25", "PULSE 12", "BRIGHT", "ORGAN",
+/* names: 16 hand-tuned character tables + 48 parametric AKWF-style families.
+   The families mirror wtExtraDesc/wtExtraHarmonic in engine/Wavetables.h exactly. */
+const WT_NAMED = ["SINE", "TRIANGLE", "SAW", "SQUARE", "PULSE 25", "PULSE 12", "BRIGHT", "ORGAN",
   "ODD", "FORMANT A", "FORMANT B", "SPARSE", "HOLLOW", "BRASS", "STRING", "VOCAL"];
+function wtExtraName(e) {
+  if (e < 12) return "SAW " + (e + 1);
+  if (e < 24) return "FORMANT " + (e - 11);
+  if (e < 36) return "VOWEL " + (e - 23);
+  if (e < 42) return "ODD " + (e - 35);
+  return "COMB " + (2 + (e - 42));
+}
+const WT_NAMES = WT_NAMED.concat(Array.from({ length: 48 }, (_, e) => wtExtraName(e)));
+function wtExtraDesc(e) {
+  if (e < 12) return { type: 0, p1: 0.55 + e * 0.26, p2: 0 };
+  if (e < 24) return { type: 2, p1: 2 + (e - 12) * 2, p2: 2.5 };
+  if (e < 36) { const k = e - 24; return { type: 3, p1: 2 + k, p2: 7 + k * 1.3 }; }
+  if (e < 42) return { type: 5, p1: 0.9 + (e - 36) * 0.32, p2: 0 };
+  return { type: 4, p1: 2 + (e - 42), p2: 0 };
+}
+function wtExtraHarmonic(d, n) {
+  const fn = n;
+  switch (d.type) {
+    case 0: return 1 / Math.pow(fn, d.p1);
+    case 2: { const c = d.p1, s = d.p2; return Math.exp(-((fn - c) * (fn - c)) / (2 * s * s)) + 0.06 / fn; }
+    case 3: { const a = Math.exp(-((fn - d.p1) * (fn - d.p1)) / 8) + 0.6 * Math.exp(-((fn - d.p2) * (fn - d.p2)) / 12); return a / fn + 0.04 / fn; }
+    case 4: { const k = d.p1 | 0; return (n % k === 1) ? 1 / fn : 0; }
+    case 5: return (n % 2 === 1) ? 1 / Math.pow(fn, d.p1) : 0;
+    default: return 1 / fn;
+  }
+}
 function wtHarmonic(w, n) {
+  if (w >= 16) return wtExtraHarmonic(wtExtraDesc(w - 16), n);
   const fn = n;
   switch (w) {
     case 0: return n === 1 ? 1 : 0;

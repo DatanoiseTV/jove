@@ -17,18 +17,46 @@
 // data can replace the procedural generator later without touching the osc.
 namespace jove
 {
-constexpr int kWtLen  = 2048;  // samples per single cycle (power of two)
-constexpr int kWtMips = 8;     // octave bands: harmonic cap 256,128,..,2
-constexpr int kNumWt  = 16;    // waveforms in the bank
+constexpr int kWtLen   = 2048; // samples per single cycle (power of two)
+constexpr int kWtMips  = 8;    // octave bands: harmonic cap 256,128,..,2
+constexpr int kNumNamed = 16;  // hand-tuned character tables
+constexpr int kNumExtra = 48;  // parametric AKWF-style families
+constexpr int kNumWt   = kNumNamed + kNumExtra; // 64 waveforms
 
-inline const char* const kWtNames[kNumWt] = {
+inline const char* const kWtNames[] = {
     "SINE", "TRIANGLE", "SAW", "SQUARE", "PULSE 25", "PULSE 12", "BRIGHT", "ORGAN",
     "ODD", "FORMANT A", "FORMANT B", "SPARSE", "HOLLOW", "BRASS", "STRING", "VOCAL"};
 
-// harmonic amplitude for waveform w, harmonic n (1-based). Classic Fourier
-// series for the analog shapes, hand-tuned spectra for the character tables.
+// Parametric families for the extended bank (e in 0..kNumExtra-1). Deterministic
+// so the JS UI mirror can reproduce every table exactly.
+struct WtDesc { int type; float p1; float p2; };
+inline WtDesc wtExtraDesc(int e) noexcept
+{
+    if(e < 12) return {0, 0.55f + (float) e * 0.26f, 0.0f};                 // saw rolloff, bright -> dark
+    if(e < 24) return {2, 2.0f + (float)(e - 12) * 2.0f, 2.5f};             // single-formant sweep
+    if(e < 36) { const int k = e - 24; return {3, 2.0f + (float) k, 7.0f + (float) k * 1.3f}; } // vowel (double formant)
+    if(e < 42) return {5, 0.9f + (float)(e - 36) * 0.32f, 0.0f};            // odd-harmonic rolloff
+    return {4, (float)(2 + (e - 42)), 0.0f};                               // comb: every k-th harmonic (e 42..47)
+}
+inline float wtExtraHarmonic(WtDesc d, int n) noexcept
+{
+    const float fn = (float) n;
+    switch(d.type)
+    {
+        case 0:  return 1.0f / std::pow(fn, d.p1);
+        case 2:  { const float c = d.p1, s = d.p2; return std::exp(-((fn - c) * (fn - c)) / (2.0f * s * s)) + 0.06f / fn; }
+        case 3:  { const float a = std::exp(-((fn - d.p1) * (fn - d.p1)) / 8.0f) + 0.6f * std::exp(-((fn - d.p2) * (fn - d.p2)) / 12.0f); return a / fn + 0.04f / fn; }
+        case 4:  { const int k = (int) d.p1; return (n % k == 1) ? 1.0f / fn : 0.0f; }
+        case 5:  return (n % 2 == 1) ? 1.0f / std::pow(fn, d.p1) : 0.0f;
+        default: return 1.0f / fn;
+    }
+}
+
+// harmonic amplitude for waveform w, harmonic n (1-based). 0..15 are the
+// hand-tuned character tables; 16+ are the parametric families.
 inline float wtHarmonic(int w, int n) noexcept
 {
+    if(w >= kNumNamed) return wtExtraHarmonic(wtExtraDesc(w - kNumNamed), n);
     const float fn = (float) n;
     switch(w)
     {
