@@ -133,7 +133,7 @@ class BlepOsc
             phase_ = masterFrac;
     }
 
-    float phase() const noexcept { return phase_; }
+    float phase() const noexcept { return (float)phase_; }
 
   private:
     // PolyBLEP: correction added around a step discontinuity to band-limit it.
@@ -215,7 +215,7 @@ class BlepOsc
     float sr_    = 48000.0f;
     float invSr_ = 1.0f / 48000.0f;
     float dt_    = 0.0f;   // normalised frequency (cycles/sample)
-    float phase_ = 0.0f;   // [0,1)
+    double phase_ = 0.0;   // [0,1) — double so pitch can't drift over long notes
     float morph_ = 0.5f;   // 0 tri .. 0.5 saw .. 1 pulse
     float pw_    = 0.5f;   // pulse duty
 };

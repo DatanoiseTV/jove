@@ -155,7 +155,7 @@ class VoiceFilter
     float        g_      = 0.1f;
     float        k_      = 0.0f;
     float        gate_   = 1.0f; // LPG amplitude (tracks cutoff); 1.0 otherwise
-    float        z_[4]   = {0, 0, 0, 0};
+    double       z_[4]   = {0, 0, 0, 0}; // ladder integrators — double for high-res stability
     int          svfType_ = 0;
     doobie::Svf  svf_;
 };

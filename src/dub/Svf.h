@@ -71,6 +71,6 @@ class Svf
   private:
     float sr_ = 48000.0f;
     float g_ = 0.1f, k_ = 2.0f, a1_ = 1.0f;
-    float ic1_ = 0.0f, ic2_ = 0.0f;
+    double ic1_ = 0.0, ic2_ = 0.0; // TPT integrator state — double for stability
 };
 } // namespace doobie

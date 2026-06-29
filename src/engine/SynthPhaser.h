@@ -92,7 +92,8 @@ class PhaserCore
   private:
     float sr_ = 48000.0f;
     float z_[kStages] = {};
-    float last_ = 0.0f, phase_ = 0.0f, phaseOffset_ = 0.0f;
+    float  last_ = 0.0f;
+    double phase_ = 0.0, phaseOffset_ = 0.0; // double phase accumulators
     float inc_ = 0.0f, depth_ = 0.7f, fb_ = 0.4f, mix_ = 0.5f;
     float coeff_ = 0.0f; // all-pass coefficient, refreshed once per block
 };

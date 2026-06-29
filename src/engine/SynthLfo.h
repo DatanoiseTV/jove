@@ -89,7 +89,7 @@ class SynthLfo
     }
 
     float value() const noexcept { return out_; }
-    float phase() const noexcept { return phase_; }
+    float phase() const noexcept { return (float)phase_; }
 
   private:
     inline float shape() const noexcept
@@ -121,7 +121,7 @@ class SynthLfo
     int      wave_      = 0;
     float    rate_      = 1.0f;
     float    depth_     = 1.0f;
-    float    phase_     = 0.0f;
+    double   phase_     = 0.0;  // double accumulator — no long-term phase drift
     float    held_      = 0.0f;
     float    out_       = 0.0f;
     float    offset_    = 0.0f;
