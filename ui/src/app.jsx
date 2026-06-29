@@ -625,11 +625,26 @@ function FilterCurve() {
 }
 
 /* ---- FX hero visualizers (fill the FX panels, like a real effect view) ---- */
-function jsSoftSat(x) { if (x < -3) return -1; if (x > 3) return 1; const x2 = x * x; return x * (27 + x2) / (27 + 9 * x2); }
+/* transfer curve for the selected drive model — mirrors SynthEngine's `shape`
+   lambda exactly so the visual tracks the MODEL segmented control, not just DRIVE */
+function jsDriveShape(x, dm) {
+  switch (dm) {
+    case 1: return (Math.tanh(x * 1.6 + 0.25) - Math.tanh(0.25)) * 0.92;        // tube
+    case 2: return x >= 0 ? Math.tanh(x * 2.2) : 0.7 * Math.tanh(x * 1.1);      // diode
+    case 3: { let y = x; for (let k = 0; k < 3; k++) { if (y > 1) y = 2 - y; else if (y < -1) y = -2 - y; } return y; } // fold
+    case 4: return Math.tanh(x * 6);                                            // fuzz
+    default: { const c = x < -1.5 ? -1.5 : (x > 1.5 ? 1.5 : x); return c - (4 / 27) * c * c * c; } // soft
+  }
+}
 function DriveCurve() {
   const drv = B.useSlider("fxDrive")[0];
-  const W = 200, H = 100, N = 80, g = 1 + drv * 4, pts = [];
-  for (let i = 0; i <= N; i++) { const x = -1 + 2 * i / N; const y = jsSoftSat(x * g); pts.push(((i / N) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 4)).toFixed(1)); }
+  const dm = B.useChoice("driveMode")[0];
+  const W = 200, H = 100, N = 96, g = 1 + drv * 4, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const x = -1 + 2 * i / N;
+    const y = Math.max(-1, Math.min(1, jsDriveShape(x * g, dm)));
+    pts.push(((i / N) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 4)).toFixed(1));
+  }
   return (
     <svg className="viz drivecv" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
       <line x1="0" y1={H / 2} x2={W} y2={H / 2} className="grid" />
