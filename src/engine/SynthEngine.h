@@ -152,6 +152,18 @@ class SynthEngine
     // keeping its own held-note book separate from the live keyboard.
     Voice& voice(int i) noexcept { return voice_[i]; }
 
+    // Re-align all bar-locked clocks (arp + tempo-synced LFOs/seqs) to phase 0.
+    // Called by the processor on a transport stop->start edge so the arp/synced
+    // mod land on the host's beat grid instead of free-running from the first note.
+    void syncToBar() noexcept
+    {
+        arp_.syncToBar();
+        for(int i = 0; i < kNumLfo; ++i)
+            if(patch_ != nullptr && patch_->lfo[i].sync) lfo_[i].retrigger();
+        for(int i = 0; i < kNumSeq; ++i)
+            if(patch_ != nullptr && patch_->seq[i].sync) seq_[i].retrigger();
+    }
+
   private:
     int  findFreeVoice() const noexcept;
     int  stealVoice() const noexcept;

@@ -184,8 +184,15 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     if(auto* ph = getPlayHead())
         if(auto pos = ph->getPosition())
+        {
             if(auto bpm = pos->getBpm())
                 engine.setTempo((float) *bpm);
+            // Re-align the arp / tempo-synced mod to the bar on a stop->start edge
+            // so a running host transport keeps the arp locked to the beat grid.
+            const bool playing = pos->getIsPlaying();
+            if(playing && !wasPlaying_) engine.syncToBar();
+            wasPlaying_ = playing;
+        }
 
     binding.readInto(patch);
     engine.setPatch(&patch);

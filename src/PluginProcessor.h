@@ -118,6 +118,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     // MPE config (global, read each block from the APVTS; not patch state)
     bool mpeOn_        = false;
     int  mpeBendRange_ = 48;
+    bool wasPlaying_   = false; // host transport stop->start edge (arp bar-sync)
 
     // audition: auto-play a looping test phrase so presets can be browsed by ear
     bool auditionOn_  = false;

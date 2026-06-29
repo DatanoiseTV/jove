@@ -102,6 +102,10 @@ class Arpeggiator
 
     void allOff() noexcept { reset(); }
 
+    // Re-align the step clock to the bar (called when host transport starts), so
+    // the arp lands on the beat grid instead of free-running from the first note.
+    void syncToBar() noexcept { phase_ = 0.0f; seqPos_ = 0; }
+
     void notePressed() noexcept { physicalDown_++; }
 
     // ---- clock + step ------------------------------------------------------
