@@ -341,6 +341,14 @@ class Voice
         oscGt[0] = g1; oscGt[1] = g2; oscGt[2] = g3;
         for(int i = 3; i < kNumOsc; ++i) oscGt[i] = p.osc[i].on ? p.osc[i].level : 0.0f;
 
+        // Pre-filter mix normalisation: several oscillators at full level sum well
+        // past unity and slam the ladder's feedback saturator, so the filter rang
+        // distorted regardless of the master. Scale the summed mix toward unity
+        // into the filter (a single osc passes unchanged); the patch's own
+        // filterDrive still overdrives on top, and the VCA/master set loudness.
+        float mixTot = oscGt[0] + oscGt[1] + oscGt[2] + oscGt[3] + oscGt[4] + subG + noiseG;
+        const float mixNorm = mixTot > 1.0f ? 1.0f / mixTot : 1.0f;
+
         // ---- per-sample render (cheap ops only) ---------------------------
         for(int s = 0; s < n; ++s)
         {
@@ -469,6 +477,7 @@ class Voice
                 // master clip never sees more than the dry oscs already give).
                 if(ringSm_ > 0.0001f)
                     voice += (o1 * o2 - o1 * gSm_[0]) * ringSm_;
+                voice *= mixNorm; // tame the summed mix into the filter (anti-saturation)
                 fout = filter_.process(voice);
                 if(routing == 1)        fout = filter2_.process(fout);                  // serial
                 else if(routing == 2)   fout = 0.5f * (fout + filter2_.process(voice)); // parallel
