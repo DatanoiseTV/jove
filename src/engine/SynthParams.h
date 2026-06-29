@@ -105,11 +105,15 @@ enum class ModSource : int
     EnvAmp, EnvFilter, EnvAux,
     Velocity, KeyTrack, ModWheel, Aftertouch, PitchBend,
     Random, Note,
+    // per-voice MPE expression (append-only — keep before Count so existing
+    // preset source indices never shift)
+    MpePressure, MpeTimbre, MpeBend,
     Count
 };
 inline constexpr const char* kModSourceNames[] = {
     "OFF",  "LFO1", "LFO2", "LFO3", "AMP EG", "FLT EG", "AUX EG",
-    "VEL",  "KEY",  "MWHEEL", "ATOUCH", "BEND", "RAND", "NOTE"};
+    "VEL",  "KEY",  "MWHEEL", "ATOUCH", "BEND", "RAND", "NOTE",
+    "MPE PRS", "MPE TMB", "MPE BND"};
 
 enum class ModDest : int
 {

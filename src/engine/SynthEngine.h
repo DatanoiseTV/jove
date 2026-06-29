@@ -49,6 +49,20 @@ class SynthEngine
     void aftertouch(float norm) noexcept;    // 0..1
     void sustainPedal(bool down) noexcept;
 
+    // ---- MPE (per-note expression on member channels 2..16) ----------------
+    // Flip clears voices so a mode change can't orphan channel-tagged notes.
+    void setMpe(bool on, int bendRangeSemis) noexcept
+    {
+        if(on != mpeOn_) allNotesOff();
+        mpeOn_ = on;
+        mpeBendRange_ = bendRangeSemis;
+    }
+    void noteOnMpe(int channel, int note, float velocity) noexcept;
+    void noteOffMpe(int channel, int note) noexcept;
+    void channelBend(int channel, float norm) noexcept;      // -1..+1 -> +/- bendRange st
+    void channelPressure(int channel, float norm) noexcept;  // 0..1
+    void channelTimbre(int channel, float norm) noexcept;    // 0..1 (CC74)
+
     // External tempo for LFO/arp sync (BPM). 0 = use internal.
     void setTempo(float bpm) noexcept { tempoBpm_ = bpm > 1.0f ? bpm : 120.0f; }
 
@@ -100,6 +114,9 @@ class SynthEngine
             case ModSource::KeyTrack:  return v.keyTrackSource();
             case ModSource::Note:      return v.noteSource();
             case ModSource::Random:    return v.randomSource();
+            case ModSource::MpePressure: return v.mpePressureSource();
+            case ModSource::MpeTimbre:   return v.mpeTimbreSource();
+            case ModSource::MpeBend:     return v.mpeBendSource();
             default: return 0.0f;
         }
     }
@@ -155,6 +172,8 @@ class SynthEngine
     float wheel_     = 0.0f; // 0..1
     float at_        = 0.0f; // 0..1
     bool  sustain_   = false;
+    bool  mpeOn_        = false; // MPE per-note expression mode
+    int   mpeBendRange_ = 48;    // per-note bend range (semitones)
 
     // held-note book for MONO last-note priority (and a base for the arp).
     static constexpr int kMaxHeld = 16;

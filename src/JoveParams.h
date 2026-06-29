@@ -32,6 +32,8 @@ namespace jID
     // so they stay put as the user's standing preference)
     inline constexpr auto maxVoices    = "maxVoices";   // polyphony cap 1..kMaxVoices
     inline constexpr auto quality      = "quality";     // oversampling: Eco/HQ/Ultra
+    inline constexpr auto mpeOn        = "mpeOn";        // MPE per-note expression mode
+    inline constexpr auto mpeBendRange = "mpeBendRange"; // per-note bend range (st)
 
     // global / voicing (patch)
     inline constexpr auto voiceMode    = "voiceMode";
@@ -175,6 +177,10 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     // ---- global plugin settings (not patch state) ----
     iparam(jID::maxVoices, "Max Polyphony", 1, kMaxVoices, 8); // up to 16, default 8
     cparam(jID::quality, "Quality", {"Eco", "HQ", "Ultra"}, 1); // default HQ (2x)
+    // MPE: global plugin settings (not patch state — presets never change them,
+    // so they stay out of PatchBinding and never touch param_roundtrip).
+    bparam(jID::mpeOn, "MPE", false);
+    iparam(jID::mpeBendRange, "MPE Bend Range", 1, 96, 48); // MPE default 48 st
 
     // ---- global / voicing ----
     cparam(jID::voiceMode, "Voice Mode", namesToArray(kVoiceModeNames, (int)VoiceMode::Count), 0);

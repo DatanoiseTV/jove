@@ -12,7 +12,7 @@ const SYNC_MODES  = ["OFF", "SOFT", "HARD"];
 const FILTER_MODES= ["MOOG", "LP", "HP", "BP", "NOTCH", "LPG", "STEINER"];
 const ARP_MODES   =["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV","CON-DIV","ASPLAYED","RANDOM","CHORD"];
 const DIVISIONS   = ["1/64","1/32T","1/32","1/16T","1/16","1/8T","1/16.","1/8","1/4T","1/8.","1/4","1/4.","1/2"];
-const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE"];
+const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE","MPE PRS","MPE TMB","MPE BND"];
 const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE"];
 const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble", "Combine"];
 const QUALITY     = ["Eco", "HQ", "Ultra"];
@@ -1008,6 +1008,8 @@ function VoicingPanel() {
       </div>
       <div className="row between">
         <Seg id="glideMode" options={GLIDE_MODES} label="GLIDE MODE" />
+        <Switch id="mpeOn" label="MPE" />
+        <IntPick id="mpeBendRange" label="MPE BEND" min={1} max={96} />
       </div>
     </Panel>
   );

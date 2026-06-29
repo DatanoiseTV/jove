@@ -114,6 +114,10 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     double sampleRate = 44100.0;
     int    hostBlockSize = 512;
 
+    // MPE config (global, read each block from the APVTS; not patch state)
+    bool mpeOn_        = false;
+    int  mpeBendRange_ = 48;
+
     std::atomic<int>   activeVoices { 0 };
     std::atomic<int>   lastMidiNote { -1 };
     std::array<std::atomic<float>, 2> outputLevel {};

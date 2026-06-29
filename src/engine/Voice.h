@@ -99,6 +99,10 @@ class Voice
         driftPhase_ = 0.0f;
         driftVal_   = 0.0f;
         driftTarget_ = 0.0f;
+        mpeChannel_  = 0;
+        mpeBendNorm_ = 0.0f;
+        mpePressure_ = 0.0f;
+        mpeTimbre_   = 0.5f;
     }
 
     bool  active() const noexcept { return active_; }
@@ -162,6 +166,16 @@ class Voice
     // Per-voice unison detune in cents (engine assigns when spreading a note).
     void setUnisonDetune(float cents) noexcept { detuneCents_ = cents / 100.0f; }
     void setPan(float pan) noexcept { basePan_ = pan; }
+
+    // ---- per-note MPE expression (member-channel voices) -------------------
+    void  setMpeChannel(int c) noexcept { mpeChannel_ = c; }
+    int   mpeChannel() const noexcept { return mpeChannel_; }
+    void  setMpeBend(float n) noexcept { mpeBendNorm_ = n; }       // -1..+1
+    void  setMpePressure(float p) noexcept { mpePressure_ = p; }   // 0..1
+    void  setMpeTimbre(float t) noexcept { mpeTimbre_ = t; }       // 0..1 (CC74)
+    float mpeBendSource() const noexcept { return mpeBendNorm_; }
+    float mpePressureSource() const noexcept { return mpePressure_; }
+    float mpeTimbreSource() const noexcept { return mpeTimbre_ * 2.0f - 1.0f; } // center 0.5 -> 0
 
     // Configure from the patch once per block (cheap setup; the heavy per-sample
     // work reads the cached coefficients).
@@ -499,6 +513,11 @@ class Voice
     float    vel_       = 1.0f;
     float    detuneCents_ = 0.0f;
     float    basePan_   = 0.0f;
+    // per-note MPE expression (0 channel = not an MPE member voice)
+    int      mpeChannel_  = 0;
+    float    mpeBendNorm_ = 0.0f; // -1..+1 (scaled by engine bend range)
+    float    mpePressure_ = 0.0f; // 0..1
+    float    mpeTimbre_   = 0.5f; // 0..1, 0.5 = CC74 centre
     float    curHz_     = 261.6f;
     float    targetHz_  = 261.6f;
     float    ampSmooth_ = 0.0f;

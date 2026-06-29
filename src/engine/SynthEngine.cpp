@@ -150,6 +150,59 @@ void SynthEngine::noteOff(int note) noexcept
     releaseNote(note);
 }
 
+// ---- MPE: per-note expression on member channels ---------------------------
+// Each member channel carries one note. Allocate POLY-per-channel and tag the
+// voice with its channel; expression events scan for matching channel voices
+// (kMaxVoices is small, so a scan is cheaper than a channel table and updates a
+// unison stack for free). Arp under MPE falls back to the normal note path.
+void SynthEngine::noteOnMpe(int channel, int note, float velocity) noexcept
+{
+    if(patch_ == nullptr)
+        return;
+    if(patch_->arp.on) { noteOn(note, velocity); return; }
+    int idx = findFreeVoice();
+    if(idx < 0)
+        idx = stealVoice();
+    pushHeld(note, (int)(velocity * 127.0f));
+    startVoice(idx, note, velocity, /*glide*/ false, 0.0f, 0.0f, -1.0f);
+    voice_[idx].setMpeChannel(channel);
+    voice_[idx].setMpeBend(0.0f);
+    voice_[idx].setMpePressure(0.0f);
+    voice_[idx].setMpeTimbre(0.5f);
+    lastNoteHz_ = midiToHz((float)note);
+}
+
+void SynthEngine::noteOffMpe(int channel, int note) noexcept
+{
+    if(patch_ != nullptr && patch_->arp.on) { noteOff(note); return; }
+    removeHeld(note);
+    if(sustain_)
+        return;
+    for(int i = 0; i < kMaxVoices; ++i)
+        if(voice_[i].active() && voice_[i].gateOn()
+           && voice_[i].mpeChannel() == channel && voice_[i].note() == note)
+            voice_[i].noteOff();
+}
+
+void SynthEngine::channelBend(int channel, float norm) noexcept
+{
+    for(int i = 0; i < kMaxVoices; ++i)
+        if(voice_[i].active() && voice_[i].mpeChannel() == channel)
+            voice_[i].setMpeBend(norm);
+}
+void SynthEngine::channelPressure(int channel, float norm) noexcept
+{
+    for(int i = 0; i < kMaxVoices; ++i)
+        if(voice_[i].active() && voice_[i].mpeChannel() == channel)
+            voice_[i].setMpePressure(norm);
+}
+void SynthEngine::channelTimbre(int channel, float norm) noexcept
+{
+    for(int i = 0; i < kMaxVoices; ++i)
+        if(voice_[i].active() && voice_[i].mpeChannel() == channel)
+            voice_[i].setMpeTimbre(norm);
+}
+
 // Shared allocation: POLY (with poly portamento), MONO (last-note priority,
 // legato glide) and UNISON (detuned stack). Used by both the keyboard and the
 // arpeggiator's step events.
@@ -382,7 +435,14 @@ void SynthEngine::buildVoiceMod(int voiceIdx, VoiceMod& m) noexcept
     src[(int)ModSource::PitchBend]  = bend_;
     src[(int)ModSource::Random]     = v.randomSource();
     src[(int)ModSource::Note]       = v.noteSource();
+    src[(int)ModSource::MpePressure] = v.mpePressureSource(); // 0..1
+    src[(int)ModSource::MpeTimbre]   = v.mpeTimbreSource();   // bipolar around CC74 centre
+    src[(int)ModSource::MpeBend]     = v.mpeBendSource();     // -1..+1
     evalMatrix(src, m);
+    // per-note MPE pitch bend, applied on top of the matrix (the global
+    // bend_ * bendRange still applies for master-channel / non-MPE bend).
+    if(mpeOn_ && v.mpeChannel() != 0)
+        m.pitchSemis += v.mpeBendSource() * (float)mpeBendRange_;
 }
 
 // ---------------------------------------------------------------------------

@@ -145,6 +145,20 @@ int main()
                st.nan ? " NAN" : "", st.inf ? " INF" : "");
         if(st.peak > kCeil || st.nan || st.inf) ++failures;
     }
+    {
+        // MPE path: two member-channel notes with per-note bend/pressure/timbre
+        SynthPatch p; LoadFactoryPreset(5, p);
+        SynthEngine e; e.prepare(kSR, kBlock); e.setPatch(&p);
+        e.setMpe(true, 48);
+        e.noteOnMpe(2, 60, 0.9f); e.noteOnMpe(3, 64, 0.9f);
+        Stats st;
+        e.channelBend(2, 1.0f); e.channelPressure(2, 1.0f); e.channelTimbre(2, 1.0f);
+        e.channelBend(3, -0.5f); e.channelTimbre(3, 0.2f); renderFor(e, st, 0.4f);
+        e.noteOffMpe(2, 60); e.noteOffMpe(3, 64); renderFor(e, st, 0.2f);
+        printf("mpe per-note bend/pressure/timbre: peak=%.3f%s%s\n", st.peak,
+               st.nan ? " NAN" : "", st.inf ? " INF" : "");
+        if(st.peak > kCeil || st.nan || st.inf) ++failures;
+    }
 
     printf("\nRESULT: %d failures, %d warnings (%d silent)\n", failures, warnings, silent);
     return failures > 0 ? 1 : 0;

@@ -83,26 +83,45 @@ void JoveAudioProcessor::parameterChanged(const juce::String& id, float)
 
 void JoveAudioProcessor::handleMidiMessage(const juce::MidiMessage& m) noexcept
 {
+    // MPE Lower Zone: channel 1 = master (global expression), channels 2..16 =
+    // per-note member channels. When MPE is off, everything takes the legacy
+    // global path so non-MPE controllers behave exactly as before.
+    const int  ch     = m.getChannel();    // 1..16, 0 if none
+    const bool member = mpeOn_ && ch >= 2; // per-note expression channel
+
     if(m.isNoteOn())
     {
-        engine.noteOn(m.getNoteNumber(), m.getFloatVelocity());
+        if(member) engine.noteOnMpe(ch, m.getNoteNumber(), m.getFloatVelocity());
+        else       engine.noteOn(m.getNoteNumber(), m.getFloatVelocity());
         lastMidiNote.store(m.getNoteNumber(), std::memory_order_relaxed);
     }
     else if(m.isNoteOff())
-        engine.noteOff(m.getNoteNumber());
+    {
+        if(member) engine.noteOffMpe(ch, m.getNoteNumber());
+        else       engine.noteOff(m.getNoteNumber());
+    }
     else if(m.isAllNotesOff() || m.isAllSoundOff())
         engine.allNotesOff();
     else if(m.isPitchWheel())
-        engine.pitchBend((m.getPitchWheelValue() - 8192) / 8192.0f);
+    {
+        const float norm = (m.getPitchWheelValue() - 8192) / 8192.0f;
+        if(member) engine.channelBend(ch, norm); // per-note +/- bend range
+        else       engine.pitchBend(norm);       // master / non-MPE = global
+    }
     else if(m.isController())
     {
         const int cc = m.getControllerNumber();
-        if(cc == 1)        engine.modWheel(m.getControllerValue() / 127.0f);
-        else if(cc == 64)  engine.sustainPedal(m.getControllerValue() >= 64);
-        else if(cc == 123) engine.allNotesOff();
+        if(cc == 74 && member) engine.channelTimbre(ch, m.getControllerValue() / 127.0f);
+        else if(cc == 1)       engine.modWheel(m.getControllerValue() / 127.0f);
+        else if(cc == 64)      engine.sustainPedal(m.getControllerValue() >= 64);
+        else if(cc == 123)     engine.allNotesOff();
     }
     else if(m.isChannelPressure())
-        engine.aftertouch(m.getChannelPressureValue() / 127.0f);
+    {
+        const float norm = m.getChannelPressureValue() / 127.0f;
+        if(member) engine.channelPressure(ch, norm);
+        else       engine.aftertouch(norm);
+    }
     else if(m.isAftertouch())
         engine.aftertouch(m.getAfterTouchValue() / 127.0f);
 }
@@ -162,6 +181,9 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     binding.readInto(patch);
     engine.setPatch(&patch);
     engine.setMaxVoices((int) apvts.getRawParameterValue(jID::maxVoices)->load());
+    mpeOn_        = apvts.getRawParameterValue(jID::mpeOn)->load() > 0.5f;
+    mpeBendRange_ = (int) apvts.getRawParameterValue(jID::mpeBendRange)->load();
+    engine.setMpe(mpeOn_, mpeBendRange_);
 
     // a preset just loaded -> release orphaned/stuck voices (held notes survive
     // for live audition; see engine.onPresetLoaded). Done after the new patch is
