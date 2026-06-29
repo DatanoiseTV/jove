@@ -19,7 +19,7 @@ juce_add_plugin(Jove
     NEEDS_MIDI_INPUT         TRUE
     NEEDS_MIDI_OUTPUT        FALSE
     IS_MIDI_EFFECT           FALSE
-    EDITOR_WANTS_KEYBOARD_FOCUS TRUE
+    EDITOR_WANTS_KEYBOARD_FOCUS FALSE   # let the host keep keys (computer-MIDI); WebView focuses its own inputs on click
     NEEDS_WEB_BROWSER        TRUE
     COPY_PLUGIN_AFTER_BUILD  ${DOOBIE_INSTALL_LOCAL}
     VST3_CATEGORIES          Instrument Synth

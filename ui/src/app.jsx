@@ -152,14 +152,39 @@ function Seg({ id, options, label }) {
   );
 }
 
+// Custom dropdown (no native <select>): flat themed, and crucially it never
+// holds keyboard focus, so typing / computer-MIDI never changes the value.
+function Dropdown({ idx, options, onPick }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    window.addEventListener("mousedown", close);
+    return () => window.removeEventListener("mousedown", close);
+  }, [open]);
+  return (
+    <div className={"dd" + (open ? " open" : "")} ref={ref}>
+      <button className="dd-head" tabIndex={-1}
+              onMouseDown={(e) => { e.preventDefault(); setOpen((o) => !o); }}>
+        <span className="dd-cur">{options[idx]}</span><span className="dd-caret" />
+      </button>
+      {open &&
+        <div className="dd-list">
+          {options.map((o, i) =>
+            <button key={i} tabIndex={-1} className={"dd-opt" + (i === idx ? " on" : "")}
+                    onMouseDown={(e) => { e.preventDefault(); onPick(i); setOpen(false); }}>{o}</button>)}
+        </div>}
+    </div>
+  );
+}
+
 function Sel({ id, options, label }) {
   const [idx, set] = B.useChoice(id);
   return (
     <div className="sel-wrap">
       {label && <div className="cl">{label}</div>}
-      <select className="sel" value={idx} onChange={(e) => set(+e.target.value)}>
-        {options.map((o, i) => <option key={i} value={i}>{o}</option>)}
-      </select>
+      <Dropdown idx={idx} options={options} onPick={set} />
     </div>
   );
 }
@@ -185,24 +210,44 @@ function IntSeg({ id, label, min, max }) {
 function IntPick({ id, label, min, max }) {
   const [v, set] = B.useSlider(id);
   const cur = Math.round(min + v * (max - min));
-  const opts = []; for (let i = min; i <= max; i++) opts.push(i);
+  const opts = []; for (let i = min; i <= max; i++) opts.push("" + i);
   return (
     <div className="sel-wrap">
       {label && <div className="cl">{label}</div>}
-      <select className="sel" value={cur} onChange={(e) => set((+e.target.value - min) / (max - min))}>
-        {opts.map((i) => <option key={i} value={i}>{i}</option>)}
-      </select>
+      <Dropdown idx={cur - min} options={opts} onPick={(i) => set(i / (max - min))} />
     </div>
   );
 }
 
-function Panel({ title, accent, children, wide, tall }) {
+function Panel({ title, children }) {
   return (
-    <section className={"panel" + (wide ? " wide" : "") + (tall ? " tall" : "")}
-             style={accent ? { "--accent": accent } : null}>
+    <section className="panel">
       <header className="ph"><span className="dot" />{title}</header>
       <div className="pbody">{children}</div>
     </section>
+  );
+}
+
+/* Discrete waveform selector — sets morph (+ pulse width for the pulse variants)
+   to named shapes, while the MORPH knob still allows continuous in-between. */
+const WAVES = [
+  ["SIN", 0.0, 0.5], ["TRI", 0.25, 0.5], ["SAW", 0.5, 0.5],
+  ["SQR", 1.0, 0.5], ["PLS", 1.0, 0.3], ["NAR", 1.0, 0.15],
+];
+function WaveSelect({ morphId, pwId }) {
+  const [m, setM] = B.useSlider(morphId);
+  const [pw, setPw] = B.useSlider(pwId);
+  let best = 0, bd = 9;
+  WAVES.forEach((w, i) => {
+    const d = Math.abs(m - w[1]) + (w[1] >= 0.999 ? Math.abs(pw - w[2]) : 0);
+    if (d < bd) { bd = d; best = i; }
+  });
+  return (
+    <div className="seg wave">
+      {WAVES.map((w, i) =>
+        <button key={i} className={i === best ? "on" : ""}
+                onClick={() => { setM(w[1]); setPw(w[2]); }}>{w[0]}</button>)}
+    </div>
   );
 }
 
@@ -308,14 +353,15 @@ function FilterCurve() {
 }
 
 /* ============================ panels ============================ */
-function OscPanel({ n, accent }) {
+function OscPanel({ n }) {
   const p = "osc" + n;
   return (
-    <Panel title={"OSC " + n} accent={accent}>
+    <Panel title={"OSC " + n}>
       <div className="row">
         <Switch id={p + "On"} label="ON" />
         <Seg id={p + "Foot"} options={FOOTAGE} />
       </div>
+      <WaveSelect morphId={p + "Morph"} pwId={p + "Pw"} />
       <div className="knobs">
         <Knob id={p + "Morph"} label="MORPH" />
         <Knob id={p + "Pw"} label="PW" />
@@ -589,36 +635,50 @@ function TopBar() {
         <Seg id="quality" options={QUALITY} label="QUALITY" />
       </div>
       <VoiceLeds />
-      {browse && <Browser onClose={() => setBrowse(false)} />}
+      {browse && <Browser onClose={() => setBrowse(false)} current={preset.index} />}
       {saving && <SaveDialog onClose={() => setSaving(false)} cat={preset.category} />}
     </header>
   );
 }
 
-function Browser({ onClose }) {
+function Browser({ onClose, current }) {
   const [list, setList] = useState([]);
   const [cat, setCat] = useState(-1);
+  const [q, setQ] = useState("");
   useEffect(() => { B.nativeFn("listPresets")().then((r) => setList(r || [])); }, []);
   const load = B.nativeFn("loadPreset");
-  const shown = list.filter((e) => cat < 0 || e.category === cat);
+  const ql = q.trim().toLowerCase();
+  const inCat = (e) => cat === -2 ? !e.factory : (cat < 0 || e.category === cat);
+  const shown = list.filter((e) => inCat(e) && (!ql || e.name.toLowerCase().indexOf(ql) >= 0));
+  const userCount = list.filter((e) => !e.factory).length;
+  // factory index == MIDI program change (bank 0); shown 0-based to match the PC value
+  const pc = (e) => e.factory ? String(e.index).padStart(3, "0") : "U";
   return (
     <div className="modal" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-h"><b>PRESETS</b><button onClick={onClose}>{"✕"}</button></div>
+        <div className="sheet-h">
+          <b>PRESETS</b>
+          <input className="ti search" autoFocus placeholder="search…" value={q}
+                 onChange={(e) => setQ(e.target.value)} />
+          <button onClick={onClose}>{"✕"}</button>
+        </div>
         <div className="cats">
           <button className={cat < 0 ? "on" : ""} onClick={() => setCat(-1)}>ALL</button>
           {CATEGORIES.map((c, i) =>
             <button key={i} className={cat === i ? "on" : ""} onClick={() => setCat(i)}>{c}</button>)}
+          {userCount > 0 &&
+            <button className={"usercat" + (cat === -2 ? " on" : "")} onClick={() => setCat(-2)}>USER ({userCount})</button>}
         </div>
         <div className="plist">
           {shown.map((e) =>
-            <button key={e.index} className={"pitem" + (e.factory ? "" : " user")}
+            <button key={e.index} className={"pitem" + (e.index === current ? " sel" : "") + (e.factory ? "" : " user")}
                     onClick={() => { load(e.index); }}>
+              <span className="pi-num">{pc(e)}</span>
               <span className="pi-cat">{CATEGORIES[e.category]}</span>
               <span className="pi-nm">{e.name}</span>
-              {!e.factory && <span className="pi-tag">USER</span>}
             </button>)}
         </div>
+        <div className="sheet-f">{shown.length} presets · # = MIDI program change (bank 0)</div>
       </div>
     </div>
   );
@@ -634,9 +694,9 @@ function SaveDialog({ onClose, cat }) {
         <div className="sheet-h"><b>SAVE PRESET</b><button onClick={onClose}>{"✕"}</button></div>
         <input className="ti" autoFocus placeholder="patch name" value={name}
                onChange={(e) => setName(e.target.value)} />
-        <select className="sel" value={c} onChange={(e) => setC(+e.target.value)}>
-          {CATEGORIES.map((x, i) => <option key={i} value={i}>{x}</option>)}
-        </select>
+        <div className="sel-wrap" style={{ margin: "0 18px" }}>
+          <Dropdown idx={c} options={CATEGORIES} onPick={setC} />
+        </div>
         <button className="tbtn save" disabled={!name.trim()}
                 onClick={() => { save(name.trim(), c); onClose(); }}>SAVE</button>
       </div>
@@ -668,13 +728,13 @@ function App() {
       {/* all tabs stay mounted (relays stay bound); inactive ones are hidden */}
       <div className={cols("voice")}>
         <div className="col">
-          <OscPanel n={1} accent="#e07a7a" />
-          <OscPanel n={2} accent="#e0a05a" />
-          <OscPanel n={3} accent="#e0d05a" />
+          <OscPanel n={1} />
+          <OscPanel n={2} />
+          <OscPanel n={3} />
         </div>
         <div className="col">
-          <OscPanel n={4} accent="#c8d05a" />
-          <OscPanel n={5} accent="#9ad05a" />
+          <OscPanel n={4} />
+          <OscPanel n={5} />
         </div>
         <div className="col">
           <MixerPanel />
@@ -688,14 +748,14 @@ function App() {
 
       <div className={cols("mod")}>
         <div className="col">
-          <EnvPanel n={1} name="AMP ENV" accent="#7ad0a0" />
-          <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
-          <EnvPanel n={3} name="AUX ENV" accent="#5a9ae0" />
+          <EnvPanel n={1} name="AMP ENV" />
+          <EnvPanel n={2} name="FILTER ENV" />
+          <EnvPanel n={3} name="AUX ENV" />
         </div>
         <div className="col">
-          <LfoPanel n={1} accent="#c08ae0" />
-          <LfoPanel n={2} accent="#b07ae0" />
-          <LfoPanel n={3} accent="#a06ae0" />
+          <LfoPanel n={1} />
+          <LfoPanel n={2} />
+          <LfoPanel n={3} />
         </div>
         <div className="col modcol">
           <ModMatrix />
@@ -703,14 +763,10 @@ function App() {
       </div>
 
       <div className={cols("fx")}>
-        <div className="col">
-          <FxPanel />
-          <ArpPanel />
-        </div>
-        <div className="col">
-          <DelayPanel />
-          <ReverbPanel />
-        </div>
+        <div className="col"><FxPanel /></div>
+        <div className="col"><ArpPanel /></div>
+        <div className="col"><DelayPanel /></div>
+        <div className="col"><ReverbPanel /></div>
       </div>
 
       <footer className="foot">

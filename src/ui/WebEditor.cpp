@@ -80,15 +80,9 @@ ResourceTable& resourceTable()
 JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
     : juce::AudioProcessorEditor(&proc), processor(proc)
 {
-    // Lock the editor to the UI's design aspect ratio (1500x1000 = 3:2) so the
-    // host window is always the right shape and the WebView's scale-to-fit fills
-    // it edge-to-edge with no letterboxing.
     setResizable(true, true);
     if(auto* c = getConstrainer())
-    {
-        c->setFixedAspectRatio(1500.0 / 1000.0);
-        c->setSizeLimits(750, 500, 3000, 2000);
-    }
+        c->setSizeLimits(820, 520, 3200, 2000);
 
     auto& apvts = processor.getValueTreeState();
 

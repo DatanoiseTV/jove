@@ -42,6 +42,25 @@
     window.addEventListener('unhandledrejection', (e) => fail('rejection: ' + e.reason));
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('dragstart', (e) => e.preventDefault());
+    document.addEventListener('selectstart', (e) => {
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      e.preventDefault();
+    });
+    // Controls must not hold keyboard focus, so typing / computer-MIDI never
+    // changes a parameter. Buttons don't take focus on click; and if any
+    // non-text control somehow has focus, keys are neutralised (but keys pass
+    // through when nothing is focused, so host transport/MIDI still work).
+    document.addEventListener('mousedown', (e) => {
+      var b = e.target.closest && e.target.closest('button');
+      if (b) e.preventDefault();
+    }, true);
+    document.addEventListener('keydown', (e) => {
+      var a = document.activeElement;
+      if (!a) return;
+      if (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable) return;
+      if (a.tagName === 'BUTTON' || a.tagName === 'SELECT') { a.blur(); e.preventDefault(); }
+    }, true);
 
     /* Fit-to-window: scale the fixed 1440px-wide #app design canvas to fill
        whatever bounds the host gives us, centred, so the whole UI is always
@@ -51,29 +70,29 @@
        cheap watchdog for the case where JUCE sets WebView bounds from C++
        without bubbling a DOM resize event. */
     (function () {
-      var DW = 1500, DH = 1000, lastKey = '';   // fixed design canvas (jove.css #app)
+      var DW = 1500, lastKey = '';   // fixed design width; height is natural (per tab)
       function fit() {
         var el = document.getElementById('app'); if (!el) return;
         var w = window.innerWidth || document.documentElement.clientWidth;
         var h = window.innerHeight || document.documentElement.clientHeight;
-        if (!w || !h) return;
-        var s = Math.min(w / DW, h / DH);
-        var sw = DW * s, sh = DH * s;
-        el.style.transform = 'translate(' + ((w - sw) / 2) + 'px,' + ((h - sh) / 2) + 'px) scale(' + s + ')';
-        lastKey = w + 'x' + h;
+        var nh = el.offsetHeight; if (!w || !h || !nh) return;
+        var s = Math.min(w / DW, h / nh, 1.5);  // cap so sparse tabs don't blow up
+        var sw = DW * s, sh = nh * s;
+        el.style.transform = 'translate(' + Math.max(0, (w - sw) / 2) + 'px,' + Math.max(0, (h - sh) / 2) + 'px) scale(' + s + ')';
+        lastKey = w + 'x' + h + 'x' + nh;
       }
       window.addEventListener('resize', fit);
       window.addEventListener('load', fit);
       window.fitJove = fit;
       (function poll(n) {
         var el = document.getElementById('app');
-        if (el) { fit(); try { new ResizeObserver(fit).observe(document.body); } catch (_) {} return; }
+        if (el) { fit(); try { new ResizeObserver(fit).observe(el); } catch (_) {} return; }
         if (n > 0) setTimeout(function () { poll(n - 1); }, 30);
       })(120);
       setInterval(function () {
-        var w = window.innerWidth, h = window.innerHeight;
-        if (w + 'x' + h !== lastKey) fit();
-      }, 400);
+        var el = document.getElementById('app'); if (!el) return;
+        if (window.innerWidth + 'x' + window.innerHeight + 'x' + el.offsetHeight !== lastKey) fit();
+      }, 350);
     })();
   </script>
 
