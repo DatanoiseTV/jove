@@ -212,7 +212,7 @@ void pad_jp(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 4.8f); p.lfo[0].fade = 0.6f; p.lfo[0].delay = 0.3f;
     lfo(p, 1, LfoWave::Triangle, 0.15f);
     mod(p, 0, ModSource::EnvFilter, ModDest::Cutoff, 0.45f);
-    mod(p, 1, ModSource::Lfo1, ModDest::Pitch, 0.03f);
+    mod(p, 1, ModSource::Lfo1, ModDest::Pitch, 0.008f);
     mod(p, 2, ModSource::Lfo2, ModDest::Pw3, 0.30f);
     mod(p, 3, ModSource::Velocity, ModDest::EnvFltAmt, 0.35f);
     p.fxChorus = 0.34f; p.fxReverb = 0.36f;
@@ -299,8 +299,8 @@ void lead_sync(SynthPatch& p)
     p.env[1] = EnvParams{0.004f, 0.4f, 0.3f, 0.30f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.0f);  // vibrato
     mod(p, 0, ModSource::ModWheel, ModDest::Osc2Pitch, 0.60f);  // wheel sweeps sync pitch
-    mod(p, 1, ModSource::EnvFilter, ModDest::Osc2Pitch, 0.40f);
-    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.04f);
+    mod(p, 1, ModSource::EnvFilter, ModDest::Osc2Pitch, 0.12f);
+    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.010f);
     mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     p.fxDrive = 0.15f; p.driveMode = 1; p.fxDelay = 0.22f; p.fxReverb = 0.20f;
 }
@@ -314,7 +314,7 @@ void lead_soft(SynthPatch& p)
     filt(p, FilterMode::SvfLP, 0.70f, 0.08f, 0.20f);
     p.env[0] = EnvParams{0.04f, 0.4f, 0.9f, 0.4f, 0.1f};
     lfo(p, 0, LfoWave::Sine, 4.5f); p.lfo[0].fade = 0.6f; p.lfo[0].delay = 0.3f;  // delayed vibrato
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.05f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.012f);
     mod(p, 1, ModSource::ModWheel, ModDest::Lfo1Depth, 0.60f);
     mod(p, 2, ModSource::Aftertouch, ModDest::Cutoff, 0.30f);
     p.fxChorus = 0.20f; p.fxDelay = 0.18f; p.fxReverb = 0.28f;
@@ -347,7 +347,7 @@ void lead_pwm(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 0.6f); lfo(p, 1, LfoWave::Triangle, 4.0f);
     mod(p, 0, ModSource::Lfo1, ModDest::Pw1, 0.45f);   // classic PWM
     mod(p, 1, ModSource::Lfo1, ModDest::Pw2, 0.40f);
-    mod(p, 2, ModSource::Lfo2, ModDest::Pitch, 0.04f);
+    mod(p, 2, ModSource::Lfo2, ModDest::Pitch, 0.010f);
     mod(p, 3, ModSource::ModWheel, ModDest::Cutoff, 0.35f);
     p.fxChorus = 0.25f; p.fxDelay = 0.20f; p.fxReverb = 0.22f;
 }
@@ -362,7 +362,7 @@ void lead_saw(SynthPatch& p)
     p.env[0] = EnvParams{0.008f, 0.4f, 0.8f, 0.30f, 0.1f};
     p.env[1] = EnvParams{0.01f, 0.3f, 0.4f, 0.25f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.2f); p.lfo[0].delay = 0.25f; p.lfo[0].fade = 0.4f;
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.04f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.010f);
     mod(p, 1, ModSource::ModWheel, ModDest::Cutoff, 0.45f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     mod(p, 3, ModSource::Aftertouch, ModDest::Lfo1Depth, 0.50f);
@@ -380,7 +380,7 @@ void lead_square(SynthPatch& p)
     p.env[0] = EnvParams{0.006f, 0.3f, 0.85f, 0.25f, 0.1f};
     p.env[1] = EnvParams{0.006f, 0.25f, 0.4f, 0.20f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.0f); p.lfo[0].delay = 0.3f; p.lfo[0].fade = 0.5f;
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.05f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.012f);
     mod(p, 1, ModSource::ModWheel, ModDest::Cutoff, 0.40f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     p.fxDelay = 0.20f; p.fxReverb = 0.22f;
@@ -412,7 +412,7 @@ void lead_fifth(SynthPatch& p)
     p.env[0] = EnvParams{0.008f, 0.35f, 0.82f, 0.30f, 0.1f};
     p.env[1] = EnvParams{0.01f, 0.30f, 0.40f, 0.25f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.0f); p.lfo[0].delay = 0.3f; p.lfo[0].fade = 0.4f;
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.04f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.010f);
     mod(p, 1, ModSource::ModWheel, ModDest::Cutoff, 0.40f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     p.fxDrive = 0.18f; p.driveMode = 1; p.fxDelay = 0.20f; p.fxReverb = 0.26f;
@@ -430,7 +430,7 @@ void lead_dist(SynthPatch& p)
     p.env[0] = EnvParams{0.006f, 0.35f, 0.85f, 0.28f, 0.1f};
     p.env[1] = EnvParams{0.008f, 0.30f, 0.45f, 0.22f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.2f); p.lfo[0].delay = 0.25f; p.lfo[0].fade = 0.4f;
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.05f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.012f);
     mod(p, 1, ModSource::ModWheel, ModDest::FilterDrive, 0.50f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     p.fxDrive = 0.55f; p.driveMode = 4; p.driveTone = 0.25f;  // FUZZ
@@ -446,7 +446,7 @@ void lead_whistle(SynthPatch& p)
     filt(p, FilterMode::SvfLP, 0.82f, 0.06f, 0.10f);
     p.env[0] = EnvParams{0.03f, 0.3f, 0.95f, 0.30f, 0.1f};
     lfo(p, 0, LfoWave::Sine, 5.5f); p.lfo[0].delay = 0.4f; p.lfo[0].fade = 0.5f;  // delayed vibrato
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.06f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.015f);
     mod(p, 1, ModSource::ModWheel, ModDest::Lfo1Depth, 0.70f);
     mod(p, 2, ModSource::Aftertouch, ModDest::Pitch, 0.04f);
     p.fxChorus = 0.18f; p.fxDelay = 0.26f; p.fxReverb = 0.34f;
@@ -463,7 +463,7 @@ void lead_uni(SynthPatch& p)
     p.env[0] = EnvParams{0.01f, 0.4f, 0.85f, 0.35f, 0.1f};
     p.env[1] = EnvParams{0.02f, 0.35f, 0.45f, 0.28f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 5.0f); p.lfo[0].delay = 0.3f; p.lfo[0].fade = 0.4f;
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.04f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.010f);
     mod(p, 1, ModSource::ModWheel, ModDest::Cutoff, 0.45f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.30f);
     p.fxChorus = 0.25f; p.fxDelay = 0.22f; p.fxReverb = 0.26f;
@@ -803,7 +803,7 @@ void stab_rave(SynthPatch& p)
     mod(p, 0, ModSource::EnvFilter, ModDest::Cutoff, 0.45f);
     mod(p, 1, ModSource::ModWheel, ModDest::Osc2Pitch, 0.50f); // hoover pitch sweep
     mod(p, 2, ModSource::EnvAux, ModDest::Pitch, -0.10f);
-    mod(p, 3, ModSource::Lfo1, ModDest::Pitch, 0.05f);
+    mod(p, 3, ModSource::Lfo1, ModDest::Pitch, 0.012f);
     p.fxChorus = 0.35f; p.fxDelay = 0.20f; p.delaySync = true; p.delayDiv = 7; p.fxReverb = 0.30f;
 }
 void stab_brass(SynthPatch& p)
@@ -818,7 +818,7 @@ void stab_brass(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 5.0f); p.lfo[0].fade = 0.35f;
     mod(p, 0, ModSource::EnvFilter, ModDest::Cutoff, 0.55f);
     mod(p, 1, ModSource::Velocity, ModDest::EnvFltAmt, 0.40f);
-    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.03f);
+    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.008f);
     p.fxReverb = 0.30f; p.fxDelay = 0.12f;
 }
 void stab_organ(SynthPatch& p)
@@ -831,7 +831,7 @@ void stab_organ(SynthPatch& p)
     p.fxDrive = 0.30f; p.driveMode = 1; p.driveTone = 0.10f; // tube/leslie grit
     p.env[0] = EnvParams{0.003f, 0.10f, 0.90f, 0.12f, 0.10f};
     lfo(p, 0, LfoWave::Sine, 6.2f); // leslie
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.03f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.008f);
     mod(p, 1, ModSource::ModWheel, ModDest::Lfo1Rate, 0.50f);
     mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.20f);
     p.fxChorus = 0.32f; p.fxReverb = 0.24f;
@@ -1022,7 +1022,7 @@ void keys_organ(SynthPatch& p)
     p.fxDrive = 0.30f; p.driveMode = 1; p.driveTone = 0.10f; // tube/leslie grit
     p.env[0] = EnvParams{0.003f, 0.08f, 1.00f, 0.10f, 0.10f};
     lfo(p, 0, LfoWave::Sine, 6.5f); // leslie fast
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.03f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.008f);
     mod(p, 1, ModSource::ModWheel, ModDest::Lfo1Rate, 0.60f); // leslie speed
     mod(p, 2, ModSource::Aftertouch, ModDest::FilterDrive, 0.30f);
     p.fxChorus = 0.34f; p.fxReverb = 0.22f;
@@ -1066,7 +1066,7 @@ void keys_softkey(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 4.0f); p.lfo[0].fade = 0.50f; p.lfo[0].delay = 0.40f; // delayed vibrato
     mod(p, 0, ModSource::EnvFilter, ModDest::Cutoff, 0.28f);
     mod(p, 1, ModSource::Velocity, ModDest::Cutoff, 0.30f);
-    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.03f);
+    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.008f);
     p.fxChorus = 0.25f; p.fxReverb = 0.36f; p.fxDelay = 0.08f;
 }
 // ================================ PLUCK (6) ================================
@@ -1211,7 +1211,7 @@ void fx_riser(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 5.0f);
     mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 1.0f);
     mod(p, 1, ModSource::EnvAux, ModDest::Cutoff, 0.7f);
-    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.05f);
+    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.012f);
     mod(p, 3, ModSource::EnvAux, ModDest::Lfo1Rate, 2.0f);    // accelerating shimmer
     mod(p, 4, ModSource::EnvAux, ModDest::Resonance, 0.3f);
     p.fxReverb = 0.55f; p.fxDelay = 0.3f;
@@ -1646,7 +1646,7 @@ void amb_underwater(SynthPatch& p)
     p.env[0] = EnvParams{1.6f, 2.0f, 0.9f, 3.0f, 0.1f};
     lfo(p, 0, LfoWave::Sine, 0.12f); lfo(p, 1, LfoWave::Sine, 0.18f);
     mod(p, 0, ModSource::Lfo1, ModDest::Cutoff, 0.35f);
-    mod(p, 1, ModSource::Lfo2, ModDest::Pitch, 0.02f);
+    mod(p, 1, ModSource::Lfo2, ModDest::Pitch, 0.006f);
     mod(p, 2, ModSource::ModWheel, ModDest::Cutoff, 0.3f);
     p.fxReverb = 0.82f; p.fxDelay = 0.4f;
 }
@@ -1728,7 +1728,7 @@ void amb_tape(SynthPatch& p)
     filt(p, FilterMode::SvfLP, 0.5f, 0.12f, 0.18f);
     p.env[0] = EnvParams{1.4f, 1.8f, 0.88f, 3.0f, 0.15f};
     lfo(p, 0, LfoWave::Sine, 0.6f, 0.4f); lfo(p, 1, LfoWave::Triangle, 0.07f);
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.02f);
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.006f);
     mod(p, 1, ModSource::Lfo2, ModDest::Cutoff, 0.2f);
     mod(p, 2, ModSource::ModWheel, ModDest::Cutoff, 0.3f);
     p.fxChorus = 0.3f; p.fxReverb = 0.74f; p.fxDelay = 0.3f;
