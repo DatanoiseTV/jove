@@ -17,7 +17,9 @@ JoveAudioProcessor::JoveAudioProcessor()
 {
     binding.connect(apvts);
     presetManager.init(apvts, binding);
-    presetManager.setLoadCallback([this] { panicPending.store(true, std::memory_order_relaxed); });
+    // NB: loading a preset does NOT kill held notes — held voices morph to the
+    // new patch so presets can be auditioned live on a sustained note. (CC123 /
+    // host all-notes-off still panic via engine.allNotesOff directly.)
     InitDefaultPatch(patch);
     apvts.addParameterListener(jID::quality, this);
 }
