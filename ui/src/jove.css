@@ -115,7 +115,10 @@ button, select, input { font-family: inherit; color: inherit; }
 /* panels stretch to fill their grid cell; body spreads content top-to-bottom */
 .oscrow > .panel, .botband > .panel { min-height: 0; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
-.botband .pbody { flex: 1; justify-content: center; gap: 10px; }
+/* safe center: keeps panel content vertically centred when it fits, but falls
+   back to top-aligned + scrollable when it overflows (e.g. FILTER with the dual
+   filter 2 section shown) so nothing is clipped by the fixed-height band row. */
+.botband .pbody { flex: 1; justify-content: safe center; gap: 10px; overflow-y: auto; }
 .row.between { width: 100%; justify-content: space-between; }
 .knobs.spread { justify-content: space-between; }
 /* LFO controls: one non-wrapping row of small knobs so the synced DIV dropdown
