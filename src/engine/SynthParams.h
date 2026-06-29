@@ -264,6 +264,12 @@ struct SynthPatch
     float filterDrive = 0.0f;
     float keyTrack   = 0.5f;  // 0..1 (1 = full keyboard tracking)
     float envFilterAmt = 0.4f; // filter-env -> cutoff depth (bipolar via UI)
+    int   filterRouting = 0;   // 0 single, 1 serial, 2 parallel
+    int   filter2Mode   = 1;   // FilterMode
+    float filter2Cutoff = 0.6f;
+    float filter2Reso   = 0.1f;
+    float filter2Drive  = 0.0f;
+    float filter2EnvAmt = 0.0f;
 
     // amp
     float ampGain  = 0.8f;

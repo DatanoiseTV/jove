@@ -115,7 +115,7 @@ button, select, input { font-family: inherit; color: inherit; }
 /* panels stretch to fill their grid cell; body spreads content top-to-bottom */
 .oscrow > .panel, .botband > .panel { min-height: 0; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
-.botband .pbody { flex: 1; justify-content: center; gap: 16px; }
+.botband .pbody { flex: 1; justify-content: center; gap: 10px; }
 .row.between { width: 100%; justify-content: space-between; }
 .knobs.spread { justify-content: space-between; }
 /* LFO controls: one non-wrapping row of small knobs so the synced DIV dropdown
@@ -280,7 +280,9 @@ button, select, input { font-family: inherit; color: inherit; }
 .hzscale span { position: absolute; top: 0; transform: translateX(-50%); font-size: 7px;
   color: var(--ink3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .hzscale .hzcur { color: var(--accent); font-weight: 700; }
-.botband .viz.filter { height: 88px; }   /* hero filter graph fills the panel */
+/* second filter section (serial/parallel) */
+.flt2 { display: flex; flex-direction: column; gap: 7px; border-top: 1px solid var(--line); padding-top: 7px; }
+.botband .viz.filter { height: 62px; }   /* hero filter graph (compact for dual-filter room) */
 .viz polyline { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .viz.env .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
 .viz.scope .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }

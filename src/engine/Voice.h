@@ -67,6 +67,7 @@ class Voice
         }
         sub_.prepare(sampleRate);
         filter_.prepare(sampleRate);
+        filter2_.prepare(sampleRate);
         env_[0].prepare(sampleRate);
         env_[1].prepare(sampleRate);
         env_[2].prepare(sampleRate);
@@ -86,6 +87,7 @@ class Voice
         filtSmInit_ = false;
         sub_.reset();
         filter_.reset();
+        filter2_.reset();
         for(int i = 0; i < kNumEnv; ++i)
             env_[i].reset();
         active_  = false;
@@ -204,6 +206,7 @@ class Voice
         }
 
         filter_.setMode((VoiceFilter::Mode)p.filterMode);
+        filter2_.setMode((VoiceFilter::Mode)p.filter2Mode);
 
         // velocity -> amp depth per env0 setting
         const float ampVelo = 1.0f - p.env[0].velToLevel * (1.0f - vel_);
@@ -286,6 +289,14 @@ class Voice
         const float res        = clamp01(p.resonance + m.resAdd);
         const float fdrive     = clamp01(p.filterDrive + m.driveAdd);
 
+        // second filter (serial / parallel routing). Shares the filter envelope
+        // (its own depth) and key tracking; the matrix mods only the main filter.
+        const int   routing    = p.filterRouting;
+        const float base2CutHz = cutoffHz(p.filter2Cutoff) * std::exp2(keyOffset);
+        const float fenv2Depth = clamp01(p.filter2EnvAmt) * 6.0f;
+        const float res2       = clamp01(p.filter2Reso);
+        const float fdrive2    = clamp01(p.filter2Drive);
+
         // pan (equal-power), constant for the block
         float pan = basePan_ + p.pan + m.panAdd;
         pan = pan < -1.0f ? -1.0f : (pan > 1.0f ? 1.0f : pan);
@@ -306,13 +317,26 @@ class Voice
             // control-rate targets (base cutoff, resonance, drive) are de-zippered
             // with a ~6 ms one-pole so moving Cutoff/Reso/Drive is click-free.
             {
-                if(!filtSmInit_) { cutSm_ = baseCutHz; resSm_ = res; drvSm_ = fdrive; filtSmInit_ = true; }
+                if(!filtSmInit_)
+                {
+                    cutSm_ = baseCutHz; resSm_ = res; drvSm_ = fdrive;
+                    cut2Sm_ = base2CutHz; res2Sm_ = res2; drv2Sm_ = fdrive2;
+                    filtSmInit_ = true;
+                }
                 constexpr float sc = 0.0025f;
                 cutSm_ += sc * (baseCutHz - cutSm_);
                 resSm_ += sc * (res - resSm_);
                 drvSm_ += sc * (fdrive - drvSm_);
                 const float cutHz = cutSm_ * std::exp2(modCutOct + fenvDepth * fltEnv);
                 filter_.setParams(cutHz, resSm_, drvSm_);
+                if(routing != 0)
+                {
+                    cut2Sm_ += sc * (base2CutHz - cut2Sm_);
+                    res2Sm_ += sc * (res2 - res2Sm_);
+                    drv2Sm_ += sc * (fdrive2 - drv2Sm_);
+                    const float cut2Hz = cut2Sm_ * std::exp2(modCutOct + fenv2Depth * fltEnv);
+                    filter2_.setParams(cut2Hz, res2Sm_, drv2Sm_);
+                }
             }
 
             // sample-rate reduction (decimate) then bit-crush, per oscillator
@@ -360,6 +384,8 @@ class Voice
                 voice += (o1 * o2 - o1 * g1) * ringG; // crossfade osc1 -> ring product
 
             float fout = filter_.process(voice);
+            if(routing == 1)        fout = filter2_.process(fout);                  // serial
+            else if(routing == 2)   fout = 0.5f * (fout + filter2_.process(voice)); // parallel
 
             float g = ampEnv * ampBase;
             ampSmooth_ += 0.25f * (g - ampSmooth_); // de-zipper block-rate gain
@@ -424,6 +450,8 @@ class Voice
     bool         filtSmInit_ = false;
     BlepOsc     sub_;
     VoiceFilter filter_;
+    VoiceFilter filter2_;
+    float       cut2Sm_ = 0.0f, res2Sm_ = 0.0f, drv2Sm_ = 0.0f;
     AdsrEnv     env_[kNumEnv];
 
     float    sr_        = 48000.0f;

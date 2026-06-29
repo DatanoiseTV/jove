@@ -671,16 +671,36 @@ function MixerPanel() {
 function FilterPanel() {
   return (
     <Panel title="FILTER" accent="#5ad0e0">
-      <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
-      <FilterCurve />
-      <div className="knobs">
-        <Knob id="cutoff" label="CUTOFF" big />
-        <Knob id="resonance" label="RESO" big />
-        <Knob id="envFilterAmt" label="ENV>CUT" />
-        <Knob id="filterDrive" label="DRIVE" />
-        <Knob id="keyTrack" label="KEYTRK" />
+      <div className="row between">
+        <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
+        <Seg id="filterRouting" options={["SINGLE", "SER", "PAR"]} label="ROUTING" />
       </div>
+      <FilterCurve />
+      <div className="knobs spread">
+        <Knob id="cutoff" label="CUTOFF" small />
+        <Knob id="resonance" label="RESO" small />
+        <Knob id="envFilterAmt" label="ENV>CUT" small />
+        <Knob id="filterDrive" label="DRIVE" small />
+        <Knob id="keyTrack" label="KEYTRK" small />
+      </div>
+      <FilterTwo />
     </Panel>
+  );
+}
+
+function FilterTwo() {
+  const [routing] = B.useChoice("filterRouting");
+  if (routing === 0) return null; // single filter -> hide the 2nd
+  return (
+    <div className="flt2">
+      <Seg id="filter2Mode" options={FILTER_MODES} label={"FILTER 2 · " + (routing === 1 ? "SERIES" : "PARALLEL")} />
+      <div className="knobs spread">
+        <Knob id="filter2Cutoff" label="CUTOFF" small />
+        <Knob id="filter2Reso" label="RESO" small />
+        <Knob id="filter2EnvAmt" label="ENV>CUT" small />
+        <Knob id="filter2Drive" label="DRIVE" small />
+      </div>
+    </div>
   );
 }
 

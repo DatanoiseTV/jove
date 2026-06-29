@@ -64,6 +64,12 @@ namespace jID
     inline constexpr auto filterDrive  = "filterDrive";
     inline constexpr auto keyTrack     = "keyTrack";
     inline constexpr auto envFilterAmt = "envFilterAmt";
+    inline constexpr auto filterRouting = "filterRouting"; // single / serial / parallel
+    inline constexpr auto filter2Mode   = "filter2Mode";
+    inline constexpr auto filter2Cutoff = "filter2Cutoff";
+    inline constexpr auto filter2Reso   = "filter2Reso";
+    inline constexpr auto filter2Drive  = "filter2Drive";
+    inline constexpr auto filter2EnvAmt = "filter2EnvAmt";
 
     // arp
     inline constexpr auto arpOn      = "arpOn";
@@ -219,6 +225,12 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::filterDrive, "Filter Drive", lin01, 0.0f);
     fparam(jID::keyTrack, "Key Track", lin01, 0.5f);
     fparam(jID::envFilterAmt, "Env > Cutoff", lin01, 0.4f);
+    cparam(jID::filterRouting, "Filter Routing", {"SINGLE", "SERIAL", "PARALLEL"}, 0);
+    cparam(jID::filter2Mode, "Filter 2 Mode", namesToArray(kFilterModeNames, (int)FilterMode::Count), 1);
+    fparam(jID::filter2Cutoff, "Filter 2 Cutoff", lin01, 0.6f);
+    fparam(jID::filter2Reso, "Filter 2 Resonance", lin01, 0.1f);
+    fparam(jID::filter2Drive, "Filter 2 Drive", lin01, 0.0f);
+    fparam(jID::filter2EnvAmt, "Filter 2 Env > Cutoff", lin01, 0.0f);
 
     // ---- envelopes (0 amp, 1 filter, 2 aux) ----
     for(int i = 0; i < kNumEnv; ++i)
@@ -363,6 +375,12 @@ class PatchBinding
         p.filterDrive  = get(filterDrive);
         p.keyTrack     = get(keyTrack);
         p.envFilterAmt = get(envFilterAmt);
+        p.filterRouting = (int) get(filterRouting);
+        p.filter2Mode   = (int) get(filter2Mode);
+        p.filter2Cutoff = get(filter2Cutoff);
+        p.filter2Reso   = get(filter2Reso);
+        p.filter2Drive  = get(filter2Drive);
+        p.filter2EnvAmt = get(filter2EnvAmt);
 
         for(int i = 0; i < kNumEnv; ++i)
         {
@@ -475,6 +493,12 @@ class PatchBinding
         set(filterDrive, p.filterDrive);
         set(keyTrack, p.keyTrack);
         set(envFilterAmt, p.envFilterAmt);
+        set(filterRouting, (float) p.filterRouting);
+        set(filter2Mode, (float) p.filter2Mode);
+        set(filter2Cutoff, p.filter2Cutoff);
+        set(filter2Reso, p.filter2Reso);
+        set(filter2Drive, p.filter2Drive);
+        set(filter2EnvAmt, p.filter2EnvAmt);
 
         for(int i = 0; i < kNumEnv; ++i)
         {
