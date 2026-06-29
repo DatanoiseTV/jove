@@ -34,10 +34,13 @@ const MOD_SCALE = 0.25; // visual: mod amount 1.0 -> a quarter of the knob's tra
 
 const ModContext = React.createContext({ map: {}, lfo: [0, 0, 0], src: [] });
 
-/* Read all 10 mod slots and build paramId -> [{src, amt}] for the indicators. */
+/* Read ALL 32 mod slots and build paramId -> [{src, amt}] for the indicators
+   and the live oscilloscope mod. (Was 10 — any route in a higher slot, which is
+   where preset routes commonly land, never reached the knob arcs or the osc
+   scope, so waveforms looked static under modulation.) */
 function useModMap() {
   const slots = [];
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 32; i++) {
     const [src] = B.useChoice("mod" + i + "Src");
     const [dst] = B.useChoice("mod" + i + "Dst");
     const [amtN] = B.useSlider("mod" + i + "Amt"); // 0..1 of the -2..+2 range
