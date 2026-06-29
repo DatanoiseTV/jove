@@ -146,6 +146,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .modcol > .panel { flex: 1 1 0; min-height: 0; }
 .modcol .pbody { flex: 1; min-height: 0; }
 .modcol .modgrid { flex: 1; min-height: 0; justify-content: space-between; }
+/* FX·ARP tab: a clean 3x2 grid of equal panels */
+.fxtab { display: flex; flex: 1; min-height: 0; }
+.fxtab.hide { display: none; }
+.fxgrid { flex: 1; min-height: 0; display: grid;
+  grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; }
+.fxgrid > .panel { min-height: 0; }
+.fxgrid .pbody { flex: 1; justify-content: center; gap: 16px; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;

@@ -14,7 +14,7 @@ const ARP_MODES   =["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV"
 const DIVISIONS   = ["1/64","1/32T","1/32","1/16T","1/16","1/8T","1/16.","1/8","1/4T","1/8.","1/4","1/4.","1/2"];
 const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE"];
 const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE"];
-const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble"];
+const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble", "Combine"];
 const QUALITY     = ["Eco", "HQ", "Ultra"];
 const CATEGORIES  = ["PAD","LEAD","BASS","ARP","STAB","KEYS","PLUCK","FX","DRONE","PERC","AMB","SEQ"];
 
@@ -633,15 +633,39 @@ function ArpPanel() {
   );
 }
 
-function FxPanel() {
+function DrivePanel() {
   return (
-    <Panel title="DRIVE / CHORUS / PHASER" accent="#8ae0a8">
-      <div className="knobs">
-        <Knob id="fxDrive" label="DRIVE" />
-        <Knob id="fxChorus" label="CHORUS" />
-        <Knob id="fxPhaser" label="PHASER" />
+    <Panel title="DRIVE">
+      <div className="knobs spread">
+        <Knob id="fxDrive" label="DRIVE" big />
+        <Knob id="driveTone" label="TONE" bipolar big />
       </div>
-      <Seg id="chorusMode" options={CHORUS_MODES} label="CHORUS MODE" />
+    </Panel>
+  );
+}
+
+function ChorusPanel() {
+  return (
+    <Panel title="CHORUS">
+      <div className="knobs spread">
+        <Knob id="fxChorus" label="MIX" />
+        <Knob id="chorusRate" label="RATE" />
+        <Knob id="chorusDepth" label="DEPTH" />
+      </div>
+      <Sel id="chorusMode" options={CHORUS_MODES} label="MODE" />
+    </Panel>
+  );
+}
+
+function PhaserPanel() {
+  return (
+    <Panel title="PHASER">
+      <div className="knobs spread">
+        <Knob id="fxPhaser" label="MIX" />
+        <Knob id="phaserRate" label="RATE" />
+        <Knob id="phaserDepth" label="DEPTH" />
+        <Knob id="phaserFeedback" label="FBK" />
+      </div>
     </Panel>
   );
 }
@@ -839,7 +863,7 @@ function SaveDialog({ onClose, cat }) {
 }
 
 /* ============================ app ============================ */
-const TABS = [["voice", "VOICE"], ["modfx", "MOD · FX · ARP"]];
+const TABS = [["voice", "VOICE"], ["mod", "MOD"], ["fx", "FX · ARP"]];
 
 function App() {
   const modMap = useModMap();
@@ -879,7 +903,7 @@ function App() {
         </div>
       </div>
 
-      <div className={"modtab" + (tab === "modfx" ? "" : " hide")}>
+      <div className={"modtab" + (tab === "mod" ? "" : " hide")}>
         {/* envelopes + LFOs on a 2x3 grid so each row's pair aligns exactly */}
         <div className="modgrid2">
           <EnvPanel n={1} name="AMP ENV" />
@@ -889,14 +913,19 @@ function App() {
           <EnvPanel n={3} name="AUX ENV" />
           <LfoPanel n={3} />
         </div>
-        <div className="col fxcol">
-          <FxPanel />
+        <div className="col modcol">
+          <ModMatrix />
+        </div>
+      </div>
+
+      <div className={"fxtab" + (tab === "fx" ? "" : " hide")}>
+        <div className="fxgrid">
+          <DrivePanel />
+          <ChorusPanel />
+          <PhaserPanel />
           <DelayPanel />
           <ReverbPanel />
           <ArpPanel />
-        </div>
-        <div className="col modcol">
-          <ModMatrix />
         </div>
       </div>
 
