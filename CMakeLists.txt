@@ -123,6 +123,24 @@ if(JOVE_TESTS)
         juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
     add_test(NAME param_roundtrip COMMAND jove_param_roundtrip)
 
+    # Dump every factory preset's live parameter values to JSON (drives the
+    # demo-video UI harness so each patch screenshot shows the real plugin UI).
+    juce_add_console_app(jove_preset_dump PRODUCT_NAME "jove_preset_dump")
+    juce_generate_juce_header(jove_preset_dump)
+    target_sources(jove_preset_dump PRIVATE
+        tests/preset_dump.cpp
+        src/PluginProcessor.cpp
+        src/ui/WebEditor.cpp
+        src/engine/SynthEngine.cpp
+        src/engine/SynthPresets.cpp
+        src/presets/PresetManager.cpp)
+    target_include_directories(jove_preset_dump PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_compile_definitions(jove_preset_dump PRIVATE
+        JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
+    target_link_libraries(jove_preset_dump PRIVATE
+        JoveUI juce::juce_audio_utils juce::juce_dsp juce::juce_gui_extra
+        juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+
     # JUCE-free engine + preset audit (no NaN/clip/silence/stuck-voice).
     add_executable(jove_engine_audit tests/engine_audit.cpp
         src/engine/SynthEngine.cpp src/engine/SynthPresets.cpp)
