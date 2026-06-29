@@ -310,6 +310,33 @@ function LfoWaveSelect({ id }) {
 }
 
 /* ============================ visualizers ============================ */
+/* Live oscillator shape from morph + pulse width (sine->tri->saw->pulse),
+   so each oscillator card shows what it actually produces. */
+function oscShape(m, pw, t) {
+  t = t - Math.floor(t);
+  const sine = Math.sin(2 * Math.PI * t);
+  const tri = t < 0.5 ? 4 * t - 1 : 3 - 4 * t;
+  const saw = 2 * t - 1;
+  const pulse = t < (pw || 0.3) ? 1 : -1;
+  const lerp = (a, b, x) => a + (b - a) * x;
+  if (m < 0.25) return lerp(sine, tri, m / 0.25);
+  if (m < 0.5) return lerp(tri, saw, (m - 0.25) / 0.25);
+  return lerp(saw, pulse, (m - 0.5) / 0.5);
+}
+function OscWave({ morphId, pwId, on }) {
+  const m = B.useSlider(morphId)[0];
+  const pw = B.useSlider(pwId)[0];
+  const W = 160, H = 40, cy = H / 2, amp = H / 2 - 3, N = 96, cyc = 2;
+  const pts = [];
+  for (let i = 0; i <= N; i++) { const t = (i / N) * cyc; pts.push(((i / N) * W).toFixed(1) + "," + (cy - oscShape(m, pw, t) * amp).toFixed(1)); }
+  return (
+    <svg className={"viz oscwave" + (on ? "" : " off")} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <line x1="0" y1={cy} x2={W} y2={cy} className="mid" />
+      <polyline points={pts.join(" ")} />
+    </svg>
+  );
+}
+
 function EnvViz({ n }) {
   // Use REAL engineering values, not the skewed 0..1 normals: A/D/R in seconds,
   // S as a 0..1 level. Segment widths are sqrt-compressed seconds so a long
@@ -425,14 +452,16 @@ function FilterCurve() {
 /* ============================ panels ============================ */
 function OscPanel({ n }) {
   const p = "osc" + n;
+  const [on] = B.useToggle(p + "On");
   return (
     <Panel title={"OSC " + n}>
-      <div className="row">
+      <div className="row between">
         <Switch id={p + "On"} label="ON" />
         <Seg id={p + "Foot"} options={FOOTAGE} />
       </div>
       <WaveSelect morphId={p + "Morph"} pwId={p + "Pw"} />
-      <div className="knobs">
+      <OscWave morphId={p + "Morph"} pwId={p + "Pw"} on={on} />
+      <div className="knobs spread">
         <Knob id={p + "Morph"} label="MORPH" />
         <Knob id={p + "Pw"} label="PW" />
         <Knob id={p + "Detune"} label="DETUNE" bipolar />
@@ -796,41 +825,36 @@ function App() {
       </nav>
 
       {/* all tabs stay mounted (relays stay bound); inactive ones are hidden */}
-      <div className={cols("voice")}>
-        <div className="oscgroup">
-          <div className="group-label">OSCILLATORS</div>
-          <div className="group-cols">
-            <div className="col">
-              <OscPanel n={1} />
-              <OscPanel n={2} />
-              <OscPanel n={3} />
-            </div>
-            <div className="col">
-              <OscPanel n={4} />
-              <OscPanel n={5} />
-              <MixerPanel />
-            </div>
+      <div className={"voicetab" + (tab === "voice" ? "" : " hide")}>
+        <section className="band oscband">
+          <header className="band-h">OSCILLATORS</header>
+          <div className="oscrow">
+            <OscPanel n={1} />
+            <OscPanel n={2} />
+            <OscPanel n={3} />
+            <OscPanel n={4} />
+            <OscPanel n={5} />
           </div>
-        </div>
-        <div className="col">
+        </section>
+        <div className="band botband">
+          <MixerPanel />
           <FilterPanel />
           <VoicingPanel />
           <MasterPanel />
         </div>
       </div>
 
-      <div className={cols("modfx")}>
-        <div className="col">
+      <div className={"modtab" + (tab === "modfx" ? "" : " hide")}>
+        {/* envelopes + LFOs on a 2x3 grid so each row's pair aligns exactly */}
+        <div className="modgrid2">
           <EnvPanel n={1} name="AMP ENV" />
-          <EnvPanel n={2} name="FILTER ENV" />
-          <EnvPanel n={3} name="AUX ENV" />
-        </div>
-        <div className="col">
           <LfoPanel n={1} />
+          <EnvPanel n={2} name="FILTER ENV" />
           <LfoPanel n={2} />
+          <EnvPanel n={3} name="AUX ENV" />
           <LfoPanel n={3} />
         </div>
-        <div className="col">
+        <div className="col fxcol">
           <FxPanel />
           <DelayPanel />
           <ReverbPanel />

@@ -100,14 +100,41 @@ button, select, input { font-family: inherit; color: inherit; }
 .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .modcol { flex: 1.35 1 0; }
 
-/* oscillator group: the 5 oscillators + their source mixer fenced into one
-   labelled region so they read as a single section (signal sources) */
-.oscgroup { flex: 2 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+/* ---- VOICE tab: two aligned horizontal bands on a strict grid ----
+   Equal grid cells guarantee alignment and fill the canvas (no dead zones). */
+.voicetab { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+.voicetab.hide { display: none; }
+.band { min-height: 0; }
+.band-h { font-size: 9px; letter-spacing: 3px; font-weight: 700; color: var(--ink3); padding: 0 4px 1px; }
+/* oscillator band: 5 identical cards fenced into one labelled section */
+.oscband { flex: 1.16 1 0; display: flex; flex-direction: column; gap: 8px;
   border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px 10px;
   background: rgba(255, 255, 255, 0.012); }
-.group-label { font-size: 9px; letter-spacing: 3px; font-weight: 700; color: var(--ink3);
-  padding: 1px 4px 2px; }
-.group-cols { display: flex; gap: 12px; flex: 1; min-width: 0; }
+.oscrow { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.botband { flex: 0.84 1 0; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+/* panels stretch to fill their grid cell; body spreads content top-to-bottom */
+.oscrow > .panel, .botband > .panel { min-height: 0; }
+.oscrow .pbody { flex: 1; justify-content: space-between; }
+.botband .pbody { flex: 1; justify-content: center; gap: 16px; }
+.row.between { width: 100%; justify-content: space-between; }
+.knobs.spread { justify-content: space-between; }
+
+/* ---- MOD tab: aligned env/LFO grid + stretched FX column + wide matrix ---- */
+.modtab { display: flex; gap: 12px; flex: 1; min-height: 0; }
+.modtab.hide { display: none; }
+.modgrid2 { flex: 2.25 1 0; min-height: 0; display: grid;
+  grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 12px; }
+.modgrid2 > .panel { min-height: 0; }
+.modgrid2 .pbody { flex: 1; justify-content: space-between; }
+.modgrid2 .viz.env { height: 64px; }          /* envelope graph fills the cell */
+.fxcol { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column;
+  justify-content: space-between; gap: 12px; }
+.fxcol > .panel { flex: 0 0 auto; min-height: 0; }
+.fxcol .pbody { gap: 12px; }
+/* mod matrix fills its column; the 10 rows distribute to the full height */
+.modcol > .panel { flex: 1 1 0; min-height: 0; }
+.modcol .pbody { flex: 1; min-height: 0; }
+.modcol .modgrid { flex: 1; min-height: 0; justify-content: space-between; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
@@ -214,6 +241,9 @@ button, select, input { font-family: inherit; color: inherit; }
 .viz.env { height: 38px; }
 .viz.scope { height: 30px; }
 .viz.filter { height: 46px; }
+.viz.oscwave { height: 40px; }
+.viz.oscwave.off { opacity: .3; }
+.botband .viz.filter { height: 88px; }   /* hero filter graph fills the panel */
 .viz polyline { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .viz.env .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
 .viz.scope .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }
