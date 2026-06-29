@@ -9,7 +9,7 @@ const VOICE_MODES = ["POLY", "MONO", "UNISON"];
 const GLIDE_MODES = ["OFF", "ON", "LEGATO"];
 const FOOTAGE     = ["32'", "16'", "8'", "4'", "2'"];
 const SYNC_MODES  = ["OFF", "SOFT", "HARD"];
-const FILTER_MODES= ["MOOG", "LP", "HP", "BP", "NOTCH"];
+const FILTER_MODES= ["MOOG", "LP", "HP", "BP", "NOTCH", "LPG", "STEINER"];
 const ARP_MODES   =["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV","CON-DIV","ASPLAYED","RANDOM","CHORD"];
 const DIVISIONS   = ["1/64","1/32T","1/32","1/16T","1/16","1/8T","1/16.","1/8","1/4T","1/8.","1/4","1/4.","1/2"];
 const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE"];
@@ -326,11 +326,13 @@ function oscShape(m, pw, t) {
 function OscWave({ morphId, pwId, on }) {
   const m = B.useSlider(morphId)[0];
   const pw = B.useSlider(pwId)[0];
-  const W = 160, H = 40, cy = H / 2, amp = H / 2 - 3, N = 96, cyc = 2;
+  const W = 160, H = 54, cy = H / 2, amp = H / 2 - 4, N = 128, cyc = 2;
   const pts = [];
   for (let i = 0; i <= N; i++) { const t = (i / N) * cyc; pts.push(((i / N) * W).toFixed(1) + "," + (cy - oscShape(m, pw, t) * amp).toFixed(1)); }
+  const grid = [0.25, 0.5, 0.75].map((f) => (f * W).toFixed(1));
   return (
     <svg className={"viz oscwave" + (on ? "" : " off")} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      {grid.map((x, i) => <line key={i} x1={x} y1="0" x2={x} y2={H} className="grid" />)}
       <line x1="0" y1={cy} x2={W} y2={cy} className="mid" />
       <polyline points={pts.join(" ")} />
     </svg>
@@ -443,6 +445,7 @@ function FilterCurve() {
   const fcx = (Math.log2(fc) - fmin) / (fmax - fmin) * W;
   return (
     <svg className="viz filter" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <polygon className="fillz" points={`0,${H} ${pts.join(" ")} ${W},${H}`} />
       <polyline points={pts.join(" ")} />
       <line x1={fcx.toFixed(1)} y1="0" x2={fcx.toFixed(1)} y2={H} className="mark" />
     </svg>
@@ -465,7 +468,7 @@ function OscPanel({ n }) {
         <Knob id={p + "Morph"} label="MORPH" />
         <Knob id={p + "Pw"} label="PW" />
         <Knob id={p + "Detune"} label="DETUNE" bipolar />
-        <Knob id={p + "Level"} label="LEVEL" />
+        <Knob id={p + "Crush"} label="CRUSH" />
       </div>
     </Panel>
   );
@@ -473,15 +476,24 @@ function OscPanel({ n }) {
 
 function MixerPanel() {
   return (
-    <Panel title="MIXER / SOURCES" accent="#e0a05a">
-      <div className="knobs">
-        <Knob id="oscMix" label="OSC1-2" bipolar />
+    <Panel title="MIXER / SOURCES">
+      <div className="cl">OSCILLATOR LEVELS</div>
+      <div className="knobs spread">
+        <Knob id="osc1Level" label="OSC 1" />
+        <Knob id="osc2Level" label="OSC 2" />
+        <Knob id="osc3Level" label="OSC 3" />
+        <Knob id="osc4Level" label="OSC 4" />
+        <Knob id="osc5Level" label="OSC 5" />
+      </div>
+      <div className="cl">SUB · NOISE · RING · FM · BALANCE</div>
+      <div className="knobs spread">
         <Knob id="subLevel" label="SUB" />
         <Knob id="noiseLevel" label="NOISE" />
         <Knob id="ringMod" label="RING" />
         <Knob id="fm2to1" label="FM 2>1" />
+        <Knob id="oscMix" label="1·2 BAL" bipolar />
       </div>
-      <div className="row">
+      <div className="row between">
         <Seg id="subOctave" options={["-1", "-2"]} label="SUB OCT" />
         <Seg id="sync2Mode" options={SYNC_MODES} label="O2 SYNC" />
         <Seg id="sync3Mode" options={SYNC_MODES} label="O3 SYNC" />
@@ -650,21 +662,25 @@ function ReverbPanel() {
 
 function VoicingPanel() {
   const [mode] = B.useChoice("voiceMode");
+  const uni = mode === 2;
   return (
-    <Panel title="VOICING" accent="#9aa6e0">
-      <div className="row">
+    <Panel title="VOICING">
+      <div className="row between">
         <Seg id="voiceMode" options={VOICE_MODES} label="MODE" />
         <IntPick id="maxVoices" label="MAX POLY" min={1} max={16} />
       </div>
-      <div className="knobs">
+      <div className="knobs spread">
         <Knob id="glideTime" label="GLIDE" />
         <Knob id="drift" label="DRIFT" />
-        {mode === 2 && <Knob id="unisonDetune" label="UNI DET" />}
-        {mode === 2 && <Knob id="unisonSpread" label="UNI SPR" />}
+        <Knob id="bendRange" label="BEND" />
       </div>
-      <div className="row">
-        <Seg id="glideMode" options={GLIDE_MODES} label="GLIDE" />
-        {mode === 2 && <IntSeg id="unisonCount" label="UNISON" min={1} max={7} />}
+      <div className={"knobs spread uni" + (uni ? "" : " dim")}>
+        <Knob id="unisonDetune" label="UNI DET" />
+        <Knob id="unisonSpread" label="UNI SPR" />
+        <IntSeg id="unisonCount" label="VOICES" min={1} max={7} />
+      </div>
+      <div className="row between">
+        <Seg id="glideMode" options={GLIDE_MODES} label="GLIDE MODE" />
       </div>
     </Panel>
   );
@@ -672,18 +688,20 @@ function VoicingPanel() {
 
 function MasterPanel() {
   const meters = B.useEvent("meters", { outL: 0, outR: 0 });
-  const bar = (x) => Math.max(0, Math.min(1, x)) * 100;
+  const bar = (x) => Math.max(0, Math.min(1, Math.sqrt(x))) * 100; // perceptual
   return (
-    <Panel title="MASTER" accent="#d8dee9">
-      <div className="knobs">
+    <Panel title="MASTER">
+      <div className="knobs spread">
         <Knob id="ampGain" label="LEVEL" big />
         <Knob id="width" label="WIDTH" />
         <Knob id="pan" label="PAN" bipolar />
-        <Knob id="bendRange" label="BEND" />
+        <Knob id="masterTune" label="TUNE" bipolar />
       </div>
       <div className="vu">
-        <div className="vu-bar"><i style={{ width: bar(meters.outL) + "%" }} /></div>
-        <div className="vu-bar"><i style={{ width: bar(meters.outR) + "%" }} /></div>
+        <div className="vu-row"><span className="vu-l">L</span>
+          <div className="vu-bar"><i style={{ width: bar(meters.outL) + "%" }} /></div></div>
+        <div className="vu-row"><span className="vu-l">R</span>
+          <div className="vu-bar"><i style={{ width: bar(meters.outR) + "%" }} /></div></div>
       </div>
     </Panel>
   );

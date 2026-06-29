@@ -107,11 +107,11 @@ button, select, input { font-family: inherit; color: inherit; }
 .band { min-height: 0; }
 .band-h { font-size: 9px; letter-spacing: 3px; font-weight: 700; color: var(--ink3); padding: 0 4px 1px; }
 /* oscillator band: 5 identical cards fenced into one labelled section */
-.oscband { flex: 1.16 1 0; display: flex; flex-direction: column; gap: 8px;
+.oscband { flex: 1.0 1 0; display: flex; flex-direction: column; gap: 8px;
   border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px 10px;
   background: rgba(255, 255, 255, 0.012); }
 .oscrow { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.botband { flex: 0.84 1 0; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.botband { flex: 1.0 1 0; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 /* panels stretch to fill their grid cell; body spreads content top-to-bottom */
 .oscrow > .panel, .botband > .panel { min-height: 0; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
@@ -241,8 +241,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .viz.env { height: 38px; }
 .viz.scope { height: 30px; }
 .viz.filter { height: 46px; }
-.viz.oscwave { height: 40px; }
-.viz.oscwave.off { opacity: .3; }
+/* per-oscillator scope: grid + glowing trace */
+.viz.oscwave { height: 56px; background: #0a0b0e; }
+.viz.oscwave.off { opacity: .28; }
+.viz.oscwave .grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .5; }
+.viz.oscwave .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.viz.oscwave polyline { stroke-width: 1.8; filter: drop-shadow(0 0 2.5px var(--accent)); }
+.viz.filter .fillz { fill: color-mix(in srgb, var(--accent) 9%, transparent); stroke: none; }
 .botband .viz.filter { height: 88px; }   /* hero filter graph fills the panel */
 .viz polyline { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .viz.env .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
@@ -270,9 +275,11 @@ button, select, input { font-family: inherit; color: inherit; }
 .smeter i { position: absolute; left: 1px; right: 1px; border-radius: 1px; background: var(--accent); }
 
 /* ---- VU ---- */
-.vu { display: flex; flex-direction: column; gap: 4px; }
-.vu-bar { height: 7px; background: var(--sunk); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
-.vu-bar i { display: block; height: 100%; background: var(--good); transition: width .05s linear; }
+.vu { display: flex; flex-direction: column; gap: 5px; }
+.vu-row { display: flex; align-items: center; gap: 7px; }
+.vu-l { font-size: 8px; color: var(--ink3); width: 8px; }
+.vu-bar { flex: 1; height: 8px; background: var(--sunk); border-radius: 3px; overflow: hidden; border: 1px solid var(--line); }
+.vu-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--good), #d8d05a 78%, var(--hot)); transition: width .05s linear; }
 
 /* ---- footer ---- */
 .foot { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px; color: var(--ink3); padding: 0 4px; }
