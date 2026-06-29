@@ -8,6 +8,7 @@
 #pragma once
 
 #include "SynthConfig.h"
+#include "Wavetables.h" // kNumWt / kWtNames for the wavetable oscillator
 #include <cmath>
 #include <cstdint>
 
@@ -181,6 +182,10 @@ struct OscParams
     float detune  = 0.0f; // fine detune in semitones (+/-)
     float level   = 1.0f;
     float crush   = 0.0f; // bit-crush amount (0 clean .. 1 heavy) for DCO grit
+    float srReduce = 0.0f; // sample-rate reduction / decimation (0 off .. 1 heavy)
+    int   oscType = 0;    // 0 = BLEP morph oscillator, 1 = wavetable
+    int   wtTable = 0;    // wavetable index (0..kNumWt-1)
+    float wtMorph = 0.0f; // blend toward the next table (0..1)
     bool  on      = true;
 };
 

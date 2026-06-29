@@ -12,6 +12,7 @@
 #include "SynthConfig.h"
 #include "SynthParams.h"
 #include "VoiceFilter.h"
+#include "WavetableOsc.h"
 #include <cmath>
 #include <cstdint>
 
@@ -60,7 +61,10 @@ class Voice
         sr_        = sampleRate;
         blockRate_ = blockRate;
         for(int i = 0; i < kNumOsc; ++i)
+        {
             osc_[i].prepare(sampleRate);
+            wt_[i].prepare(sampleRate);
+        }
         sub_.prepare(sampleRate);
         filter_.prepare(sampleRate);
         env_[0].prepare(sampleRate);
@@ -73,7 +77,12 @@ class Voice
     void reset() noexcept
     {
         for(int i = 0; i < kNumOsc; ++i)
+        {
             osc_[i].reset();
+            wt_[i].reset();
+            srPhase_[i] = 0.0f;
+            srHold_[i] = 0.0f;
+        }
         sub_.reset();
         filter_.reset();
         for(int i = 0; i < kNumEnv; ++i)
@@ -222,10 +231,12 @@ class Voice
         for(int i = 3; i < kNumOsc; ++i)
         {
             const float sign = (i & 1) ? 1.0f : -1.0f;
-            osc_[i].setFrequency(baseHz * footageMul(p.osc[i].footage)
-                                 * semis(p.osc[i].detune + sign * m.detuneAdd));
+            const float hz = baseHz * footageMul(p.osc[i].footage)
+                             * semis(p.osc[i].detune + sign * m.detuneAdd);
+            osc_[i].setFrequency(hz);
             osc_[i].setMorph(p.osc[i].morph + m.morphAdd[i]);
             osc_[i].setPulseWidth(p.osc[i].pw + m.pwAdd[i]);
+            wt_[i].setFrequency(hz);
         }
 
         const bool  o0on = p.osc[0].on, o1on = p.osc[1].on, o2on = p.osc[2].on;
@@ -245,14 +256,24 @@ class Voice
             sub_.setPulseWidth(0.5f);
         }
 
-        // per-osc bit-crush: quantisation step count (0 => bypass). The useful
-        // range is spread across the whole knob: amount ~0.1 is gentle ~8-bit,
-        // 0.5 is gritty ~5-bit, 1.0 is a destroyed ~1.5-bit DCO.
-        float crushLv[kNumOsc];
+        // wavetable oscillators run in parallel; oscType selects per oscillator.
+        wt_[0].setFrequency(o1Hz); wt_[1].setFrequency(o2Hz); wt_[2].setFrequency(o3Hz);
+        bool  wtO[kNumOsc];
+        float crushLv[kNumOsc], srStep[kNumOsc];
         for(int i = 0; i < kNumOsc; ++i)
+        {
+            wt_[i].setTable((float) p.osc[i].wtTable + p.osc[i].wtMorph);
+            wtO[i] = (p.osc[i].oscType == 1);
+            // per-osc bit-crush: quantisation step count (0 => bypass). ~0.1 is a
+            // gentle ~8-bit, 0.5 gritty ~5-bit, 1.0 a near-1-bit destroyed DCO.
             crushLv[i] = p.osc[i].crush > 0.001f
-                             ? std::exp2(9.0f - p.osc[i].crush * 7.5f)
+                             ? std::exp2(8.5f - p.osc[i].crush * 8.0f)
                              : 0.0f;
+            // sample-rate reduction: decimation ratio (1 = full rate, down to ~SR/41)
+            srStep[i] = p.osc[i].srReduce > 0.001f
+                            ? 1.0f / (1.0f + p.osc[i].srReduce * 40.0f)
+                            : 1.0f;
+        }
 
         // filter: base cutoff (env-independent part) + key + matrix mod, in
         // octaves; the per-sample env contribution is applied in the loop.
@@ -288,11 +309,25 @@ class Voice
                 filter_.setParams(cutHz, res, fdrive);
             }
 
-            // oscillators (+ osc2->osc1 cross-mod, hard sync)
-            bool  w0, w1, w2;
-            float o2 = o1on ? osc_[1].process(0.0f, w1) : (w1 = false, 0.0f);
-            float o1 = o0on ? osc_[0].process(fmAmt * 0.5f * o2, w0) : (w0 = false, 0.0f);
-            float o3 = o2on ? osc_[2].process(0.0f, w2) : (w2 = false, 0.0f);
+            // sample-rate reduction (decimate) then bit-crush, per oscillator
+            auto post = [&](int i, float x) -> float
+            {
+                if(srStep[i] < 0.999f)
+                {
+                    srPhase_[i] += srStep[i];
+                    if(srPhase_[i] >= 1.0f) { srPhase_[i] -= 1.0f; srHold_[i] = x; }
+                    x = srHold_[i];
+                }
+                if(crushLv[i] != 0.0f) x = std::round(x * crushLv[i]) / crushLv[i];
+                return x;
+            };
+
+            // oscillators (+ osc2->osc1 cross-mod, hard sync). A wavetable osc
+            // replaces the BLEP path for that oscillator; FM/sync apply to BLEP.
+            bool  w0 = false, w1 = false, w2 = false;
+            float o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(0.0f, w1));
+            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmAmt * 0.5f * o2, w0));
+            float o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(0.0f, w2));
             if(w0)
             {
                 if(p.sync2Mode == (int)SyncMode::Hard)      osc_[1].hardSync(0.0f);
@@ -303,18 +338,15 @@ class Voice
             float subv = 0.0f;
             if(subOn) { bool ws; subv = sub_.process(0.0f, ws); }
 
-            if(crushLv[0] != 0.0f) o1 = std::round(o1 * crushLv[0]) / crushLv[0];
-            if(crushLv[1] != 0.0f) o2 = std::round(o2 * crushLv[1]) / crushLv[1];
-            if(crushLv[2] != 0.0f) o3 = std::round(o3 * crushLv[2]) / crushLv[2];
+            o1 = post(0, o1); o2 = post(1, o2); o3 = post(2, o3);
 
             float voice = o1 * g1 + o2 * g2 + o3 * g3
                           + subv * subG + (rngf() * 2.0f - 1.0f) * noiseG;
             for(int i = 3; i < kNumOsc; ++i)
                 if(p.osc[i].on)
                 {
-                    bool wi; float oi = osc_[i].process(0.0f, wi);
-                    if(crushLv[i] != 0.0f) oi = std::round(oi * crushLv[i]) / crushLv[i];
-                    voice += oi * p.osc[i].level;
+                    bool wi; float oi = wtO[i] ? wt_[i].process() : osc_[i].process(0.0f, wi);
+                    voice += post(i, oi) * p.osc[i].level;
                 }
             // ring modulation: blend the osc1 x osc2 product in (bounded by 1, so
             // the master soft-clip never sees more than the dry oscs already give).
@@ -378,7 +410,10 @@ class Voice
     }
 
     const SynthPatch* patch_ = nullptr;
-    BlepOsc     osc_[kNumOsc];
+    BlepOsc      osc_[kNumOsc];
+    WavetableOsc wt_[kNumOsc];
+    float        srPhase_[kNumOsc] = {0};  // sample-rate-reduction decimator phase
+    float        srHold_[kNumOsc]  = {0};  // and held sample, per oscillator
     BlepOsc     sub_;
     VoiceFilter filter_;
     AdsrEnv     env_[kNumEnv];

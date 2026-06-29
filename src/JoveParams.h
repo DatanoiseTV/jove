@@ -186,12 +186,18 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         cparam(jID::osc(i, "Foot"),   n + "Footage", footage, 2);
         fparam(jID::osc(i, "Morph"),  n + "Morph", lin01, 0.5f);
         fparam(jID::osc(i, "Pw"),     n + "Pulse Width", lin01, 0.5f);
-        // ±24 st: most patches detune by fractions of a semitone, but inharmonic
-        // percussion patches tune an oscillator up to ~19 st away for metallic tones.
-        fparam(jID::osc(i, "Detune"), n + "Detune", FR(-24.0f, 24.0f), 0.0f, "st");
+        // ±24 st with a strong symmetric skew: fine sub-semitone resolution
+        // around the centre (where most detuning lives) while the extremes still
+        // reach the ~19 st inharmonic-percussion tunings at the ends of the knob.
+        fparam(jID::osc(i, "Detune"), n + "Detune",
+               [] { juce::NormalisableRange<float> r(-24.0f, 24.0f, 0.0f, 0.3f, true); return r; }(), 0.0f, "st");
         fparam(jID::osc(i, "Level"),  n + "Level", lin01, 1.0f);
         // bit-crush: 0 clean, up -> coarser quantisation for old-school DCO grit
         fparam(jID::osc(i, "Crush"),  n + "Bit Crush", lin01, 0.0f);
+        fparam(jID::osc(i, "Sr"),     n + "SR Crush", lin01, 0.0f); // sample-rate reduction
+        cparam(jID::osc(i, "Type"),   n + "Osc Type", {"BLEP", "WT"}, 0);
+        iparam(jID::osc(i, "WtTable"), n + "WT Table", 0, kNumWt - 1, 0);
+        fparam(jID::osc(i, "WtMorph"), n + "WT Morph", lin01, 0.0f);
     }
     fparam(jID::oscMix, "Osc Mix", lin01, 0.5f);
     fparam(jID::subLevel, "Sub Level", lin01, 0.0f);
@@ -331,6 +337,10 @@ class PatchBinding
             p.osc[i].detune = get(osc(i, "Detune"));
             p.osc[i].level  = get(osc(i, "Level"));
             p.osc[i].crush  = get(osc(i, "Crush"));
+            p.osc[i].srReduce = get(osc(i, "Sr"));
+            p.osc[i].oscType  = (int) get(osc(i, "Type"));
+            p.osc[i].wtTable  = (int) get(osc(i, "WtTable"));
+            p.osc[i].wtMorph  = get(osc(i, "WtMorph"));
         }
         p.oscMix     = get(oscMix);
         p.subLevel   = get(subLevel);
@@ -436,6 +446,10 @@ class PatchBinding
             set(osc(i, "Detune"), p.osc[i].detune);
             set(osc(i, "Level"), p.osc[i].level);
             set(osc(i, "Crush"), p.osc[i].crush);
+            set(osc(i, "Sr"), p.osc[i].srReduce);
+            set(osc(i, "Type"), (float) p.osc[i].oscType);
+            set(osc(i, "WtTable"), (float) p.osc[i].wtTable);
+            set(osc(i, "WtMorph"), p.osc[i].wtMorph);
         }
         set(oscMix, p.oscMix);
         set(subLevel, p.subLevel);
