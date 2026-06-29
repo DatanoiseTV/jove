@@ -36,9 +36,6 @@ inline constexpr int kNumEnv = 3;
 // Mod-matrix routable slots (sparse routes backing the full source x dest grid).
 inline constexpr int kNumModSlots = 32;
 
-// EMS-style patchbay: a second sparse routing bank, evaluated by the same matrix
-// machinery, shown as a pin grid on the PATCH tab.
-inline constexpr int kNumBaySlots = 24;
 
 // A4 reference for MIDI-note -> Hz.
 inline constexpr float kA4Hz   = 440.0f;

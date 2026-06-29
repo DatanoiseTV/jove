@@ -814,9 +814,6 @@ function LfoPanel({ n, accent }) {
    MOD_SRC; [0] is the unused OFF slot). */
 const SRC_ABBR = ["", "L1", "L2", "L3", "AEG", "FEG", "XEG", "VEL", "KEY", "MW", "AT", "BND", "RND", "NOT", "MPR", "MTM", "MBN", "S1", "S2", "S3", "S4"];
 const N_MOD_SLOTS = 32;
-const N_BAY_SLOTS = 24;
-// pre-patched default pins, mirror of kBayDefaultSlots in SynthParams.h (src,dst,amt)
-const BAY_DEFAULTS = [[5, 13, 0.5], [7, 16, 0.3], [1, 1, 0.03], [9, 13, 0.4], [8, 13, 0.2], [6, 26, 0.3]];
 
 /* One grid cell = one (source, destination) intersection. Drag vertically to
    set a bipolar amount; the fill grows from the centre line and an active cell
@@ -908,61 +905,56 @@ function ModGrid() {
 
 /* EMS-style patchbay: a second routing bank over the full source x dest grid,
    with a pre-patched/manual toggle. Independent of the MOD matrix bank. */
-function Patchbay() {
-  const mc = React.useContext(ModContext);
-  const [pre, setPre] = B.useToggle("bayPrePatched");
-  const slots = [];
-  for (let i = 1; i <= N_BAY_SLOTS; i++) {
-    const [src, setSrc] = B.useChoice("bay" + i + "Src");
-    const [dst, setDst] = B.useChoice("bay" + i + "Dst");
-    const [amtN, setAmt] = B.useSlider("bay" + i + "Amt");
-    slots.push({ src, dst, amtN, setSrc, setDst, setAmt });
-  }
-  const byPair = {};
-  let used = 0;
-  slots.forEach((s) => { if (s.src > 0 && s.dst > 0) { byPair[s.src + "_" + s.dst] = s; used++; } });
-  const defByPair = {};
-  if (pre) BAY_DEFAULTS.forEach(([s, d, a]) => { defByPair[s + "_" + d] = a; });
+/* modular audio patchbay: rows = audio source nodes, cols = destination buses,
+   each cell a bipolar gain (ab{s}_{d}). Reroutes the actual signal topology when
+   PATCHBAY ON; off = the classic osc->filter->VCA path. */
+const ANODES = ["OSC1", "OSC2", "OSC3", "OSC4", "OSC5", "SUB", "NOISE", "RING", "FLT1", "FLT2"];
+const ADSTS  = ["FLT1", "FLT2", "RING A", "RING B", "FM1", "OUT"];
 
-  const setCell = (srcI, dstI, amt) => {
-    amt = Math.max(-2, Math.min(2, amt));
-    const key = srcI + "_" + dstI;
-    let s = byPair[key];
-    if (!s) {
-      if (Math.abs(amt) < 0.01) return;
-      s = slots.find((x) => x.src <= 0);
-      if (!s) return;
-      s.setSrc(srcI); s.setDst(dstI);
-    }
-    s.setAmt((amt + 2) / 4);
-    if (Math.abs(amt) < 0.01) s.setSrc(0);
+function ABayCell({ s, d }) {
+  const [v, set] = B.useSlider("ab" + s + "_" + d); // 0..1 of the -1..+1 range
+  const amt = v * 2 - 1;
+  const drag = useRef(null);
+  const down = (e) => {
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    drag.current = { y: p.clientY, a: amt };
+    const move = (ev) => {
+      const q = ev.touches ? ev.touches[0] : ev;
+      const fine = ev.shiftKey ? 0.25 : 1;
+      const na = Math.max(-1, Math.min(1, drag.current.a + (drag.current.y - q.clientY) / 120 * fine));
+      set((na + 1) / 2);
+    };
+    const up = () => {
+      window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move); window.removeEventListener("touchend", up);
+    };
+    window.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
   };
-
-  const srcCols = SRC_ABBR.slice(1);
-  const dstRows = MOD_DST.slice(1);
+  const cls = "mg-cell" + (amt > 0.004 ? " pos" : amt < -0.004 ? " neg" : "");
   return (
-    <Panel title={"PATCHBAY · " + used + "/" + N_BAY_SLOTS}>
+    <div className={cls} onMouseDown={down} onTouchStart={down} onDoubleClick={() => set(0.5)}
+         title={ANODES[s] + " → " + ADSTS[d] + (Math.abs(amt) > 0.004 ? "   " + amt.toFixed(2) : "")}
+         style={{ "--m": Math.min(1, Math.abs(amt)).toFixed(3) }}><i /></div>
+  );
+}
+
+function Patchbay() {
+  const [on] = B.useToggle("patchbayOn");
+  return (
+    <Panel title="PATCHBAY · AUDIO TOPOLOGY">
       <div className="row between pbhead">
-        <Switch id="bayPrePatched" label="PRE-PATCHED" />
-        <span className="pb-hint">{pre ? "factory pins shown dim · your pins overlay" : "manual — your pins only"}</span>
+        <Switch id="patchbayOn" label="PATCHBAY ON" />
+        <span className="pb-hint">{on ? "modular routing active — the fixed path is bypassed" : "off — classic osc → filter → VCA path"}</span>
       </div>
-      <div className="mgrid" style={{ "--cols": srcCols.length }}>
+      <div className={"abgrid" + (on ? "" : " dim")} style={{ "--cols": ADSTS.length }}>
         <div className="mg-corner" />
-        {srcCols.map((s, c) => <div key={c} className="mg-chead" title={MOD_SRC[c + 1]}>{s}</div>)}
-        {dstRows.map((dname, r) => {
-          const dstI = r + 1;
-          return [
-            <div key={"l" + r} className="mg-rlabel">{dname}</div>,
-            ...srcCols.map((_, c) => {
-              const srcI = c + 1;
-              const slot = byPair[srcI + "_" + dstI];
-              const amt = slot ? slot.amtN * 4 - 2 : 0;
-              const def = defByPair[srcI + "_" + dstI] || 0;
-              const live = ((mc.src && mc.src[srcI]) || 0) * (amt || def);
-              return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} def={def} live={live} onSet={setCell} />;
-            }),
-          ];
-        })}
+        {ADSTS.map((d, c) => <div key={c} className="mg-chead">{d}</div>)}
+        {ANODES.map((sname, s) => ([
+          <div key={"l" + s} className="mg-rlabel">{sname}</div>,
+          ...ADSTS.map((_, d) => <ABayCell key={s + "_" + d} s={s} d={d} />),
+        ]))}
       </div>
     </Panel>
   );

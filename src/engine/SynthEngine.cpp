@@ -427,9 +427,6 @@ void SynthEngine::evalMatrix(const float* src, VoiceMod& m) noexcept
     const SynthPatch& p = *patch_;
     m.pitchSemis += bend_ * (float)p.bendRange; // base bend applies to all voices
     evalSlots(p.mod, kNumModSlots, src, m);
-    evalSlots(p.bay, kNumBaySlots, src, m);
-    if(p.bayPrePatched)
-        evalSlots(kBayDefaultSlots, kNumBayDefaultSlots, src, m);
 }
 
 // Assemble one voice's complete mod-source array (global LFOs/controllers +

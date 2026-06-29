@@ -85,6 +85,7 @@ class Voice
             srHold_[i] = 0.0f;
         }
         filtSmInit_ = false;
+        for(int i = 0; i < kNumANode; ++i) pbNode_[i] = 0.0f;
         sub_.reset();
         filter_.reset();
         filter2_.reset();
@@ -400,9 +401,19 @@ class Voice
 
             // oscillators (+ osc2->osc1 cross-mod, hard sync). A wavetable osc
             // replaces the BLEP path for that oscillator; FM/sync apply to BLEP.
+            // In patchbay mode the osc1 FM input comes from the FM1 bus instead of
+            // the fixed osc2 cross-mod.
+            const bool pbOn = p.patchbayOn;
+            const float* A = p.abay;
             bool  w0 = false, w1 = false, w2 = false;
             float o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(0.0f, w1));
-            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmSm_ * 0.5f * o2, w0));
+            float fmIn = fmSm_ * 0.5f * o2;
+            if(pbOn)
+            {
+                fmIn = 0.0f;
+                for(int s2 = 0; s2 < kNumANode; ++s2) fmIn += pbNode_[s2] * A[s2 * kNumADst + (int)ADst::Fm1];
+            }
+            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmIn, w0));
             float o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(0.0f, w2));
             if(w0)
             {
@@ -413,25 +424,43 @@ class Voice
             }
             float subv = 0.0f;
             if(subOn) { bool ws; subv = sub_.process(0.0f, ws); }
+            const float noiseSamp = rngf() * 2.0f - 1.0f;
 
             o1 = post(0, o1); o2 = post(1, o2); o3 = post(2, o3);
+            float o4 = 0.0f, o5 = 0.0f;
+            { bool wi; if(p.osc[3].on) o4 = post(3, wtO[3] ? wt_[3].process() : osc_[3].process(0.0f, wi)); }
+            { bool wi; if(p.osc[4].on) o5 = post(4, wtO[4] ? wt_[4].process() : osc_[4].process(0.0f, wi)); }
 
-            float voice = o1 * gSm_[0] + o2 * gSm_[1] + o3 * gSm_[2]
-                          + subv * subGSm_ + (rngf() * 2.0f - 1.0f) * noiseGSm_;
-            for(int i = 3; i < kNumOsc; ++i)
-                if(p.osc[i].on)
-                {
-                    bool wi; float oi = wtO[i] ? wt_[i].process() : osc_[i].process(0.0f, wi);
-                    voice += post(i, oi) * gSm_[i];
-                }
-            // ring modulation: blend the osc1 x osc2 product in (bounded by 1, so
-            // the master soft-clip never sees more than the dry oscs already give).
-            if(ringSm_ > 0.0001f)
-                voice += (o1 * o2 - o1 * gSm_[0]) * ringSm_; // crossfade osc1 -> ring product
-
-            float fout = filter_.process(voice);
-            if(routing == 1)        fout = filter2_.process(fout);                  // serial
-            else if(routing == 2)   fout = 0.5f * (fout + filter2_.process(voice)); // parallel
+            float fout;
+            if(pbOn)
+            {
+                // modular topology: source nodes -> destination buses, with the
+                // previous sample's ring/filter/osc values providing 1-sample
+                // feedback. The matrix gains replace the fixed mixer levels.
+                pbNode_[(int)ANode::Osc1] = o1; pbNode_[(int)ANode::Osc2] = o2;
+                pbNode_[(int)ANode::Osc3] = o3; pbNode_[(int)ANode::Osc4] = o4;
+                pbNode_[(int)ANode::Osc5] = o5; pbNode_[(int)ANode::Sub]  = subv;
+                pbNode_[(int)ANode::Noise] = noiseSamp;
+                auto bus = [&](int d) { float a = 0.0f; for(int s2 = 0; s2 < kNumANode; ++s2) a += pbNode_[s2] * A[s2 * kNumADst + d]; return a; };
+                const float rA = bus((int)ADst::RingA), rB = bus((int)ADst::RingB);
+                pbNode_[(int)ANode::Ring]  = rA * rB;
+                pbNode_[(int)ANode::Filt1] = filter_.process(bus((int)ADst::Filt1In));
+                pbNode_[(int)ANode::Filt2] = filter2_.process(bus((int)ADst::Filt2In));
+                fout = bus((int)ADst::Out);
+            }
+            else
+            {
+                float voice = o1 * gSm_[0] + o2 * gSm_[1] + o3 * gSm_[2]
+                              + subv * subGSm_ + noiseSamp * noiseGSm_
+                              + o4 * gSm_[3] + o5 * gSm_[4];
+                // ring modulation: blend the osc1 x osc2 product in (bounded so the
+                // master clip never sees more than the dry oscs already give).
+                if(ringSm_ > 0.0001f)
+                    voice += (o1 * o2 - o1 * gSm_[0]) * ringSm_;
+                fout = filter_.process(voice);
+                if(routing == 1)        fout = filter2_.process(fout);                  // serial
+                else if(routing == 2)   fout = 0.5f * (fout + filter2_.process(voice)); // parallel
+            }
 
             float g = ampEnv * ampBase;
             ampSmooth_ += 0.25f * (g - ampSmooth_); // de-zipper block-rate gain
@@ -497,6 +526,7 @@ class Voice
     float        srPhase_[kNumOsc] = {0};  // sample-rate-reduction decimator phase
     float        srHold_[kNumOsc]  = {0};  // and held sample, per oscillator
     float        cutSm_ = 0.0f, resSm_ = 0.0f, drvSm_ = 0.0f; // de-zipper filter params
+    float        pbNode_[kNumANode] = {0};                     // patchbay audio-node feedback state
     float        gSm_[kNumOsc] = {0};                          // de-zipper osc mix gains
     float        subGSm_ = 0.0f, noiseGSm_ = 0.0f, ringSm_ = 0.0f, fmSm_ = 0.0f;
     float        glSm_ = 0.0f, grSm_ = 0.0f;                   // de-zipper pan

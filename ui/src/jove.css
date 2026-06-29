@@ -190,6 +190,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .pb-hint { font-size: 9px; letter-spacing: .5px; color: var(--ink3); }
 .mg-cell.factory::before { content: ""; position: absolute; inset: 2px;
   border: 1px dashed var(--ink3); border-radius: 2px; opacity: .45; }
+/* audio patchbay grid: fewer, larger cells than the mod matrix */
+.abgrid { display: grid; grid-template-columns: 70px repeat(var(--cols), 1fr);
+  gap: 4px; align-content: start; flex: 1; min-height: 0; }
+.abgrid.dim { opacity: .5; }
+.abgrid .mg-chead { font-size: 9px; }
+.abgrid .mg-rlabel { font-size: 9px; }
+.abgrid .mg-cell { min-height: 30px; }
 
 /* SEQ tab: a 2x2 grid of compact sequencer cards (step lane + tight controls) */
 .seqtab { display: flex; flex: 1; min-height: 0; }
