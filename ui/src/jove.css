@@ -118,23 +118,29 @@ button, select, input { font-family: inherit; color: inherit; }
 .voicetab.hide { display: none; }
 .band { min-height: 0; }
 .band-h { font-size: 9px; letter-spacing: 3px; font-weight: 700; color: var(--ink3); padding: 0 4px 1px; }
-/* oscillator band: 5 identical cards fenced into one labelled section */
-.oscband { flex: 1.0 1 0; display: flex; flex-direction: column; gap: 8px;
+/* oscillator band: 5 identical cards fenced into one labelled section.
+   Slightly shorter than the bottom band so the denser VOICING / envelope /
+   master panels there have room (was 1:1). */
+.oscband { flex: 0.84 1 0; display: flex; flex-direction: column; gap: 8px;
   border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px 10px;
   background: rgba(255, 255, 255, 0.012); }
 .oscrow { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 /* MIXER | FILTER | VOICING | right column (AMP ENV + FILTER ENV + MASTER) */
-.botband { flex: 1.0 1 0; min-height: 0; display: grid;
+.botband { flex: 1.18 1 0; min-height: 0; display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.05fr; gap: 12px; }
+/* dense bottom panels: trim knob size + gaps so VOICING / envelopes fit the cell */
+.botband .knob svg { width: 40px; height: 40px; }
+.botband .knob.big svg { width: 46px; height: 46px; }
 /* panels stretch to fill their grid cell; body spreads content top-to-bottom */
 .oscrow > .panel, .botband > .panel { min-height: 0; }
 /* right column on the VOICE screen: 2 compact envelopes above a small master */
 .rightstack { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
 .rightstack > .panel { flex: 1 1 0; min-height: 0; }
 .rightstack .pbody { gap: 6px; }
-.rightstack .viz.env { height: 40px; }
-.rightstack .knobs { gap: 7px; }
-.rightstack .smeter { height: 18px; }
+.rightstack .viz.env { height: 38px; }
+.rightstack .knobs { gap: 4px; flex-wrap: nowrap; }
+.rightstack .knob svg { width: 36px; height: 36px; }
+.rightstack .smeter { height: 16px; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
 /* safe center keeps content vertically centred when it fits. NB: do NOT set
    overflow on the generic band pbody — it traps dropdown popups (MAX POLY,

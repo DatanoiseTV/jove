@@ -584,20 +584,23 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     for(int i = 0; i < n; ++i)
     {
         float l = outL[i], r = outR[i];
-        // Voice-bus auto-gain: smoothly pull a hot stack down toward the glue
-        // ceiling BEFORE the saturator, so a held chord (N voices summing well
-        // past 1.0) is level-controlled instead of slammed into softSat — that
-        // hard clip on chords was the audible "clipping" across presets. Fast
-        // attack, slow release; single notes (peak ~0.35) pass untouched.
+        // Voice-bus auto-gain: a TRANSPARENT, slow-attack leveller that gently
+        // pulls a hot stack (a held chord summing past unity) below the ceiling.
+        // NB the attack must stay slow: a fast peak-follower here modulates the
+        // gain within a waveform cycle and waveshapes the signal at audio rate —
+        // that was the "saturated/distorted" sound across patches. Brief transient
+        // peaks during the attack are caught by the master limiter downstream, so
+        // there is no always-on glue softSat on the bus any more (it saturated
+        // every loud chord). mb saturation stays — it's an opt-in per-patch effect.
         const float bpk = std::max(std::fabs(l), std::fabs(r));
-        if(bpk > busEnv_) busEnv_ += 0.30f * (bpk - busEnv_);
-        else              busEnv_ += 0.001f * (bpk - busEnv_);
-        constexpr float busCeil = 0.90f;
+        if(bpk > busEnv_) busEnv_ += 0.006f * (bpk - busEnv_);  // ~slow attack
+        else              busEnv_ += 0.0006f * (bpk - busEnv_); // slower release
+        constexpr float busCeil = 0.95f;
         const float bg = busEnv_ > busCeil ? busCeil / busEnv_ : 1.0f;
         l *= bg; r *= bg;
         if(mbActive) { l = mbsat_.process(0, l); r = mbsat_.process(1, r); }
-        outL[i] = softSat(l);
-        outR[i] = softSat(r);
+        outL[i] = l;
+        outR[i] = r;
     }
 
     // Juno-style ensemble chorus on the voice bus (true-bypass at mix 0). A fixed
