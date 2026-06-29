@@ -123,6 +123,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     // audition: auto-play a looping test phrase so presets can be browsed by ear
     bool auditionOn_  = false;
     long auditionPos_ = 0; // sample position within the phrase loop
+    int  auditionCat_ = 0; // preset category -> which demo phrase to play
 
     std::atomic<int>   activeVoices { 0 };
     std::atomic<int>   lastMidiNote { -1 };

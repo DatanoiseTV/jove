@@ -7,6 +7,7 @@
 
 #include "PluginProcessor.h"
 #include "ui/WebEditor.h"
+#include "AuditionPhrases.h"
 
 using namespace jove;
 
@@ -223,6 +224,11 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // user can browse presets by ear. Restarts on each preset load.
     {
         const bool aud = apvts.getRawParameterValue(jID::auditionOn)->load() > 0.5f;
+        // Cache the category so the audition plays a phrase that fits the patch
+        // type (bassline for BASS, swell for PAD, stabs for STAB, held chord for
+        // ARP/SEQ, ...). Refreshed on a preset load and on each audition start.
+        if((aud && !auditionOn_) || presetJustLoaded)
+            auditionCat_ = presetManager.currentCategory();
         if(aud != auditionOn_)
         {
             auditionOn_ = aud;
@@ -233,20 +239,16 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         if(aud)
         {
             const double sr = sampleRate;
-            const long loopLen = (long) (3.2 * sr);
-            // {time s, note-on?, midi note}; velocity fixed. Arp run, then a chord.
-            static const struct { double t; bool on; int note; } kPat[] = {
-                {0.00, true, 48}, {0.22, false, 48}, {0.25, true, 52}, {0.47, false, 52},
-                {0.50, true, 55}, {0.72, false, 55}, {0.75, true, 60}, {0.97, false, 60},
-                {1.10, true, 48}, {1.10, true, 52}, {1.10, true, 55}, {1.10, true, 60},
-                {2.10, false, 48}, {2.10, false, 52}, {2.10, false, 55}, {2.10, false, 60} };
+            const AuditionPhrase ph = auditionPhraseFor(auditionCat_);
+            const long loopLen = (long) (ph.loop * sr);
             const long bStart = auditionPos_, bEnd = auditionPos_ + numSamples;
-            for(const auto& e : kPat)
+            for(int i = 0; i < ph.count; ++i)
             {
+                const AuditionEvent& e = ph.ev[i];
                 const long es = (long) (e.t * sr);
                 if(es >= bStart && es < bEnd)
                 {
-                    if(e.on) engine.noteOn(e.note, 0.85f);
+                    if(e.on) engine.noteOn(e.note, e.vel);
                     else     engine.noteOff(e.note);
                 }
             }
