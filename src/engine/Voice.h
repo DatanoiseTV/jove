@@ -205,7 +205,7 @@ class Voice
         curHz_ = targetHz_ + (curHz_ - targetHz_) * glideCoef; // glide once/block
         const float pitchMul = std::exp2((m.pitchSemis + driftSemi + p.masterTune * 0.01f) * (1.0f / 12.0f));
         const float baseHz   = curHz_ * pitchMul;
-        const float o1Hz = baseHz * footageMul(p.osc[0].footage);
+        const float o1Hz = baseHz * footageMul(p.osc[0].footage) * semis(p.osc[0].detune);
         // detune spread: osc2 widens one way, osc3 the other (LFO -> living ensemble)
         const float o2Hz = baseHz * footageMul(p.osc[1].footage) * semis(p.osc[1].detune + m.osc2Semis + m.detuneAdd);
         const float o3Hz = baseHz * footageMul(p.osc[2].footage) * semis(p.osc[2].detune + m.osc3Semis - m.detuneAdd);

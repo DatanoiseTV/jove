@@ -323,12 +323,27 @@ function oscShape(m, pw, t) {
   if (m < 0.5) return lerp(tri, saw, (m - 0.25) / 0.25);
   return lerp(saw, pulse, (m - 0.5) / 0.5);
 }
-function OscWave({ morphId, pwId, on }) {
-  const m = B.useSlider(morphId)[0];
-  const pw = B.useSlider(pwId)[0];
-  const W = 160, H = 54, cy = H / 2, amp = H / 2 - 4, N = 128, cyc = 2;
+function OscWave({ morphId, pwId, crushId, on }) {
+  const m0 = B.useSlider(morphId)[0];
+  const pw0 = B.useSlider(pwId)[0];
+  const crush = B.useSlider(crushId)[0];
+  // live modulation reaching this oscillator's morph / pulse-width (matrix routes
+  // to MORPHn / PWn), so the scope visibly moves as LFOs/envelopes modulate it.
+  const mc = React.useContext(ModContext);
+  let mAdd = 0, pwAdd = 0;
+  ((mc.map && mc.map[morphId]) || []).forEach((x) => { mAdd += ((mc.src && mc.src[x.src]) || 0) * x.amt; });
+  ((mc.map && mc.map[pwId]) || []).forEach((x) => { pwAdd += ((mc.src && mc.src[x.src]) || 0) * x.amt * 0.5; });
+  const m = Math.max(0, Math.min(1, m0 + mAdd));
+  const pw = Math.max(0.02, Math.min(0.98, pw0 + pwAdd));
+  const levels = crush > 0.01 ? Math.pow(2, 9 - crush * 7.5) : 0; // mirror engine bit-crush
+  const W = 160, H = 54, cy = H / 2, amp = H / 2 - 4, N = 160, cyc = 2;
   const pts = [];
-  for (let i = 0; i <= N; i++) { const t = (i / N) * cyc; pts.push(((i / N) * W).toFixed(1) + "," + (cy - oscShape(m, pw, t) * amp).toFixed(1)); }
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * cyc;
+    let y = oscShape(m, pw, t);
+    if (levels) y = Math.round(y * levels) / levels;
+    pts.push(((i / N) * W).toFixed(1) + "," + (cy - y * amp).toFixed(1));
+  }
   const grid = [0.25, 0.5, 0.75].map((f) => (f * W).toFixed(1));
   return (
     <svg className={"viz oscwave" + (on ? "" : " off")} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
@@ -527,7 +542,7 @@ function OscPanel({ n }) {
         <Seg id={p + "Foot"} options={FOOTAGE} />
       </div>
       <WaveSelect morphId={p + "Morph"} pwId={p + "Pw"} />
-      <OscWave morphId={p + "Morph"} pwId={p + "Pw"} on={on} />
+      <OscWave morphId={p + "Morph"} pwId={p + "Pw"} crushId={p + "Crush"} on={on} />
       <div className="knobs spread">
         <Knob id={p + "Morph"} label="MORPH" />
         <Knob id={p + "Pw"} label="PW" />
