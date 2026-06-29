@@ -114,10 +114,16 @@ class SynthReverb
         inline float process(float in, float fb, float d1, float d2, float modSamp) noexcept
         {
             // fractional, slowly-modulated read -> detunes the tail so it shimmers
-            // like a real room instead of ringing metallically.
+            // like a real room instead of ringing metallically. modSamp is +/- a
+            // few samples, so rp must be wrapped on BOTH sides: a negative modSamp
+            // pushes rp past the buffer end, and an unbounded i0 there reads heap
+            // garbage straight into the feedback -> metallic self-oscillation.
             float rp = (float) pos - modSamp;
-            while(rp < 0.0f) rp += (float) len;
-            const int i0 = (int) rp, i1 = (i0 + 1) % len;
+            while(rp < 0.0f)         rp += (float) len;
+            while(rp >= (float) len) rp -= (float) len;
+            int i0 = (int) rp;
+            if(i0 >= len) i0 = len - 1; // guard the fp boundary
+            const int i1 = (i0 + 1 == len) ? 0 : i0 + 1;
             const float out = buf[i0] + (buf[i1] - buf[i0]) * (rp - (float) i0);
             store = out * d2 + store * d1; // damping low-pass
             buf[pos] = in + store * fb;
