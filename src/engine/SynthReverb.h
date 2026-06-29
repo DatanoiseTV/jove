@@ -45,8 +45,11 @@ class SynthReverb
             apL_[a].init(nL, 0.5f);
             apR_[a].init(nR, 0.5f);
         }
+        // 0.5 (not 0.7): four allpasses in series at 0.7 form a resonant comb
+        // that pumps the input pitch into the tank — measured as a ~5x louder,
+        // strongly pitched ("metallic") tail. 0.5 diffuses without resonating.
         for(int d = 0; d < kNumDiff; ++d)
-            diff_[d].init((int)(diffTune[d] * k), 0.7f);
+            diff_[d].init((int)(diffTune[d] * k), 0.5f);
         // pre-delay (~8 ms) — a touch of space before the tail builds, short
         // enough not to leave an audible gap when the mix is fully wet.
         preLen_ = (int)(0.008f * sampleRate) + 1;
@@ -76,8 +79,11 @@ class SynthReverb
         const float d1 = damp_ * 0.4f;       // comb damping
         const float d2 = 1.0f - d1;
         const float in_gain = 0.015f;        // Freeverb fixed input scale
-        const float modRate = 0.7f / sr_;    // ~0.7 Hz tail modulation
-        const float modDepth = 7.0f;         // +/- samples
+        const float modRate = 1.3f / sr_;    // ~1.3 Hz tail modulation
+        const float modDepth = 16.0f;        // +/- samples (~1.3% pitch)
+        // A slower/shallower wobble lets a sustained tone re-form a standing wave
+        // between cycles (the metallic ring returns); 1.3 Hz / 16 smp keeps the
+        // tail continuously detuned so it decorrelates into noise.
         // Without this the comb bank runs ~4-16x louder than the dry (measured),
         // so even a small mix buried the signal. wetNorm is calibrated (by direct
         // measurement of wet/dry vs roomfb) to put a fully-wet tail near the dry
