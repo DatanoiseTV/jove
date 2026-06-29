@@ -123,14 +123,24 @@ button, select, input { font-family: inherit; color: inherit; }
   border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px 10px;
   background: rgba(255, 255, 255, 0.012); }
 .oscrow { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.botband { flex: 1.0 1 0; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+/* MIXER | FILTER | VOICING | right column (AMP ENV + FILTER ENV + MASTER) */
+.botband { flex: 1.0 1 0; min-height: 0; display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1.05fr; gap: 12px; }
 /* panels stretch to fill their grid cell; body spreads content top-to-bottom */
 .oscrow > .panel, .botband > .panel { min-height: 0; }
+/* right column on the VOICE screen: 2 compact envelopes above a small master */
+.rightstack { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
+.rightstack > .panel { flex: 1 1 0; min-height: 0; }
+.rightstack .pbody { gap: 6px; }
+.rightstack .viz.env { height: 40px; }
+.rightstack .knobs { gap: 7px; }
+.rightstack .smeter { height: 18px; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
-/* safe center: keeps panel content vertically centred when it fits, but falls
-   back to top-aligned + scrollable when it overflows (e.g. FILTER with the dual
-   filter 2 section shown) so nothing is clipped by the fixed-height band row. */
-.botband .pbody { flex: 1; justify-content: safe center; gap: 10px; overflow-y: auto; }
+/* safe center keeps content vertically centred when it fits. NB: do NOT set
+   overflow on the generic band pbody — it traps dropdown popups (MAX POLY,
+   chorus/delay divisions) inside the panel and clips them. Only the FILTER
+   panel (Segs only, no dropdowns) opts into scrolling, scoped below. */
+.botband .pbody { flex: 1; justify-content: safe center; gap: 10px; }
 .row.between { width: 100%; justify-content: space-between; }
 .knobs.spread { justify-content: space-between; }
 /* LFO controls: one non-wrapping row of small knobs so the synced DIV dropdown
@@ -335,7 +345,7 @@ button, select, input { font-family: inherit; color: inherit; }
 .botband .viz.filter { height: 62px; }   /* hero filter graph (compact for dual-filter room) */
 /* when filter 2 is shown, compact the whole FILTER panel so it fits the band
    cell without scrolling: smaller graph, tighter gaps, shorter Hz scale. */
-.botband .panel:has(.flt2) .pbody { gap: 6px; justify-content: flex-start; }
+.botband .panel:has(.flt2) .pbody { gap: 6px; justify-content: flex-start; overflow-y: auto; }
 .botband .panel:has(.flt2) .viz.filter { height: 38px; }
 .botband .panel:has(.flt2) .hzscale { height: 9px; }
 .botband .panel:has(.flt2) .knobs { gap: 8px; }

@@ -281,12 +281,14 @@ class Voice
         for(int i = 0; i < kNumOsc; ++i)
         {
             // WT table scan: the dropdown picks the base table; MORPH (wtMorph)
-            // and the matrix MORPH mod sweep across the WHOLE bank from there
-            // (full kNumWt span), so MORPH actually scans the wavetable instead
-            // of only blending to the next table.
+            // and the matrix MORPH mod sweep from there to the LAST available
+            // table — the morph range is sized to the actual tables remaining in
+            // the bank, so MORPH=1 always lands exactly on the last waveform with
+            // no dead zone past the end.
             {
-                float tp = (float) p.osc[i].wtTable
-                           + (p.osc[i].wtMorph + (i < 3 ? m.morphAdd[i] : 0.0f)) * (float)(kNumWt - 1);
+                const float base = (float) p.osc[i].wtTable;
+                const float span = (float)(kNumWt - 1) - base; // tables available above the base
+                float tp = base + (p.osc[i].wtMorph + (i < 3 ? m.morphAdd[i] : 0.0f)) * span;
                 if(tp < 0.0f) tp = 0.0f;
                 if(tp > (float)(kNumWt - 1)) tp = (float)(kNumWt - 1);
                 wt_[i].setTable(tp);

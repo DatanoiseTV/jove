@@ -432,7 +432,8 @@ function OscWave({ morphId, pwId, crushId, on, wt, tableId, wtMorphId }) {
   const N1 = WT_NAMES.length - 1;
   let wi0 = 0, wi1 = 0, frac = 0, wtNorm = 1;
   if (wt) {
-    let tp = wtV * N1 + (wtMorphV + mAdd) * N1;
+    const base = wtV * N1;
+    let tp = base + (wtMorphV + mAdd) * (N1 - base); // span = tables above the base
     tp = Math.max(0, Math.min(N1, tp));
     wi0 = Math.floor(tp); wi1 = Math.min(N1, wi0 + 1); frac = tp - wi0;
     let pk = 1e-6;
@@ -1344,7 +1345,11 @@ function App() {
           <MixerPanel />
           <FilterPanel />
           <VoicingPanel />
-          <MasterPanel />
+          <div className="rightstack">
+            <EnvPanel n={1} name="AMP ENV" accent="#e0a85a" />
+            <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
+            <MasterPanel />
+          </div>
         </div>
       </div>
 
