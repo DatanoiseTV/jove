@@ -27,6 +27,9 @@ class SynthReverb
         const float k = sampleRate / 44100.0f; // Freeverb tunings are for 44.1 kHz
         static const int combTune[kNumComb] = {1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617};
         static const int apTune[kNumAp]     = {556, 441, 341, 225};
+        // input-diffusion allpasses (prime, decorrelated) smear transients before
+        // the tank so the tail is smooth instead of grainy/metallic.
+        static const int diffTune[kNumDiff] = {142, 107, 379, 277};
         const int        spread             = (int)(23 * k);
         for(int c = 0; c < kNumComb; ++c)
         {
@@ -39,9 +42,15 @@ class SynthReverb
         {
             int nL = (int)(apTune[a] * k);
             int nR = nL + spread;
-            apL_[a].init(nL);
-            apR_[a].init(nR);
+            apL_[a].init(nL, 0.5f);
+            apR_[a].init(nR, 0.5f);
         }
+        for(int d = 0; d < kNumDiff; ++d)
+            diff_[d].init((int)(diffTune[d] * k), 0.7f);
+        // pre-delay (~18 ms) — a touch of space before the tail builds.
+        preLen_ = (int)(0.018f * sampleRate) + 1;
+        pre_.assign((size_t)preLen_, 0.0f);
+        prePos_ = 0;
         reset();
     }
 
@@ -49,6 +58,9 @@ class SynthReverb
     {
         for(int c = 0; c < kNumComb; ++c) { combL_[c].clear(); combR_[c].clear(); }
         for(int a = 0; a < kNumAp; ++a)   { apL_[a].clear();   apR_[a].clear(); }
+        for(int d = 0; d < kNumDiff; ++d) diff_[d].clear();
+        std::fill(pre_.begin(), pre_.end(), 0.0f);
+        prePos_ = 0;
     }
 
     // size 0..1 -> room feedback; damp 0..1 -> HF absorption; mix 0..1 wet.
@@ -69,7 +81,15 @@ class SynthReverb
         {
             modPhase_ += modRate;
             if(modPhase_ >= 1.0f) modPhase_ -= 1.0f;
-            const float input = (L[i] + R[i]) * in_gain;
+            // pre-delay the mono send, then diffuse it through the input allpasses
+            float send = (L[i] + R[i]) * in_gain;
+            pre_[(size_t)prePos_] = send;
+            int rp = prePos_ - (preLen_ - 1);
+            if(rp < 0) rp += preLen_;
+            send = pre_[(size_t)rp];
+            if(++prePos_ >= preLen_) prePos_ = 0;
+            for(int d = 0; d < kNumDiff; ++d) send = diff_[d].process(send);
+            const float input = send;
             float wl = 0.0f, wr = 0.0f;
             for(int c = 0; c < kNumComb; ++c)
             {
@@ -91,6 +111,7 @@ class SynthReverb
   private:
     static constexpr int kNumComb = 8;
     static constexpr int kNumAp   = 4;
+    static constexpr int kNumDiff = 4; // input-diffusion allpasses
 
     static inline float clamp01(float v) noexcept { return v < 0 ? 0 : (v > 1 ? 1 : v); }
 
@@ -136,18 +157,20 @@ class SynthReverb
     {
         std::vector<float> buf;
         int    len = 0, pos = 0;
-        void   init(int n)
+        float  coef = 0.5f;
+        void   init(int n, float c)
         {
             len = n < 1 ? 1 : n;
             buf.assign((size_t)len, 0.0f);
             pos = 0;
+            coef = c;
         }
         void clear() { std::fill(buf.begin(), buf.end(), 0.0f); }
         inline float process(float in) noexcept
         {
             const float bufout = buf[pos];
             const float out    = -in + bufout;
-            buf[pos] = in + bufout * 0.5f; // fixed allpass feedback
+            buf[pos] = in + bufout * coef;
             if(++pos >= len) pos = 0;
             return out;
         }
@@ -156,6 +179,9 @@ class SynthReverb
     float   sr_     = 48000.0f;
     Comb    combL_[kNumComb], combR_[kNumComb];
     Allpass apL_[kNumAp], apR_[kNumAp];
+    Allpass diff_[kNumDiff];           // input diffusion (mono, pre-tank)
+    std::vector<float> pre_;           // pre-delay line
+    int     preLen_ = 1, prePos_ = 0;
     float   roomfb_ = 0.84f;
     float   damp_   = 0.4f;
     float   mix_    = 0.0f;
