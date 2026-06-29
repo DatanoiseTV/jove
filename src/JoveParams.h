@@ -94,6 +94,9 @@ namespace jID
     inline constexpr auto fxReverb   = "fxReverb";
     inline constexpr auto fxDrive    = "fxDrive";
     inline constexpr auto driveTone  = "driveTone";
+    inline constexpr auto mbLow      = "mbLow";  // multiband saturation: low band
+    inline constexpr auto mbMid      = "mbMid";
+    inline constexpr auto mbHigh     = "mbHigh";
     // delay voicing
     inline constexpr auto delaySync     = "delaySync";
     inline constexpr auto delayDiv      = "delayDiv";
@@ -199,7 +202,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         // around the centre (where most detuning lives) while the extremes still
         // reach the ~19 st inharmonic-percussion tunings at the ends of the knob.
         fparam(jID::osc(i, "Detune"), n + "Detune",
-               [] { juce::NormalisableRange<float> r(-24.0f, 24.0f, 0.0f, 0.3f, true); return r; }(), 0.0f, "st");
+               [] { juce::NormalisableRange<float> r(-24.0f, 24.0f, 0.0f, 0.16f, true); return r; }(), 0.0f, "st");
         fparam(jID::osc(i, "Level"),  n + "Level", lin01, 1.0f);
         // bit-crush: 0 clean, up -> coarser quantisation for old-school DCO grit
         fparam(jID::osc(i, "Crush"),  n + "Bit Crush", lin01, 0.0f);
@@ -288,6 +291,9 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     // ---- FX ----
     fparam(jID::fxDrive, "Drive", lin01, 0.0f);
     fparam(jID::driveTone, "Drive Tone", bip, 0.0f);
+    fparam(jID::mbLow, "MB Sat Low", lin01, 0.0f);
+    fparam(jID::mbMid, "MB Sat Mid", lin01, 0.0f);
+    fparam(jID::mbHigh, "MB Sat High", lin01, 0.0f);
     fparam(jID::fxChorus, "Chorus", lin01, 0.3f);
     cparam(jID::chorusMode, "Chorus Mode", {"Chorus I", "Chorus II", "Ensemble", "Combine"}, 0);
     fparam(jID::chorusRate, "Chorus Rate", [] { auto r = FR(0.25f, 4.0f); r.setSkewForCentre(1.0f); return r; }(), 1.0f);
@@ -424,6 +430,9 @@ class PatchBinding
 
         p.fxDrive    = get(fxDrive);
         p.driveTone  = get(driveTone);
+        p.mbLow      = get(mbLow);
+        p.mbMid      = get(mbMid);
+        p.mbHigh     = get(mbHigh);
         p.fxChorus   = get(fxChorus);
         p.chorusMode = (int)get(chorusMode);
         p.chorusRate = get(chorusRate);
@@ -542,6 +551,9 @@ class PatchBinding
 
         set(fxDrive, p.fxDrive);
         set(driveTone, p.driveTone);
+        set(mbLow, p.mbLow);
+        set(mbMid, p.mbMid);
+        set(mbHigh, p.mbHigh);
         set(fxChorus, p.fxChorus);
         set(chorusMode, (float)p.chorusMode);
         set(chorusRate, p.chorusRate);

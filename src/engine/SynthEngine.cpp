@@ -19,6 +19,7 @@ void SynthEngine::prepare(float sampleRate, int blockSize) noexcept
     for(int i = 0; i < kNumLfo; ++i)
         lfo_[i].prepare(sampleRate, blockRate_);
     arp_.prepare(sampleRate);
+    mbsat_.prepare(sampleRate);
     chorus_.prepare(sampleRate);
     phaser_.prepare((float)sampleRate);
     delay_.prepare(sampleRate);
@@ -456,10 +457,15 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // unison/voice-steal transient under full scale instead of letting it clip
     // hard into the FX chain. This is the analog-console "glue" a real polysynth
     // mix bus has, and it keeps the artifact gate (peak < 1.0) satisfied.
+    // 3-band saturation on the filtered bus (band-targeted grit), then the glue clip
+    mbsat_.setDrive(p.mbLow, p.mbMid, p.mbHigh);
+    const bool mbActive = mbsat_.active();
     for(int i = 0; i < n; ++i)
     {
-        outL[i] = softSat(outL[i]);
-        outR[i] = softSat(outR[i]);
+        float l = outL[i], r = outR[i];
+        if(mbActive) { l = mbsat_.process(0, l); r = mbsat_.process(1, r); }
+        outL[i] = softSat(l);
+        outR[i] = softSat(r);
     }
 
     // Juno-style ensemble chorus on the voice bus (true-bypass at mix 0). A fixed

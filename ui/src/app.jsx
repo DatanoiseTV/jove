@@ -62,6 +62,7 @@ function Knob({ id, label, bipolar = false, big = false, small = false }) {
   const [v, set, scaled] = B.useSlider(id);
   const ref = useRef(null);
   const drag = useRef(null);
+  const lastClick = useRef(0);
   const A0 = -135, SWEEP = 270;
   const D = big ? 58 : (small ? 40 : 48), c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
   const ang = A0 + v * SWEEP;
@@ -75,6 +76,11 @@ function Knob({ id, label, bipolar = false, big = false, small = false }) {
   const fillFrom = bipolar ? A0 + 0.5 * SWEEP : A0;
   const down = (e) => {
     e.preventDefault();
+    // manual double-click reset (mousedown preventDefault suppresses dblclick):
+    // bipolar knobs reset to centre (0), unipolar to 0.
+    const now = e.timeStamp || 0;
+    if (now - lastClick.current < 330) { lastClick.current = 0; set(bipolar ? 0.5 : 0); return; }
+    lastClick.current = now;
     const p = e.touches ? e.touches[0] : e;
     drag.current = { y: p.clientY, v };
     const move = (ev) => {
@@ -866,11 +872,17 @@ function ArpPanel() {
 
 function DrivePanel() {
   return (
-    <Panel title="DRIVE">
+    <Panel title="DRIVE · MULTIBAND SAT">
       <DriveCurve />
       <div className="knobs spread">
-        <Knob id="fxDrive" label="DRIVE" big />
-        <Knob id="driveTone" label="TONE" bipolar big />
+        <Knob id="fxDrive" label="DRIVE" />
+        <Knob id="driveTone" label="TONE" bipolar />
+      </div>
+      <div className="cl">MULTIBAND SATURATION</div>
+      <div className="knobs spread">
+        <Knob id="mbLow" label="LOW" small />
+        <Knob id="mbMid" label="MID" small />
+        <Knob id="mbHigh" label="HIGH" small />
       </div>
     </Panel>
   );

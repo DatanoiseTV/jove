@@ -9,6 +9,7 @@
 
 #include "Arpeggiator.h"
 #include "Chorus.h"
+#include "MultibandSat.h"
 #include "SynthConfig.h"
 #include "SynthDelay.h"
 #include "SynthLfo.h"
@@ -129,6 +130,7 @@ class SynthEngine
     Voice             voice_[kMaxVoices];
     SynthLfo          lfo_[kNumLfo];
     Arpeggiator       arp_;
+    MultibandSat      mbsat_;             // 3-band saturation on the filtered bus
     Chorus            chorus_;            // Juno-style ensemble on the voice bus
     StereoPhaser      phaser_;            // 6-stage all-pass phaser (ported from Doobie)
     SynthDelay        delay_;             // clean tempo-synced delay (no pitch mod)

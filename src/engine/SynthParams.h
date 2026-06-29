@@ -300,6 +300,7 @@ struct SynthPatch
     float fxReverb = 0.25f;
     float fxDrive  = 0.0f;
     float driveTone = 0.0f; // bipolar pre-drive tilt (-dark .. +bright)
+    float mbLow = 0.0f, mbMid = 0.0f, mbHigh = 0.0f; // 3-band saturation drives
     float width    = 0.5f;  // master stereo width (0 mono, 0.5 normal, 1 wide)
 
     // Delay voicing (the built-in clean delay; mix is fxDelay above).
