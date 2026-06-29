@@ -203,8 +203,45 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // a preset just loaded -> release orphaned/stuck voices (held notes survive
     // for live audition; see engine.onPresetLoaded). Done after the new patch is
     // read so the arp-on guard sees the loaded patch.
-    if(presetLoadPending.exchange(false, std::memory_order_relaxed))
+    const bool presetJustLoaded = presetLoadPending.exchange(false, std::memory_order_relaxed);
+    if(presetJustLoaded)
         engine.onPresetLoaded();
+
+    // Audition: when on, auto-play a looping test phrase (arpeggio + chord) so the
+    // user can browse presets by ear. Restarts on each preset load.
+    {
+        const bool aud = apvts.getRawParameterValue(jID::auditionOn)->load() > 0.5f;
+        if(aud != auditionOn_)
+        {
+            auditionOn_ = aud;
+            auditionPos_ = 0;
+            engine.allNotesOff();
+        }
+        if(aud && presetJustLoaded) { auditionPos_ = 0; engine.allNotesOff(); }
+        if(aud)
+        {
+            const double sr = sampleRate;
+            const long loopLen = (long) (3.2 * sr);
+            // {time s, note-on?, midi note}; velocity fixed. Arp run, then a chord.
+            static const struct { double t; bool on; int note; } kPat[] = {
+                {0.00, true, 48}, {0.22, false, 48}, {0.25, true, 52}, {0.47, false, 52},
+                {0.50, true, 55}, {0.72, false, 55}, {0.75, true, 60}, {0.97, false, 60},
+                {1.10, true, 48}, {1.10, true, 52}, {1.10, true, 55}, {1.10, true, 60},
+                {2.10, false, 48}, {2.10, false, 52}, {2.10, false, 55}, {2.10, false, 60} };
+            const long bStart = auditionPos_, bEnd = auditionPos_ + numSamples;
+            for(const auto& e : kPat)
+            {
+                const long es = (long) (e.t * sr);
+                if(es >= bStart && es < bEnd)
+                {
+                    if(e.on) engine.noteOn(e.note, 0.85f);
+                    else     engine.noteOff(e.note);
+                }
+            }
+            auditionPos_ += numSamples;
+            if(auditionPos_ >= loopLen) { auditionPos_ = 0; engine.allNotesOff(); }
+        }
+    }
 
     if(osFactor <= 1 || oversampling == nullptr || numCh < 2)
     {

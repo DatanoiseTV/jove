@@ -1177,6 +1177,7 @@ function TopBar() {
         <button className="tbtn" onClick={() => init()}>INIT</button>
         <button className="tbtn" onClick={() => setSaving(true)}>SAVE</button>
         <button className="tbtn" onClick={() => setBrowse(true)}>BROWSE</button>
+        <Switch id="auditionOn" label="LISTEN" />
       </div>
       <div className="tb-fx">
         <span className="cl">FX</span>

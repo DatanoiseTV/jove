@@ -119,6 +119,10 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     bool mpeOn_        = false;
     int  mpeBendRange_ = 48;
 
+    // audition: auto-play a looping test phrase so presets can be browsed by ear
+    bool auditionOn_  = false;
+    long auditionPos_ = 0; // sample position within the phrase loop
+
     std::atomic<int>   activeVoices { 0 };
     std::atomic<int>   lastMidiNote { -1 };
     std::array<std::atomic<float>, 2> outputLevel {};

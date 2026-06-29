@@ -34,6 +34,7 @@ namespace jID
     inline constexpr auto quality      = "quality";     // oversampling: Eco/HQ/Ultra
     inline constexpr auto mpeOn        = "mpeOn";        // MPE per-note expression mode
     inline constexpr auto mpeBendRange = "mpeBendRange"; // per-note bend range (st)
+    inline constexpr auto auditionOn   = "auditionOn";   // auto-play a test phrase to browse by ear
     // master FX enables (global quick-bypass; not patch state)
     inline constexpr auto fxDriveOn    = "fxDriveOn";
     inline constexpr auto fxChorusOn   = "fxChorusOn";
@@ -192,6 +193,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     // so they stay out of PatchBinding and never touch param_roundtrip).
     bparam(jID::mpeOn, "MPE", false);
     iparam(jID::mpeBendRange, "MPE Bend Range", 1, 96, 48); // MPE default 48 st
+    bparam(jID::auditionOn, "Audition", false); // auto-play a test phrase to browse by ear
     // master FX enables — global quick-bypass toggles (default on). Not patch
     // state, so they persist while auditioning presets and never touch round-trip.
     bparam(jID::fxDriveOn, "Drive On", true);
