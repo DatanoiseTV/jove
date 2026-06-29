@@ -49,8 +49,8 @@ class AdsrEnv
     }
 
     // times in seconds, sustain 0..1
-    void setAttack(float s) noexcept { aCoef_ = coef(s); }
-    void setDecay(float s) noexcept { dCoef_ = coef(s); }
+    void setAttack(float s) noexcept { aCoef_ = attCoef(s); }
+    void setDecay(float s) noexcept { dCoef_ = decCoef(s); }
     void setSustain(float v) noexcept { sustain_ = clamp01(v); }
     // Release uses a coefficient that reaches near-silence (kEps) in `s` seconds,
     // so the release TIME a patch sets is the actual time-to-silence. The plain
@@ -119,6 +119,24 @@ class AdsrEnv
         if(seconds < 0.0005f)
             seconds = 0.0005f; // ~0.5 ms floor -> click-free "instant"
         return std::exp(-1.0f / (seconds * sr_));
+    }
+
+    // Attack reaches 1.0 in `seconds` (target time, not time-constant). The curve
+    // aims past 1.0 at kAttackAim, so when it crosses 1.0 the remaining span is
+    // (kAttackAim-1)/kAttackAim; size the coefficient to consume that in `seconds`.
+    inline float attCoef(float seconds) noexcept
+    {
+        if(seconds < 0.0005f) seconds = 0.0005f;
+        const float frac = (kAttackAim - 1.0f) / kAttackAim; // remaining at level 1.0
+        return std::exp(std::log(frac) / (seconds * sr_));
+    }
+
+    // Decay reaches ~99% of the way to sustain in `seconds` (target time), so the
+    // decay number is the audible decay length rather than a ~5x-longer constant.
+    inline float decCoef(float seconds) noexcept
+    {
+        if(seconds < 0.0005f) seconds = 0.0005f;
+        return std::exp(std::log(0.01f) / (seconds * sr_));
     }
 
     // One-pole coefficient that decays from 1.0 to the silence floor kEps in
