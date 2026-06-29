@@ -136,11 +136,16 @@ button, select, input { font-family: inherit; color: inherit; }
 /* right column on the VOICE screen: 2 compact envelopes above a small master */
 .rightstack { min-height: 0; display: flex; flex-direction: column; gap: 10px; }
 .rightstack > .panel { flex: 1 1 0; min-height: 0; }
-.rightstack .pbody { gap: 6px; }
-.rightstack .viz.env { height: 38px; }
+.rightstack > .panel { overflow: hidden; }
+.rightstack .ph { padding: 5px 12px; }
+.rightstack .pbody { gap: 4px; padding: 7px 12px 8px; }
+.rightstack .viz.env { height: 30px; }
 .rightstack .knobs { gap: 4px; flex-wrap: nowrap; }
-.rightstack .knob svg { width: 36px; height: 36px; }
-.rightstack .smeter { height: 16px; }
+.rightstack .knob svg { width: 33px; height: 33px; }
+.rightstack .k-lab { font-size: 8px; }
+.rightstack .k-val { font-size: 8px; }
+.rightstack .smeter { height: 14px; }
+.rightstack .vu-bar { height: 6px; }
 .oscrow .pbody { flex: 1; justify-content: space-between; }
 /* safe center keeps content vertically centred when it fits. NB: do NOT set
    overflow on the generic band pbody — it traps dropdown popups (MAX POLY,
