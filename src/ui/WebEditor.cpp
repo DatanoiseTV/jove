@@ -129,7 +129,16 @@ JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
             })
         .withNativeFunction(juce::Identifier{"initPatch"},
             [this](const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion c)
-            { processor.getPresetManager().loadInit(); c(juce::var()); });
+            { processor.getPresetManager().loadInit(); c(juce::var()); })
+        // reset one parameter to its real default (double-click on a control)
+        .withNativeFunction(juce::Identifier{"resetParam"},
+            [this](const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            {
+                if(a.size() > 0)
+                    if(auto* prm = processor.getValueTreeState().getParameter(a[0].toString()))
+                        prm->setValueNotifyingHost(prm->getDefaultValue());
+                c(juce::var());
+            });
 
     // ---- generic relay creation: one per parameter, typed by its class ----
     for(auto* param : apvts.processor.getParameters())

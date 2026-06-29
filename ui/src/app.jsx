@@ -69,6 +69,8 @@ function Knob({ id, label, bipolar = false, big = false, small = false }) {
   const ref = useRef(null);
   const drag = useRef(null);
   const lastClick = useRef(0);
+  // reset to the param's REAL default (native), falling back to centre/zero
+  const reset = () => { try { B.nativeFn("resetParam")(id); } catch (_) { set(bipolar ? 0.5 : 0); } };
   const A0 = -135, SWEEP = 270;
   const D = big ? 58 : (small ? 40 : 48), c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
   const ang = A0 + v * SWEEP;
@@ -85,7 +87,7 @@ function Knob({ id, label, bipolar = false, big = false, small = false }) {
     // manual double-click reset (mousedown preventDefault suppresses dblclick):
     // bipolar knobs reset to centre (0), unipolar to 0.
     const now = e.timeStamp || 0;
-    if (now - lastClick.current < 330) { lastClick.current = 0; set(bipolar ? 0.5 : 0); return; }
+    if (now - lastClick.current < 330) { lastClick.current = 0; reset(); return; }
     lastClick.current = now;
     const p = e.touches ? e.touches[0] : e;
     drag.current = { y: p.clientY, v };
@@ -126,7 +128,7 @@ function Knob({ id, label, bipolar = false, big = false, small = false }) {
 
   return (
     <div className={"knob" + (big ? " big" : "") + (minfo ? " modded" : "")} onMouseDown={down}
-         onTouchStart={down} onWheel={wheel} onDoubleClick={() => set(bipolar ? 0.5 : 0)} title={label}>
+         onTouchStart={down} onWheel={wheel} onDoubleClick={reset} title={label}>
       <svg width={D} height={D} viewBox={`0 0 ${D} ${D}`}>
         <path d={arc(A0, A0 + SWEEP)} className="k-track" strokeWidth={sw} />
         {minfo && <path d={arc(modA0, modA1)} className="k-mod" strokeWidth={sw + 2.5} />}
