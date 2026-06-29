@@ -393,11 +393,12 @@ function EnvViz({ n }) {
 // the curve at the engine-reported phase so motion is still visible and correct.
 function LfoScope({ n }) {
   const [wave] = B.useChoice("lfo" + n + "Wave");
-  const depth = B.useSlider("lfo" + n + "Depth")[0] * 2;   // 0..2
-  const offset = B.useSlider("lfo" + n + "Offset")[2]();   // -1..1 (bias)
+  // OFFSET shifts the whole wave (the engine adds it as a DC bias); shown but
+  // bounded so the trace never clips. DEPTH is its own knob, not drawn as scale.
+  const offset = Math.max(-0.45, Math.min(0.45, B.useSlider("lfo" + n + "Offset")[2]() * 0.45));
   const meters = B.useEvent("meters", { lfoPhase: [0, 0, 0] });
   const ph = (meters.lfoPhase && meters.lfoPhase[n - 1]) || 0;
-  const W = 140, H = 26, cy = H / 2, amp = H / 2 - 2.5, cycles = 2;
+  const W = 140, H = 26, cy = H / 2, amp = (H / 2 - 2.5) * 0.55, mid = cy - offset * (H / 2 - 2.5), cycles = 2;
   const shape = (t) => {
     t = t - Math.floor(t);
     switch (wave) {
@@ -409,28 +410,26 @@ function LfoScope({ n }) {
       default: return 0;
     }
   };
-  // actual LFO output = shape*depth + offset (matches the engine), clamped to view
-  const val = (s) => Math.max(-1, Math.min(1, s * depth + offset));
   const phPos = ((ph * cycles) % cycles) / cycles; // 0..1 across the view
   const phx = phPos * W;
   let pointStr, phy;
   if (wave === 5) {                       // sample & hold: clean staircase
     const steps = 4 * cycles, sp = [];
     for (let i = 0; i < steps; i++) {
-      const yy = (cy - val(SNH_LEVELS[i % SNH_LEVELS.length]) * amp).toFixed(1);
+      const yy = (mid - SNH_LEVELS[i % SNH_LEVELS.length] * amp).toFixed(1);
       sp.push((i / steps * W).toFixed(1) + "," + yy, ((i + 1) / steps * W).toFixed(1) + "," + yy);
     }
     pointStr = sp.join(" ");
     const si = Math.min(steps - 1, Math.floor(phPos * steps));
-    phy = cy - val(SNH_LEVELS[si % SNH_LEVELS.length]) * amp;
+    phy = mid - SNH_LEVELS[si % SNH_LEVELS.length] * amp;
   } else {
     const N = 96, pts = [];
     for (let i = 0; i <= N; i++) {
       const t = (i / N) * cycles;
-      pts.push(((i / N) * W).toFixed(1) + "," + (cy - val(shape(t)) * amp).toFixed(1));
+      pts.push(((i / N) * W).toFixed(1) + "," + (mid - shape(t) * amp).toFixed(1));
     }
     pointStr = pts.join(" ");
-    phy = cy - val(shape(ph * cycles)) * amp;
+    phy = mid - shape(ph * cycles) * amp;
   }
   return (
     <svg className="viz scope" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
