@@ -102,6 +102,7 @@ namespace jID
     inline constexpr auto fxReverb   = "fxReverb";
     inline constexpr auto fxDrive    = "fxDrive";
     inline constexpr auto driveTone  = "driveTone";
+    inline constexpr auto driveMode  = "driveMode";
     inline constexpr auto mbLow      = "mbLow";  // multiband saturation: low band
     inline constexpr auto mbMid      = "mbMid";
     inline constexpr auto mbHigh     = "mbHigh";
@@ -346,6 +347,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     // ---- FX ----
     fparam(jID::fxDrive, "Drive", lin01, 0.0f);
     fparam(jID::driveTone, "Drive Tone", bip, 0.0f);
+    cparam(jID::driveMode, "Drive Model", {"SOFT", "TUBE", "DIODE", "FOLD", "FUZZ"}, 0);
     fparam(jID::mbLow, "MB Sat Low", lin01, 0.0f);
     fparam(jID::mbMid, "MB Sat Mid", lin01, 0.0f);
     fparam(jID::mbHigh, "MB Sat High", lin01, 0.0f);
@@ -506,6 +508,7 @@ class PatchBinding
 
         p.fxDrive    = get(fxDrive);
         p.driveTone  = get(driveTone);
+        p.driveMode  = (int) get(driveMode);
         p.mbLow      = get(mbLow);
         p.mbMid      = get(mbMid);
         p.mbHigh     = get(mbHigh);
@@ -648,6 +651,7 @@ class PatchBinding
 
         set(fxDrive, p.fxDrive);
         set(driveTone, p.driveTone);
+        set(driveMode, (float) p.driveMode);
         set(mbLow, p.mbLow);
         set(mbMid, p.mbMid);
         set(mbHigh, p.mbHigh);

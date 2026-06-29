@@ -639,14 +639,27 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // made the old chain warble out of tune.
     if(fxDriveOn_ && (p.fxDrive > 0.001f || std::fabs(p.driveTone) > 0.001f))
     {
-        const float g = 1.0f + p.fxDrive * 4.0f;
+        const float g = 1.0f + p.fxDrive * 6.0f;
         const float tone = p.driveTone; // -1 dark .. +1 bright, tilt around a LP
+        const int   dm = p.driveMode;
+        // selectable drive models: SOFT cubic, TUBE asymmetric (even harmonics),
+        // DIODE asymmetric clip, FOLD reflective wavefolder, FUZZ hard tanh.
+        auto shape = [dm](float x) noexcept -> float {
+            switch(dm)
+            {
+                case 1: return (std::tanh(x * 1.6f + 0.25f) - std::tanh(0.25f)) * 0.92f; // tube
+                case 2: return x >= 0.0f ? std::tanh(x * 2.2f) : 0.7f * std::tanh(x * 1.1f); // diode
+                case 3: { float y = x; for(int k = 0; k < 3; ++k) { if(y > 1.0f) y = 2.0f - y; else if(y < -1.0f) y = -2.0f - y; } return y; } // fold
+                case 4: return std::tanh(x * 6.0f); // fuzz
+                default: { const float c = x < -1.5f ? -1.5f : (x > 1.5f ? 1.5f : x); return c - (4.0f / 27.0f) * c * c * c; } // soft
+            }
+        };
         for(int i = 0; i < n; ++i)
         {
             toneZL_ += 0.25f * (outL[i] - toneZL_);
             toneZR_ += 0.25f * (outR[i] - toneZR_);
-            outL[i] = softSat((outL[i] + tone * (outL[i] - toneZL_)) * g);
-            outR[i] = softSat((outR[i] + tone * (outR[i] - toneZR_)) * g);
+            outL[i] = shape((outL[i] + tone * (outL[i] - toneZL_)) * g);
+            outR[i] = shape((outR[i] + tone * (outR[i] - toneZR_)) * g);
         }
     }
 

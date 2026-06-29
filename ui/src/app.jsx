@@ -993,6 +993,7 @@ function DrivePanel() {
         <Knob id="mbMid" label="MB MID" small />
         <Knob id="mbHigh" label="MB HIGH" small />
       </div>
+      <Seg id="driveMode" options={["SOFT", "TUBE", "DIODE", "FOLD", "FUZZ"]} label="MODEL" />
     </Panel>
   );
 }
