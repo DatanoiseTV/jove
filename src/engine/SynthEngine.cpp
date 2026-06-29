@@ -162,7 +162,7 @@ void SynthEngine::playNote(int note, float velocity) noexcept
     if(activeVoices() == 0)
         for(int i = 0; i < kNumLfo; ++i)
             if(patch_->lfo[i].retrig)
-                lfo_[i].retrigger(patch_->lfo[i].phase);
+                lfo_[i].retrigger(); // phase positioning is the continuous setPhase() offset
     pushHeld(note, (int)(velocity * 127.0f));
     const int   mode = patch_->voiceMode;
     const float newHz = midiToHz((float)note);
@@ -437,6 +437,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         lfo_[i].setFade(lp.fade);
         lfo_[i].setDelay(lp.delay);
         lfo_[i].setOffset(lp.offset);
+        lfo_[i].setPhase(lp.phase);
         lfo_[i].advance();
     }
 

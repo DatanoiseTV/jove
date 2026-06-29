@@ -56,6 +56,11 @@ class SynthLfo
     // Bipolar DC bias added to the output so the LFO can sweep around a point
     // other than centre (e.g. an upward-only filter wobble).
     void setOffset(float o) noexcept { offset_ = o; }
+    // Phase offset (0..1 of a cycle) applied to the shape readout every block, so
+    // turning Phase shifts the wave continuously — it decorrelates two LFOs at the
+    // same rate and visibly/audibly jogs a free-running LFO when moved (the old
+    // value only set a retrigger start phase, inaudible on a running LFO).
+    void setPhase(float p) noexcept { phaseOffset_ = p - std::floor(p); }
 
     // Advance one control block; returns the smoothed bipolar value * depth + offset.
     float advance() noexcept
@@ -95,14 +100,16 @@ class SynthLfo
     inline float shape() const noexcept
     {
         constexpr float twoPi = 6.2831853f;
+        float ph = (float) phase_ + phaseOffset_;
+        ph -= std::floor(ph);
         switch((LfoWave)wave_)
         {
-            case LfoWave::Sine: return std::sin(twoPi * phase_);
+            case LfoWave::Sine: return std::sin(twoPi * ph);
             case LfoWave::Triangle:
-                return phase_ < 0.5f ? (4.0f * phase_ - 1.0f) : (3.0f - 4.0f * phase_);
-            case LfoWave::SawUp: return 2.0f * phase_ - 1.0f;
-            case LfoWave::SawDown: return 1.0f - 2.0f * phase_;
-            case LfoWave::Square: return phase_ < 0.5f ? 1.0f : -1.0f;
+                return ph < 0.5f ? (4.0f * ph - 1.0f) : (3.0f - 4.0f * ph);
+            case LfoWave::SawUp: return 2.0f * ph - 1.0f;
+            case LfoWave::SawDown: return 1.0f - 2.0f * ph;
+            case LfoWave::Square: return ph < 0.5f ? 1.0f : -1.0f;
             case LfoWave::SampleHold: return held_;
             default: return 0.0f;
         }
@@ -125,6 +132,7 @@ class SynthLfo
     float    held_      = 0.0f;
     float    out_       = 0.0f;
     float    offset_    = 0.0f;
+    float    phaseOffset_ = 0.0f; // readout phase offset (0..1)
     float    smooth_    = 0.0f;
     float    fadeGain_  = 1.0f;
     float    fadeInc_   = 1.0f;
