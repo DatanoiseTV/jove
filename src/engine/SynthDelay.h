@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "../dub/Svf.h"
 #include <cmath>
 #include <vector>
 
@@ -27,7 +28,17 @@ class SynthDelay
         maxLen_ = (int)(2.0f * sampleRate) + 4; // up to 2 s
         bufL_.assign((size_t)maxLen_, 0.0f);
         bufR_.assign((size_t)maxLen_, 0.0f);
+        pfL_.prepare(sampleRate);
+        pfR_.prepare(sampleRate);
         reset();
+    }
+
+    // pre-filter in the feedback path: type 0 LP / 1 HP / 2 BP, freq Hz, q 0..1
+    void setFilter(int type, float freqHz, float q) noexcept
+    {
+        pfType_ = (type < 0 || type > 2) ? 0 : type;
+        pfL_.setParams(freqHz, q < 0.0f ? 0.0f : (q > 0.95f ? 0.95f : q));
+        pfR_.copyCoefsFrom(pfL_);
     }
 
     void reset() noexcept
@@ -66,21 +77,23 @@ class SynthDelay
             const float dL = readInterp(bufL_.data(), curL_);
             const float dR = readInterp(bufR_.data(), curR_);
 
-            // feedback with a low-pass in the loop
+            // feedback path: gentle one-pole damp, then the LP/BP/HP pre-filter
             lpL_ += dcoef * (dL - lpL_);
             lpR_ += dcoef * (dR - lpR_);
+            const float fL = pfL_.process(lpL_, pfType_);
+            const float fR = pfR_.process(lpR_, pfType_);
 
             float wL, wR;
             if(ping_)
             {
                 // cross the feedback so repeats bounce L<->R
-                wL = L[i] + fb_ * lpR_;
-                wR = R[i] + fb_ * lpL_;
+                wL = L[i] + fb_ * fR;
+                wR = R[i] + fb_ * fL;
             }
             else
             {
-                wL = L[i] + fb_ * lpL_;
-                wR = R[i] + fb_ * lpR_;
+                wL = L[i] + fb_ * fL;
+                wR = R[i] + fb_ * fR;
             }
             // Soft-saturate the recirculating signal. fb < 1 is geometrically
             // stable for a bounded input, but a sustained near-self-oscillating
@@ -126,6 +139,8 @@ class SynthDelay
     float  tgtL_ = 12000.0f, tgtR_ = 12000.0f;
     float  curL_ = 12000.0f, curR_ = 12000.0f;
     float  lpL_ = 0.0f, lpR_ = 0.0f;
+    doobie::Svf pfL_, pfR_;       // feedback pre-filter (LP/BP/HP)
+    int    pfType_ = 0;
     float  fb_   = 0.35f;
     float  damp_ = 0.4f;
     float  mix_  = 0.0f;

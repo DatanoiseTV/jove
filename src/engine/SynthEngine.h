@@ -139,6 +139,7 @@ class SynthEngine
     // output DC-blocker state (one-pole high-pass per channel)
     float             dcxL_ = 0.0f, dcyL_ = 0.0f, dcxR_ = 0.0f, dcyR_ = 0.0f;
     float             toneZL_ = 0.0f, toneZR_ = 0.0f; // drive-tone tilt LP state
+    float             limEnv_ = 0.0f; // master limiter peak-envelope follower
 
     float sr_        = 48000.0f;
     int   blockSize_ = 48;

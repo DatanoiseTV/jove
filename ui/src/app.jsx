@@ -890,15 +890,18 @@ function DelayPanel() {
     <Panel title="DELAY" accent="#6ac0d0">
       <DelayViz />
       <div className="knobs spread">
-        <Knob id="fxDelay" label="MIX" />
+        <Knob id="fxDelay" label="MIX" small />
         {sync ? <Sel id="delayDiv" options={DIVISIONS} label="TIME" />
-              : <Knob id="delayTimeMs" label="TIME" />}
-        <Knob id="delayFeedback" label="FBK" />
-        <Knob id="delayTone" label="TONE" />
+              : <Knob id="delayTimeMs" label="TIME" small />}
+        <Knob id="delayFeedback" label="FBK" small />
+        <Knob id="delayTone" label="TONE" small />
+        <Knob id="delayFltFreq" label="FLT FREQ" small />
+        <Knob id="delayFltQ" label="FLT Q" small />
       </div>
-      <div className="row">
+      <div className="row between">
+        <Seg id="delayFltType" options={["LP", "HP", "BP"]} label="FILTER" />
         <Switch id="delaySync" label="SYNC" />
-        <Switch id="delayPing" label="PING-PONG" />
+        <Switch id="delayPing" label="PING" />
       </div>
     </Panel>
   );

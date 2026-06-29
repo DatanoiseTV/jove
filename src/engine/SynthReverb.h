@@ -63,14 +63,20 @@ class SynthReverb
         const float d1 = damp_ * 0.4f;       // comb damping
         const float d2 = 1.0f - d1;
         const float in_gain = 0.015f;        // Freeverb fixed input scale
+        const float modRate = 0.7f / sr_;    // ~0.7 Hz tail modulation
+        const float modDepth = 7.0f;         // +/- samples
         for(int i = 0; i < n; ++i)
         {
+            modPhase_ += modRate;
+            if(modPhase_ >= 1.0f) modPhase_ -= 1.0f;
             const float input = (L[i] + R[i]) * in_gain;
             float wl = 0.0f, wr = 0.0f;
             for(int c = 0; c < kNumComb; ++c)
             {
-                wl += combL_[c].process(input, roomfb_, d1, d2);
-                wr += combR_[c].process(input, roomfb_, d1, d2);
+                const float ml = modDepth * std::sin(6.2831853f * (modPhase_ + (float) c * 0.13f));
+                const float mr = modDepth * std::sin(6.2831853f * (modPhase_ + (float) c * 0.13f + 0.5f));
+                wl += combL_[c].process(input, roomfb_, d1, d2, ml);
+                wr += combR_[c].process(input, roomfb_, d1, d2, mr);
             }
             for(int a = 0; a < kNumAp; ++a)
             {
@@ -105,9 +111,14 @@ class SynthReverb
             std::fill(buf.begin(), buf.end(), 0.0f);
             store = 0.0f;
         }
-        inline float process(float in, float fb, float d1, float d2) noexcept
+        inline float process(float in, float fb, float d1, float d2, float modSamp) noexcept
         {
-            float out = buf[pos];
+            // fractional, slowly-modulated read -> detunes the tail so it shimmers
+            // like a real room instead of ringing metallically.
+            float rp = (float) pos - modSamp;
+            while(rp < 0.0f) rp += (float) len;
+            const int i0 = (int) rp, i1 = (i0 + 1) % len;
+            const float out = buf[i0] + (buf[i1] - buf[i0]) * (rp - (float) i0);
             store = out * d2 + store * d1; // damping low-pass
             buf[pos] = in + store * fb;
             if(++pos >= len) pos = 0;
@@ -142,5 +153,6 @@ class SynthReverb
     float   roomfb_ = 0.84f;
     float   damp_   = 0.4f;
     float   mix_    = 0.0f;
+    float   modPhase_ = 0.0f; // slow tail-modulation phase
 };
 } // namespace jove

@@ -303,6 +303,9 @@ struct SynthPatch
     float delayFeedback = 0.42f;
     float delayTone     = 0.45f;  // feedback-path damping (0 bright .. 1 dark)
     bool  delayPing     = true;   // cross feedback L<->R
+    int   delayFltType  = 0;      // feedback pre-filter: 0 LP / 1 HP / 2 BP
+    float delayFltFreq  = 12000.0f;
+    float delayFltQ     = 0.2f;
 
     // Reverb voicing (mix is fxReverb above).
     float reverbSize    = 0.6f;   // tail length / room feedback

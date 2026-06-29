@@ -95,6 +95,9 @@ namespace jID
     inline constexpr auto delayFeedback = "delayFeedback";
     inline constexpr auto delayTone     = "delayTone";
     inline constexpr auto delayPing     = "delayPing";
+    inline constexpr auto delayFltType  = "delayFltType";
+    inline constexpr auto delayFltFreq  = "delayFltFreq";
+    inline constexpr auto delayFltQ     = "delayFltQ";
     // reverb voicing
     inline constexpr auto reverbSize    = "reverbSize";
     inline constexpr auto reverbTone    = "reverbTone";
@@ -288,6 +291,9 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::delayFeedback, "Delay Feedback", lin01, 0.42f);
     fparam(jID::delayTone, "Delay Tone", lin01, 0.45f);
     bparam(jID::delayPing, "Delay Ping-Pong", true);
+    cparam(jID::delayFltType, "Delay Filter", {"LP", "HP", "BP"}, 0);
+    fparam(jID::delayFltFreq, "Delay Filter Freq", [] { auto r = FR(40.0f, 18000.0f); r.setSkewForCentre(1200.0f); return r; }(), 12000.0f, "Hz");
+    fparam(jID::delayFltQ, "Delay Filter Q", lin01, 0.2f);
     fparam(jID::fxReverb, "Reverb", lin01, 0.25f);
     fparam(jID::reverbSize, "Reverb Size", lin01, 0.6f);
     fparam(jID::reverbTone, "Reverb Tone", lin01, 0.4f);
@@ -416,6 +422,9 @@ class PatchBinding
         p.delayFeedback = get(delayFeedback);
         p.delayTone     = get(delayTone);
         p.delayPing     = get(delayPing) > 0.5f;
+        p.delayFltType  = (int) get(delayFltType);
+        p.delayFltFreq  = get(delayFltFreq);
+        p.delayFltQ     = get(delayFltQ);
         p.reverbSize    = get(reverbSize);
         p.reverbTone    = get(reverbTone);
     }
@@ -525,6 +534,9 @@ class PatchBinding
         set(delayFeedback, p.delayFeedback);
         set(delayTone, p.delayTone);
         set(delayPing, p.delayPing ? 1.0f : 0.0f);
+        set(delayFltType, (float) p.delayFltType);
+        set(delayFltFreq, p.delayFltFreq);
+        set(delayFltQ, p.delayFltQ);
         set(reverbSize, p.reverbSize);
         set(reverbTone, p.reverbTone);
     }

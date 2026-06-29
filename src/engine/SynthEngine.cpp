@@ -531,6 +531,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     delay_.setPingPong(p.delayPing);
     delay_.setFeedback(p.delayFeedback);
     delay_.setDamp(p.delayTone);
+    delay_.setFilter(p.delayFltType, p.delayFltFreq, p.delayFltQ);
     delay_.setMix(p.fxDelay);
     delay_.process(outL, outR, n);
 
@@ -556,13 +557,18 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         }
     }
 
-    // Master limiter: a final soft-clip on each channel so the FX sums and the
-    // stereo widener can never overshoot the converter. Near-linear below ~0.5,
-    // so it's transparent on normal levels and only tames peaks.
+    // Master limiter: a transparent peak limiter (fast attack, slow release)
+    // pulls loud material under the ceiling so it never reaches the clipper, then
+    // a gentle soft-clip guarantees the converter feed stays in range.
+    constexpr float ceiling = 0.92f;
     for(int i = 0; i < n; ++i)
     {
-        outL[i] = softSat(outL[i]);
-        outR[i] = softSat(outR[i]);
+        const float peak = std::max(std::fabs(outL[i]), std::fabs(outR[i]));
+        if(peak > limEnv_) limEnv_ += 0.5f * (peak - limEnv_);      // fast attack
+        else               limEnv_ += 0.0006f * (peak - limEnv_);  // slow release (~30 ms)
+        const float gr = limEnv_ > ceiling ? ceiling / limEnv_ : 1.0f;
+        outL[i] = softSat(outL[i] * gr);
+        outR[i] = softSat(outR[i] * gr);
     }
 }
 
