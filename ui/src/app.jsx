@@ -544,12 +544,21 @@ function FilterCurve() {
     pts.push(((i / N) * W).toFixed(1) + "," + (H - 2 - y * (H - 4)).toFixed(1));
   }
   const fcx = (Math.log2(fc) - fmin) / (fmax - fmin) * W;
+  const xOf = (f) => (Math.log2(f) - fmin) / (fmax - fmin) * W;
+  const hzMarks = [100, 1000, 10000];
   return (
-    <svg className="viz filter" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-      <polygon className="fillz" points={`0,${H} ${pts.join(" ")} ${W},${H}`} />
-      <polyline points={pts.join(" ")} />
-      <line x1={fcx.toFixed(1)} y1="0" x2={fcx.toFixed(1)} y2={H} className="mark" />
-    </svg>
+    <div className="filtviz">
+      <svg className="viz filter" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+        {hzMarks.map((f, i) => <line key={i} x1={xOf(f).toFixed(1)} y1="0" x2={xOf(f).toFixed(1)} y2={H} className="hzgrid" />)}
+        <polygon className="fillz" points={`0,${H} ${pts.join(" ")} ${W},${H}`} />
+        <polyline points={pts.join(" ")} />
+        <line x1={fcx.toFixed(1)} y1="0" x2={fcx.toFixed(1)} y2={H} className="mark" />
+      </svg>
+      <div className="hzscale">
+        {hzMarks.map((f, i) => <span key={i} style={{ left: (xOf(f) / W * 100).toFixed(1) + "%" }}>{f >= 1000 ? (f / 1000) + "k" : f}</span>)}
+        <span className="hzcur" style={{ left: Math.max(0, Math.min(100, fcx / W * 100)).toFixed(1) + "%" }}>{fc >= 1000 ? (fc / 1000).toFixed(1) + "k" : Math.round(fc)}</span>
+      </div>
+    </div>
   );
 }
 
@@ -662,10 +671,8 @@ function MixerPanel() {
 function FilterPanel() {
   return (
     <Panel title="FILTER" accent="#5ad0e0">
-      <div className="row">
-        <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
-        <FilterCurve />
-      </div>
+      <Seg id="filterMode" options={FILTER_MODES} label="MODE" />
+      <FilterCurve />
       <div className="knobs">
         <Knob id="cutoff" label="CUTOFF" big />
         <Knob id="resonance" label="RESO" big />

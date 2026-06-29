@@ -153,8 +153,9 @@ button, select, input { font-family: inherit; color: inherit; }
   grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; }
 .fxgrid > .panel { min-height: 0; }
 .fxgrid .pbody { flex: 1; justify-content: flex-start; gap: 12px; }
-/* the hero viz grows to fill the panel; knobs anchor at the bottom */
-.fxgrid .viz { flex: 1 1 auto; height: auto; min-height: 70px; }
+/* the hero viz grows to fill the panel; knobs anchor at the bottom. min-height
+   kept low so the chorus panel's extra MODE dropdown can't push past its cell. */
+.fxgrid .viz { flex: 1 1 auto; height: auto; min-height: 40px; }
 .viz .grid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .55; }
 .viz.delayv .bar { fill: var(--accent); }
 .viz.reverbv .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
@@ -272,6 +273,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .viz.oscwave .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .viz.oscwave polyline { stroke-width: 1.8; filter: drop-shadow(0 0 2.5px var(--accent)); }
 .viz.filter .fillz { fill: color-mix(in srgb, var(--accent) 9%, transparent); stroke: none; }
+.viz.filter .hzgrid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .45; }
+/* filter frequency (Hz) scale under the response curve */
+.filtviz { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+.hzscale { position: relative; height: 11px; }
+.hzscale span { position: absolute; top: 0; transform: translateX(-50%); font-size: 7px;
+  color: var(--ink3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hzscale .hzcur { color: var(--accent); font-weight: 700; }
 .botband .viz.filter { height: 88px; }   /* hero filter graph fills the panel */
 .viz polyline { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .viz.env .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
