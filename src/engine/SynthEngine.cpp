@@ -6,6 +6,7 @@
 */
 
 #include "SynthEngine.h"
+#include <cmath>
 
 namespace jove
 {
@@ -699,18 +700,28 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         }
     }
 
-    // Master limiter: a transparent peak limiter (fast attack, slow release)
-    // pulls loud material under the ceiling so it never reaches the clipper, then
-    // a gentle soft-clip guarantees the converter feed stays in range.
+    // Master limiter: a peak limiter (fast attack, slow release) pulls loud
+    // material under the ceiling, then a TRANSPARENT-below clip catches only true
+    // overshoots. The old stage soft-clipped EVERY sample (softSat bends the
+    // whole curve), so any moderately loud patch picked up constant harmonic
+    // distortion — the "everything sounds saturated" problem. This clip is exactly
+    // linear up to 0.95 and only soft-saturates above, so normal content (held
+    // under the 0.92 ceiling by the limiter) passes through untouched.
     constexpr float ceiling = 0.92f;
+    auto limClip = [](float x) noexcept -> float {
+        constexpr float t = 0.95f;
+        if(x >  t) return  t + (1.0f - t) * std::tanh((x - t) / (1.0f - t));
+        if(x < -t) return -t + (1.0f - t) * std::tanh((x + t) / (1.0f - t));
+        return x;
+    };
     for(int i = 0; i < n; ++i)
     {
         const float peak = std::max(std::fabs(outL[i]), std::fabs(outR[i]));
         if(peak > limEnv_) limEnv_ += 0.5f * (peak - limEnv_);      // fast attack
         else               limEnv_ += 0.0006f * (peak - limEnv_);  // slow release (~30 ms)
         const float gr = limEnv_ > ceiling ? ceiling / limEnv_ : 1.0f;
-        outL[i] = softSat(outL[i] * gr);
-        outR[i] = softSat(outR[i] * gr);
+        outL[i] = limClip(outL[i] * gr);
+        outR[i] = limClip(outR[i] * gr);
     }
 }
 
