@@ -13,7 +13,7 @@ namespace jove
 {
 // Number of factory patches. The bank spans the categories the UI groups by
 // (PAD / LEAD / BASS / ARP / STAB / KEYS / PLUCK / FX / DRONE / PERC / AMB / SEQ).
-inline constexpr int kNumFactoryPresets = 128;
+inline constexpr int kNumFactoryPresets = 140;
 
 // Load factory patch `index` into `p`. Out-of-range -> the INIT patch.
 void LoadFactoryPreset(int index, SynthPatch& p) noexcept;

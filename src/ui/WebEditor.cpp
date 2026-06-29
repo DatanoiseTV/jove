@@ -263,7 +263,9 @@ void JoveWebEditor::emitPresetInfo()
     auto& pm = processor.getPresetManager();
     const auto name = pm.currentName();
     const int idx = pm.currentIndex();
-    if(name == lastPresetName && idx == lastPresetIndex) return;
+    const bool changed = (name != lastPresetName || idx != lastPresetIndex);
+    if(!changed && presetReannounce <= 0) return;
+    if(presetReannounce > 0) --presetReannounce; // keep re-emitting while the WebView loads
     lastPresetName = name;
     lastPresetIndex = idx;
     auto* o = new juce::DynamicObject();

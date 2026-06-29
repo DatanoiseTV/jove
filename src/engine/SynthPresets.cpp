@@ -1996,6 +1996,306 @@ void seq_8bit(SynthPatch& p)
     p.fxDelay = 0.28f; p.fxReverb = 0.15f;
 }
 
+// ===================== SEQ wave 2 (extra sequencer presets) =====================
+void seq2_a(SynthPatch& p)
+{
+    setName(p, "SUB STEPPER"); p.category = 11; p.width = 0.35f; p.ampGain = 0.74f;
+    p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.5f, 1); p.subLevel = 0.35f; p.drift = 0.12f;
+    filt(p, FilterMode::LadderLP, 0.32f, 0.34f, 0.5f, 0.3f, 0.3f);
+    p.env[0] = EnvParams{0.004f, 0.2f, 0.3f, 0.13f, 0.12f};
+    p.env[1] = EnvParams{0.004f, 0.18f, 0.05f, 0.12f, 0.0f};
+    // Seq1: melodic sub line, octave-down roots + fifths
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0,0,-0.4167f,0, 0.5833f,0,-0.4167f,0, 0,0.25f,-0.4167f,0, 0.5833f,0.8333f,-0.4167f,0};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 1/8 cutoff accents under the line
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[8] = {0.3f,0.7f,0.2f,1.0f, 0.4f,0.8f,0.2f,0.9f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::Cutoff, 0.45f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.4f);
+    mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.25f);
+    p.fxDrive = 0.2f; p.driveMode = 1; p.fxDelay = 0.2f; p.fxReverb = 0.18f;
+}
+void seq2_b(SynthPatch& p)
+{
+    setName(p, "GATE RUSH"); p.category = 11; p.width = 0.85f; p.ampGain = 0.6f; p.chorusMode = 2;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.14f, 1.0f); osc(p, 2, PULSE, -0.11f, 0.7f);
+    osc(p, 3, SAW, 0.26f, 0.6f); p.subLevel = 0.1f; p.drift = 0.28f;
+    filt(p, FilterMode::SvfLP, 0.6f, 0.18f, 0.2f, 0.0f, 0.4f);
+    p.env[0] = EnvParams{0.35f, 1.0f, 0.95f, 0.55f, 0.0f};
+    // Seq1: dense 1/16 amp gate, syncopated
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {1,1,-1,1, 1,-1,1,1, -1,1,1,-1, 1,-1,1,1};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: slow smooth 1/4 cutoff swell over the gate
+    p.seq[1].sync = true; p.seq[1].syncDiv = 10; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Smooth;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = false;
+    { const float s[8] = {-0.6f,0.2f,0.6f,1.0f, 0.6f,0.2f,-0.4f,-1.0f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Amp, 0.95f);
+    mod(p, 1, ModSource::Seq2, ModDest::Cutoff, 0.5f);
+    mod(p, 2, ModSource::ModWheel, ModDest::Cutoff, 0.3f);
+    p.fxChorus = 0.35f; p.fxDelay = 0.3f; p.fxReverb = 0.42f;
+}
+void seq2_c(SynthPatch& p)
+{
+    setName(p, "POLY DRIFT"); p.category = 11; p.width = 0.7f; p.ampGain = 0.66f; p.chorusMode = 2;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.1f, 0.8f); p.osc[1].pw = 0.45f; p.drift = 0.22f;
+    filt(p, FilterMode::LadderLP, 0.45f, 0.26f, 0.35f, 0.15f, 0.4f);
+    p.env[0] = EnvParams{0.006f, 0.3f, 0.45f, 0.2f, 0.1f};
+    // Seq1: 16-step 1/16 cutoff pattern
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0.3f,0.9f,0.5f,0.2f, 1.0f,0.4f,0.7f,0.3f, 0.8f,0.2f,1.0f,0.5f, 0.3f,0.9f,0.4f,0.6f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 12-step melodic line at 1/16 -> phases against Seq1 (3:4 cross-rhythm)
+    p.seq[1].sync = true; p.seq[1].syncDiv = 4; p.seq[1].length = 12;
+    p.seq[1].mode = (int) SeqMode::Melodic; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[16] = {0,0.4167f,0.5833f,0.25f, 0.8333f,0.5833f,0.4167f,1.0f, 0.5833f,0.25f,0.4167f,0, 0,0,0,0};
+      for(int i = 0; i < 16; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Cutoff, 0.5f);
+    mod(p, 1, ModSource::Seq2, ModDest::Pitch, 1.0f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.3f);
+    p.fxChorus = 0.3f; p.fxDelay = 0.32f; p.fxReverb = 0.34f;
+}
+void seq2_d(SynthPatch& p)
+{
+    setName(p, "CHANCE SEQ"); p.category = 11; p.width = 0.65f; p.ampGain = 0.68f;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.07f, 0.6f); p.subLevel = 0.14f; p.drift = 0.2f;
+    filt(p, FilterMode::Steiner, 0.42f, 0.3f, 0.4f, 0.2f, 0.4f);
+    p.env[0] = EnvParams{0.004f, 0.26f, 0.35f, 0.18f, 0.12f};
+    // Seq1: random-walk melodic line
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].dir = (int) SeqDir::Random; p.seq[0].depth = 1.0f; p.seq[0].retrig = false;
+    { const float s[16] = {0,0.5833f,0.25f,1.0f, 0.4167f,0.8333f,0,0.5833f, 0.25f,1.0f,0.4167f,0.75f, 0,0.5833f,0.8333f,0.25f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: random stepped cutoff (independent dice roll)
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].dir = (int) SeqDir::Random; p.seq[1].depth = 1.0f; p.seq[1].retrig = false;
+    { const float s[8] = {-0.6f,0.8f,-0.2f,1.0f, 0.4f,-1.0f,0.6f,-0.4f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::Cutoff, 0.5f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.35f);
+    p.fxDelay = 0.34f; p.fxReverb = 0.36f;
+}
+void seq2_e(SynthPatch& p)
+{
+    setName(p, "STAB RUSH"); p.category = 11; p.width = 0.78f; p.ampGain = 0.6f; p.chorusMode = 2;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.13f, 0.9f); osc(p, 2, SAW, -0.1f, 0.7f);
+    osc(p, 3, PULSE, 0.2f, 0.5f); p.drift = 0.26f;
+    filt(p, FilterMode::LadderLP, 0.5f, 0.2f, 0.45f, 0.15f, 0.4f);
+    p.env[0] = EnvParams{0.004f, 0.35f, 0.0f, 0.26f, 0.18f};
+    p.env[1] = EnvParams{0.004f, 0.28f, 0.0f, 0.2f, 0.0f};
+    // Seq1: rhythmic chord-stab gate
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true; p.seq[0].swing = 0.2f;
+    { const float s[16] = {1,-1,-1,1, 1,-1,1,-1, 1,1,-1,1, -1,1,-1,-1};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: smooth morph sweep on the stabs
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Smooth;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = false;
+    { const float s[8] = {0.0f,0.5f,1.0f,0.5f, -0.5f,0.0f,0.5f,1.0f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Amp, 0.85f);
+    mod(p, 1, ModSource::Seq2, ModDest::Morph1, 0.4f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.35f);
+    mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.25f);
+    p.fxChorus = 0.35f; p.fxDelay = 0.3f; p.fxReverb = 0.4f;
+}
+void seq2_f(SynthPatch& p)
+{
+    setName(p, "CROSSWIRE"); p.category = 11; p.width = 0.72f; p.ampGain = 0.66f;
+    osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.45f; osc(p, 1, SAW, 0.1f, 0.85f);
+    p.subLevel = 0.12f; p.drift = 0.2f;
+    filt(p, FilterMode::LadderLP, 0.46f, 0.3f, 0.35f, 0.2f, 0.4f);
+    p.env[0] = EnvParams{0.005f, 0.3f, 0.5f, 0.2f, 0.1f};
+    // Seq1: 1/16 cutoff rhythm
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {1.0f,0.2f,0.6f,0.2f, 0.9f,0.2f,0.5f,0.2f, 1.0f,0.3f,0.7f,0.2f, 0.8f,0.2f,0.6f,0.4f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 1/8 melodic line -> half the speed, cross-rhythm against Seq1
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Melodic; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[8] = {0,0.5833f,0.4167f,0.8333f, 0.5833f,1.0f,0.4167f,0.25f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Cutoff, 0.55f);
+    mod(p, 1, ModSource::Seq2, ModDest::Pitch, 1.0f);
+    mod(p, 2, ModSource::Velocity, ModDest::Cutoff, 0.25f);
+    p.fxChorus = 0.25f; p.fxDelay = 0.3f; p.fxReverb = 0.3f;
+}
+void seq2_g(SynthPatch& p)
+{
+    setName(p, "WT SCANNER"); p.category = 11; p.width = 0.68f; p.ampGain = 0.64f; p.chorusMode = 2;
+    osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 6; p.osc[0].wtMorph = 0.3f;
+    osc(p, 1, SAW, 0.08f, 0.6f); p.osc[1].oscType = 1; p.osc[1].wtTable = 18; p.drift = 0.18f;
+    filt(p, FilterMode::SvfLP, 0.55f, 0.2f, 0.3f, 0.1f, 0.4f);
+    p.env[0] = EnvParams{0.006f, 0.4f, 0.6f, 0.3f, 0.1f};
+    // Seq1: smooth morph scan across the wavetable
+    p.seq[0].sync = true; p.seq[0].syncDiv = 7; p.seq[0].length = 8;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Smooth;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = false;
+    { const float s[8] = {-1.0f,-0.4f,0.3f,1.0f, 0.5f,-0.2f,-0.7f,0.2f};
+      for(int i = 0; i < 8; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 1/16 melodic line
+    p.seq[1].sync = true; p.seq[1].syncDiv = 4; p.seq[1].length = 16;
+    p.seq[1].mode = (int) SeqMode::Melodic; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[16] = {0,0,0.5833f,0, 0.4167f,0,0.8333f,0, 0,0.25f,0.5833f,0, 1.0f,0,0.4167f,0};
+      for(int i = 0; i < 16; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Morph1, 0.8f);
+    mod(p, 1, ModSource::Seq2, ModDest::Pitch, 1.0f);
+    mod(p, 2, ModSource::ModWheel, ModDest::Cutoff, 0.3f);
+    p.fxChorus = 0.3f; p.fxDelay = 0.3f; p.fxReverb = 0.38f;
+}
+void seq2_h(SynthPatch& p)
+{
+    setName(p, "FOLD STEP"); p.category = 11; p.width = 0.55f; p.ampGain = 0.62f;
+    p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.7f); p.subLevel = 0.18f; p.drift = 0.12f;
+    filt(p, FilterMode::LadderLP, 0.5f, 0.22f, 0.4f, 0.3f, 0.3f);
+    p.env[0] = EnvParams{0.004f, 0.24f, 0.4f, 0.16f, 0.12f};
+    p.fxDrive = 0.4f; p.driveMode = 3; p.driveTone = 0.2f; // wavefolder
+    // Seq1: melodic line
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0,0.4167f,0,0.5833f, 0,0.8333f,0.5833f,0.4167f, 0,0.4167f,0,0.5833f, 1.0f,0.8333f,0.5833f,0.25f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 1/8 fold-drive accents -> rhythmic timbral grit
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[8] = {0.2f,1.0f,0.3f,0.8f, 0.2f,1.0f,0.4f,0.9f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::FilterDrive, 0.5f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.35f);
+    mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.25f);
+    p.fxDelay = 0.24f; p.fxReverb = 0.22f;
+}
+void seq2_i(SynthPatch& p)
+{
+    setName(p, "PLUCK RUN"); p.category = 11; p.width = 0.7f; p.ampGain = 0.76f;
+    osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.06f, 0.45f); p.drift = 0.12f;
+    filt(p, FilterMode::LadderLP, 0.42f, 0.26f, 0.65f, 0.15f, 0.5f);
+    p.env[0] = EnvParams{0.002f, 0.13f, 0.0f, 0.1f, 0.18f};
+    p.env[1] = EnvParams{0.002f, 0.12f, 0.0f, 0.09f, 0.0f};
+    // Seq1: fast 1/16 melodic arpeggio (ascending broken chord)
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0,0.3333f,0.5833f,1.0f, 0.5833f,0.3333f,0,0.3333f, 0.0833f,0.4167f,0.6667f,1.0f, 0.6667f,0.4167f,0.0833f,0.4167f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: slow pan motion for stereo movement
+    p.seq[1].sync = true; p.seq[1].syncDiv = 10; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Smooth;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = false;
+    { const float s[8] = {-0.8f,-0.3f,0.4f,0.9f, 0.5f,-0.1f,-0.6f,-1.0f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::Pan, 0.6f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.55f);
+    mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.35f);
+    p.fxChorus = 0.25f; p.fxDelay = 0.34f; p.fxReverb = 0.34f;
+}
+void seq2_j(SynthPatch& p)
+{
+    setName(p, "FM STEPPER"); p.category = 11; p.width = 0.6f; p.ampGain = 0.66f;
+    osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.8f); p.fm2to1 = 0.4f; p.drift = 0.1f;
+    filt(p, FilterMode::LadderLP, 0.6f, 0.14f, 0.3f, 0.1f, 0.5f);
+    p.env[0] = EnvParams{0.003f, 0.3f, 0.3f, 0.18f, 0.12f};
+    // Seq1: melodic line
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0,0.5833f,0.25f,0.5833f, 0.8333f,0.5833f,0.25f,0, 0.4167f,0.8333f,0.4167f,0.8333f, 1.0f,0.8333f,0.5833f,0.25f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: smooth FM-index sweep -> evolving bell/bark timbre
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Smooth;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = false;
+    { const float s[8] = {-0.8f,0.2f,0.8f,1.0f, 0.4f,-0.2f,-0.6f,-1.0f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::FmAmount, 0.6f);
+    mod(p, 2, ModSource::Velocity, ModDest::FmAmount, 0.3f);
+    p.fxDelay = 0.3f; p.fxReverb = 0.3f;
+}
+void seq2_k(SynthPatch& p)
+{
+    setName(p, "RING STEP"); p.category = 11; p.width = 0.66f; p.ampGain = 0.64f;
+    osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.9f); p.ringMod = 0.3f; p.drift = 0.12f;
+    filt(p, FilterMode::SvfBP, 0.55f, 0.3f, 0.25f, 0.1f, 0.4f);
+    p.env[0] = EnvParams{0.004f, 0.28f, 0.3f, 0.2f, 0.12f};
+    // Seq1: melodic line drives osc1 (ring partials track the note)
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Melodic; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0,0.25f,0.5833f,1.0f, 0.5833f,0.25f,0,0.4167f, 0.8333f,0.4167f,0,0.25f, 0.5833f,1.0f,0.8333f,0.5833f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: rhythmic ring-mod depth gate -> metallic on/off
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 8;
+    p.seq[1].mode = (int) SeqMode::Curve; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[8] = {1.0f,-0.5f,0.6f,-1.0f, 0.8f,-0.4f,1.0f,-0.6f};
+      for(int i = 0; i < 8; ++i) p.seq[1].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Pitch, 1.0f);
+    mod(p, 1, ModSource::Seq2, ModDest::RingMod, 0.55f);
+    mod(p, 2, ModSource::EnvFilter, ModDest::Cutoff, 0.3f);
+    p.fxDelay = 0.32f; p.fxReverb = 0.4f;
+}
+void seq2_l(SynthPatch& p)
+{
+    setName(p, "TRIPLE MOD"); p.category = 11; p.width = 0.8f; p.ampGain = 0.62f; p.chorusMode = 2;
+    osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.1f, 0.8f); p.osc[1].pw = 0.4f;
+    osc(p, 2, SAW, -0.12f, 0.6f); p.subLevel = 0.1f; p.drift = 0.24f;
+    filt(p, FilterMode::LadderLP, 0.48f, 0.24f, 0.3f, 0.15f, 0.4f);
+    p.env[0] = EnvParams{0.008f, 0.4f, 0.6f, 0.3f, 0.1f};
+    // Seq1: 1/16 cutoff (length 16)
+    p.seq[0].sync = true; p.seq[0].syncDiv = 4; p.seq[0].length = 16;
+    p.seq[0].mode = (int) SeqMode::Curve; p.seq[0].curve = (int) SeqCurve::Step;
+    p.seq[0].depth = 1.0f; p.seq[0].retrig = true;
+    { const float s[16] = {0.3f,0.8f,0.4f,1.0f, 0.2f,0.7f,0.5f,0.9f, 0.3f,1.0f,0.4f,0.6f, 0.2f,0.8f,0.5f,1.0f};
+      for(int i = 0; i < 16; ++i) p.seq[0].step[i] = s[i]; }
+    // Seq2: 1/8 melodic (length 6) -> phases against the others
+    p.seq[1].sync = true; p.seq[1].syncDiv = 7; p.seq[1].length = 6;
+    p.seq[1].mode = (int) SeqMode::Melodic; p.seq[1].curve = (int) SeqCurve::Step;
+    p.seq[1].depth = 1.0f; p.seq[1].retrig = true;
+    { const float s[16] = {0,0.4167f,0.5833f,0.8333f, 0.5833f,0.4167f,0,0, 0,0,0,0, 0,0,0,0};
+      for(int i = 0; i < 16; ++i) p.seq[1].step[i] = s[i]; }
+    // Seq3: slow smooth 1/4 morph drift (length 5)
+    p.seq[2].sync = true; p.seq[2].syncDiv = 10; p.seq[2].length = 5;
+    p.seq[2].mode = (int) SeqMode::Curve; p.seq[2].curve = (int) SeqCurve::Smooth;
+    p.seq[2].depth = 1.0f; p.seq[2].retrig = false;
+    { const float s[16] = {-1.0f,-0.2f,0.6f,0.2f, 1.0f,0,0,0, 0,0,0,0, 0,0,0,0};
+      for(int i = 0; i < 16; ++i) p.seq[2].step[i] = s[i]; }
+    mod(p, 0, ModSource::Seq1, ModDest::Cutoff, 0.5f);
+    mod(p, 1, ModSource::Seq2, ModDest::Pitch, 1.0f);
+    mod(p, 2, ModSource::Seq3, ModDest::Morph1, 0.4f);
+    mod(p, 3, ModSource::Velocity, ModDest::Cutoff, 0.2f);
+    p.fxChorus = 0.32f; p.fxDelay = 0.32f; p.fxReverb = 0.4f;
+}
+
 using Builder = void (*)(SynthPatch&);
 const Builder kBuilders[kNumFactoryPresets] = {
     // PAD (12)
@@ -2022,6 +2322,8 @@ const Builder kBuilders[kNumFactoryPresets] = {
     amb_glacier, amb_shimmer, amb_choir, amb_deep, amb_aurora, amb_drift, amb_underwater, amb_meadow, amb_dust, amb_breath, amb_crystal, amb_nebula, amb_tape, amb_warmth,
     // SEQ (12)
     seq_trance, seq_acid, seq_wobble, seq_blade, seq_hoover, seq_pulse, seq_pluckseq, seq_chordseq, seq_sh, seq_gate, seq_arpbass, seq_8bit,
+    // SEQ wave 2 (12)
+    seq2_a, seq2_b, seq2_c, seq2_d, seq2_e, seq2_f, seq2_g, seq2_h, seq2_i, seq2_j, seq2_k, seq2_l,
 };
 } // namespace
 
