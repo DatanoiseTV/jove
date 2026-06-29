@@ -46,6 +46,9 @@ struct VoiceMod
     float driveAdd  = 0.0f; // filter pre-drive offset
     float envFltAdd = 0.0f; // filter-env depth offset
     float detuneAdd = 0.0f; // osc2 (+) / osc3 (-) detune spread offset
+    // multiplicative envelope-time scaling (1 = unmodulated)
+    float ampAtkMul = 1.0f, ampDecMul = 1.0f, ampRelMul = 1.0f;
+    float fltAtkMul = 1.0f, fltDecMul = 1.0f, fltRelMul = 1.0f;
 };
 
 // One synth voice: 3 morphing BLEP oscillators + sub + noise -> selectable
@@ -211,13 +214,16 @@ class Voice
         driftVal_ += 0.03f * (driftTarget_ - driftVal_);
         const float driftSemi = driftVal_ * p.drift * 0.02f; // up to ~2 cents
 
-        // envelope times
+        // envelope times — amp(0) and filter(1) accept matrix time-scaling mods
+        const float atkMul[kNumEnv] = {m.ampAtkMul, m.fltAtkMul, 1.0f};
+        const float decMul[kNumEnv] = {m.ampDecMul, m.fltDecMul, 1.0f};
+        const float relMul[kNumEnv] = {m.ampRelMul, m.fltRelMul, 1.0f};
         for(int i = 0; i < kNumEnv; ++i)
         {
-            env_[i].setAttack(p.env[i].attack);
-            env_[i].setDecay(p.env[i].decay);
+            env_[i].setAttack(p.env[i].attack * atkMul[i]);
+            env_[i].setDecay(p.env[i].decay * decMul[i]);
             env_[i].setSustain(p.env[i].sustain);
-            env_[i].setRelease(p.env[i].release);
+            env_[i].setRelease(p.env[i].release * relMul[i]);
         }
 
         filter_.setMode((VoiceFilter::Mode)p.filterMode);

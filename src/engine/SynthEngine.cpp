@@ -413,6 +413,14 @@ void SynthEngine::evalSlots(const ModSlot* slots, int count, const float* src, V
             // Detune is in semitones; scale so a mod amount of 1.0 is ~15 cents of
             // spread (ensemble shimmer), not a whole-semitone warble.
             case ModDest::Detune: m.detuneAdd += v * 0.15f; break;
+            // envelope-time scaling: multiplicative, +/-2 octaves of time at full
+            // (v>0 lengthens, v<0 shortens). e.g. velocity -> shorter attack.
+            case ModDest::AmpAtk: m.ampAtkMul *= std::exp2(v * 2.0f); break;
+            case ModDest::AmpDec: m.ampDecMul *= std::exp2(v * 2.0f); break;
+            case ModDest::AmpRel: m.ampRelMul *= std::exp2(v * 2.0f); break;
+            case ModDest::FltAtk: m.fltAtkMul *= std::exp2(v * 2.0f); break;
+            case ModDest::FltDec: m.fltDecMul *= std::exp2(v * 2.0f); break;
+            case ModDest::FltRel: m.fltRelMul *= std::exp2(v * 2.0f); break;
             // LFO-rate/depth and FX destinations are applied at the engine/FX
             // layer in later phases; ignored here.
             default: break;

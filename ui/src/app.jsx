@@ -16,7 +16,7 @@ const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL"
 const SEQ_CURVES  = ["STEP","LIN","SMOOTH"];
 const SEQ_DIRS    = ["FWD","REV","PEND","RND"];
 const SEQ_MODES   = ["CURVE","MELODIC"];
-const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE"];
+const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE","A.ATK","A.DEC","A.REL","F.ATK","F.DEC","F.REL"];
 const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble", "Combine"];
 const QUALITY     = ["Eco", "HQ", "Ultra"];
 const CATEGORIES  = ["PAD","LEAD","BASS","ARP","STAB","KEYS","PLUCK","FX","DRONE","PERC","AMB","SEQ"];
@@ -29,7 +29,7 @@ const DEST_PARAM = [
   "osc1Pw", "osc2Pw", "osc3Pw", "oscMix", "subLevel", "noiseLevel", "cutoff",
   "resonance", "filterDrive", "ampGain", "pan", "lfo1Rate", "lfo2Rate", "lfo3Rate",
   "lfo1Depth", "lfo2Depth", "lfo3Depth", null, null, "fm2to1", "ringMod",
-  "envFilterAmt", null];
+  "envFilterAmt", null, null, null, null, null, null, null];
 const MOD_SCALE = 0.25; // visual: mod amount 1.0 -> a quarter of the knob's travel
 
 const ModContext = React.createContext({ map: {}, lfo: [0, 0, 0], src: [] });

@@ -137,6 +137,9 @@ enum class ModDest : int
     RingMod,  // osc1 x osc2 ring product depth (env/LFO -> metallic swell)
     EnvFltAmt,// filter-envelope -> cutoff depth
     Detune,   // osc2 (+) / osc3 (-) detune spread (LFO -> animated ensemble)
+    // envelope-TIME destinations (multiplicative on the base time): e.g.
+    // velocity -> shorter attack, key -> shorter decay. amp env + filter env.
+    AmpAtk, AmpDec, AmpRel, FltAtk, FltDec, FltRel,
     Count
 };
 inline constexpr const char* kModDestNames[] = {
@@ -144,7 +147,8 @@ inline constexpr const char* kModDestNames[] = {
     "PW1",   "PW2",   "PW3",    "OSCMIX", "SUB",    "NOISE",  "CUTOFF",
     "RESO",  "FDRIVE","AMP",    "PAN",    "L1 RATE","L2 RATE","L3 RATE",
     "L1 DPT","L2 DPT","L3 DPT", "FXSEND", "FXPARM", "FM",     "RING",
-    "ENVFLT","DETUNE"};
+    "ENVFLT","DETUNE",
+    "A.ATK", "A.DEC", "A.REL", "F.ATK", "F.DEC", "F.REL"};
 
 struct ModSlot
 {
