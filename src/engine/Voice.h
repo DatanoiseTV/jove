@@ -83,6 +83,7 @@ class Voice
             srPhase_[i] = 0.0f;
             srHold_[i] = 0.0f;
         }
+        filtSmInit_ = false;
         sub_.reset();
         filter_.reset();
         for(int i = 0; i < kNumEnv; ++i)
@@ -278,7 +279,9 @@ class Voice
         // filter: base cutoff (env-independent part) + key + matrix mod, in
         // octaves; the per-sample env contribution is applied in the loop.
         const float keyOffset  = ((float)note_ - 60.0f) / 12.0f * p.keyTrack;
-        const float baseCutHz  = cutoffHz(p.cutoff) * std::exp2(m.cutoffOct + keyOffset);
+        // param + key cutoff is smoothed (de-zipper); matrix mod stays per-sample
+        const float baseCutHz  = cutoffHz(p.cutoff) * std::exp2(keyOffset);
+        const float modCutOct  = m.cutoffOct;
         const float fenvDepth  = clamp01(p.envFilterAmt + m.envFltAdd) * 6.0f; // octaves per env unit
         const float res        = clamp01(p.resonance + m.resAdd);
         const float fdrive     = clamp01(p.filterDrive + m.driveAdd);
@@ -299,14 +302,17 @@ class Voice
             const float fltEnv = env_[1].process();
             env_[2].process(); // aux env runs as a mod source (read by engine)
 
-            // filter cutoff tracks the filter envelope per sample. (On the M7 this
-            // was throttled to every 16 samples to amortise the exp2; on desktop
-            // the transcendental is free, and per-sample tracking removes the faint
-            // stair-stepping otherwise audible on fast filter envelopes and on
-            // S&H/LFO-to-cutoff at high depth.)
+            // filter cutoff tracks the filter envelope per sample, and the
+            // control-rate targets (base cutoff, resonance, drive) are de-zippered
+            // with a ~6 ms one-pole so moving Cutoff/Reso/Drive is click-free.
             {
-                const float cutHz = baseCutHz * std::exp2(fenvDepth * fltEnv);
-                filter_.setParams(cutHz, res, fdrive);
+                if(!filtSmInit_) { cutSm_ = baseCutHz; resSm_ = res; drvSm_ = fdrive; filtSmInit_ = true; }
+                constexpr float sc = 0.0025f;
+                cutSm_ += sc * (baseCutHz - cutSm_);
+                resSm_ += sc * (res - resSm_);
+                drvSm_ += sc * (fdrive - drvSm_);
+                const float cutHz = cutSm_ * std::exp2(modCutOct + fenvDepth * fltEnv);
+                filter_.setParams(cutHz, resSm_, drvSm_);
             }
 
             // sample-rate reduction (decimate) then bit-crush, per oscillator
@@ -414,6 +420,8 @@ class Voice
     WavetableOsc wt_[kNumOsc];
     float        srPhase_[kNumOsc] = {0};  // sample-rate-reduction decimator phase
     float        srHold_[kNumOsc]  = {0};  // and held sample, per oscillator
+    float        cutSm_ = 0.0f, resSm_ = 0.0f, drvSm_ = 0.0f; // de-zipper filter params
+    bool         filtSmInit_ = false;
     BlepOsc     sub_;
     VoiceFilter filter_;
     AdsrEnv     env_[kNumEnv];
