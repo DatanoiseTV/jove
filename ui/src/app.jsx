@@ -323,10 +323,52 @@ function oscShape(m, pw, t) {
   if (m < 0.5) return lerp(tri, saw, (m - 0.25) / 0.25);
   return lerp(saw, pulse, (m - 0.5) / 0.5);
 }
-function OscWave({ morphId, pwId, crushId, on }) {
+/* JS mirror of the engine wavetable bank (Wavetables.h) so the scope shows the
+   real table; table index + morph blend toward the next table. */
+const WT_NAMES = ["SINE", "TRIANGLE", "SAW", "SQUARE", "PULSE 25", "PULSE 12", "BRIGHT", "ORGAN",
+  "ODD", "FORMANT A", "FORMANT B", "SPARSE", "HOLLOW", "BRASS", "STRING", "VOCAL"];
+function wtHarmonic(w, n) {
+  const fn = n;
+  switch (w) {
+    case 0: return n === 1 ? 1 : 0;
+    case 1: return (n % 2 === 1) ? (1 / (fn * fn)) * ((n % 4 === 1) ? 1 : -1) : 0;
+    case 2: return 1 / fn;
+    case 3: return (n % 2 === 1) ? 1 / fn : 0;
+    case 4: return Math.abs(Math.sin(fn * Math.PI * 0.25)) / fn * 2;
+    case 5: return Math.abs(Math.sin(fn * Math.PI * 0.125)) / fn * 2;
+    case 6: return 1 / Math.sqrt(fn);
+    case 7: { const d = [1, 0.7, 0.5, 0.4, 0, 0.3, 0, 0.2]; return n <= 8 ? d[n - 1] : 0; }
+    case 8: return (n % 2 === 1) ? 1 / (fn * fn) : 0;
+    case 9: { const c = 3; return Math.exp(-((fn - c) * (fn - c)) / 4) + 0.12 / fn; }
+    case 10: { const c = 9; return Math.exp(-((fn - c) * (fn - c)) / 12) + 0.06 / fn; }
+    case 11: return (n === 1 || n === 3 || n === 7 || n === 11 || n === 17) ? 1 / fn : 0;
+    case 12: return (n % 2 === 1) ? 1.2 / fn : 0;
+    case 13: { const c = 5; return (1 / fn) * (0.5 + Math.exp(-((fn - c) * (fn - c)) / 20)); }
+    case 14: return 1 / Math.pow(fn, 1.2);
+    case 15: { const a = Math.exp(-((fn - 4) * (fn - 4)) / 3) + 0.6 * Math.exp(-((fn - 9) * (fn - 9)) / 6) + 0.3 * Math.exp(-((fn - 13) * (fn - 13)) / 8); return a / fn + 0.05 / fn; }
+    default: return 1 / fn;
+  }
+}
+function wtSample(w, t) { let s = 0; for (let nn = 1; nn <= 48; nn++) { const a = wtHarmonic(w, nn); if (Math.abs(a) > 1e-5) s += a * Math.sin(2 * Math.PI * nn * t); } return s; }
+
+/* table-name dropdown driven by the integer wtTable slider param */
+function WtTableSel({ id }) {
+  const [v, set] = B.useSlider(id);
+  const N = WT_NAMES.length, idx = Math.round(v * (N - 1));
+  return (
+    <div className="sel-wrap">
+      <div className="cl">WAVETABLE</div>
+      <Dropdown idx={idx} options={WT_NAMES} onPick={(i) => set(i / (N - 1))} />
+    </div>
+  );
+}
+
+function OscWave({ morphId, pwId, crushId, on, wt, tableId, wtMorphId }) {
   const m0 = B.useSlider(morphId)[0];
   const pw0 = B.useSlider(pwId)[0];
   const crush = B.useSlider(crushId)[0];
+  const wtV = B.useSlider(tableId)[0];
+  const wtMorphV = B.useSlider(wtMorphId)[0];
   // live modulation reaching this oscillator's morph / pulse-width (matrix routes
   // to MORPHn / PWn), so the scope visibly moves as LFOs/envelopes modulate it.
   const mc = React.useContext(ModContext);
@@ -335,12 +377,18 @@ function OscWave({ morphId, pwId, crushId, on }) {
   ((mc.map && mc.map[pwId]) || []).forEach((x) => { pwAdd += ((mc.src && mc.src[x.src]) || 0) * x.amt * 0.5; });
   const m = Math.max(0, Math.min(1, m0 + mAdd));
   const pw = Math.max(0.02, Math.min(0.98, pw0 + pwAdd));
-  const levels = crush > 0.01 ? Math.pow(2, 9 - crush * 7.5) : 0; // mirror engine bit-crush
+  const levels = crush > 0.01 ? Math.pow(2, 8.5 - crush * 8.0) : 0; // mirror engine bit-crush
   const W = 160, H = 54, cy = H / 2, amp = H / 2 - 4, N = 160, cyc = 2;
+  // wavetable: blend table idx -> idx+1 by morph, normalised to fit
+  const wi0 = Math.round(wtV * (WT_NAMES.length - 1));
+  const wi1 = Math.min(WT_NAMES.length - 1, wi0 + 1);
+  let wtNorm = 1;
+  if (wt) { let pk = 1e-6; for (let i = 0; i < 64; i++) { const s = wtSample(wi0, i / 64) * (1 - wtMorphV) + wtSample(wi1, i / 64) * wtMorphV; pk = Math.max(pk, Math.abs(s)); } wtNorm = 1 / pk; }
   const pts = [];
   for (let i = 0; i <= N; i++) {
-    const t = (i / N) * cyc;
-    let y = oscShape(m, pw, t);
+    const t = (i / N) * cyc, tt = t - Math.floor(t);
+    let y = wt ? (wtSample(wi0, tt) * (1 - wtMorphV) + wtSample(wi1, tt) * wtMorphV) * wtNorm
+               : oscShape(m, pw, t);
     if (levels) y = Math.round(y * levels) / levels;
     pts.push(((i / N) * W).toFixed(1) + "," + (cy - y * amp).toFixed(1));
   }
@@ -557,19 +605,27 @@ function SweepViz({ rateId, depthId }) {
 function OscPanel({ n }) {
   const p = "osc" + n;
   const [on] = B.useToggle(p + "On");
+  const [type] = B.useChoice(p + "Type"); // 0 BLEP, 1 wavetable
+  const wt = type === 1;
   return (
     <Panel title={"OSC " + n}>
       <div className="row between">
         <Switch id={p + "On"} label="ON" />
+        <Seg id={p + "Type"} options={["BLEP", "WT"]} />
         <Seg id={p + "Foot"} options={FOOTAGE} />
       </div>
-      <WaveSelect morphId={p + "Morph"} pwId={p + "Pw"} />
-      <OscWave morphId={p + "Morph"} pwId={p + "Pw"} crushId={p + "Crush"} on={on} />
+      {wt ? <WtTableSel id={p + "WtTable"} />
+          : <WaveSelect morphId={p + "Morph"} pwId={p + "Pw"} />}
+      <OscWave morphId={p + "Morph"} pwId={p + "Pw"} crushId={p + "Crush"} on={on}
+               wt={wt} tableId={p + "WtTable"} wtMorphId={p + "WtMorph"} />
       <div className="knobs spread">
-        <Knob id={p + "Morph"} label="MORPH" />
-        <Knob id={p + "Pw"} label="PW" />
-        <Knob id={p + "Detune"} label="DETUNE" bipolar />
-        <Knob id={p + "Crush"} label="CRUSH" />
+        {wt ? <Knob id={p + "WtMorph"} label="MORPH" small />
+            : <Knob id={p + "Morph"} label="MORPH" small />}
+        {wt ? <Knob id={p + "WtTable"} label="TABLE" small />
+            : <Knob id={p + "Pw"} label="PW" small />}
+        <Knob id={p + "Detune"} label="DETUNE" bipolar small />
+        <Knob id={p + "Crush"} label="CRUSH" small />
+        <Knob id={p + "Sr"} label="SR" small />
       </div>
     </Panel>
   );
