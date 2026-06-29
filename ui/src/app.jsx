@@ -468,6 +468,54 @@ function FilterCurve() {
   );
 }
 
+/* ---- FX hero visualizers (fill the FX panels, like a real effect view) ---- */
+function jsSoftSat(x) { if (x < -3) return -1; if (x > 3) return 1; const x2 = x * x; return x * (27 + x2) / (27 + 9 * x2); }
+function DriveCurve() {
+  const drv = B.useSlider("fxDrive")[0];
+  const W = 200, H = 100, N = 80, g = 1 + drv * 4, pts = [];
+  for (let i = 0; i <= N; i++) { const x = -1 + 2 * i / N; const y = jsSoftSat(x * g); pts.push(((i / N) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 4)).toFixed(1)); }
+  return (
+    <svg className="viz drivecv" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <line x1="0" y1={H / 2} x2={W} y2={H / 2} className="grid" />
+      <line x1={W / 2} y1="0" x2={W / 2} y2={H} className="grid" />
+      <polyline points={pts.join(" ")} />
+    </svg>
+  );
+}
+function DelayViz() {
+  const mix = B.useSlider("fxDelay")[0], fb = B.useSlider("delayFeedback")[0];
+  const W = 200, H = 100, taps = 9, bars = [];
+  for (let n = 0; n < taps; n++) bars.push({ x: 6 + n * (W - 14) / taps, h: Math.max(0.02, Math.pow(fb, n) * Math.min(1, mix + 0.25)) });
+  return (
+    <svg className="viz delayv" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <line x1="0" y1={H - 2} x2={W} y2={H - 2} className="grid" />
+      {bars.map((b, i) => <rect key={i} x={b.x.toFixed(1)} y={((H - 4) * (1 - b.h) + 2).toFixed(1)} width="5" height={((H - 4) * b.h).toFixed(1)} className="bar" />)}
+    </svg>
+  );
+}
+function ReverbViz() {
+  const mix = B.useSlider("fxReverb")[0], size = B.useSlider("reverbSize")[0];
+  const W = 200, H = 100, N = 72, decay = 1.5 + size * 7, pts = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; const y = Math.exp(-t * 6 / decay) * Math.min(1, mix + 0.25); pts.push((t * W).toFixed(1) + "," + ((H - 3) - (H - 6) * y).toFixed(1)); }
+  return (
+    <svg className="viz reverbv" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <polyline points={pts.join(" ")} />
+      <polygon className="fillz" points={`0,${H} ${pts.join(" ")} ${W},${H}`} />
+    </svg>
+  );
+}
+function SweepViz({ rateId, depthId }) {
+  const rate = B.useSlider(rateId)[0], depth = B.useSlider(depthId)[0];
+  const W = 200, H = 100, N = 96, cy = H / 2, cyc = 1 + rate * 4, amp = (H / 2 - 5) * (0.2 + depth * 0.8), pts = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; pts.push((t * W).toFixed(1) + "," + (cy - Math.sin(2 * Math.PI * t * cyc) * amp).toFixed(1)); }
+  return (
+    <svg className="viz sweepv" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+      <line x1="0" y1={cy} x2={W} y2={cy} className="grid" />
+      <polyline points={pts.join(" ")} />
+    </svg>
+  );
+}
+
 /* ============================ panels ============================ */
 function OscPanel({ n }) {
   const p = "osc" + n;
@@ -699,6 +747,7 @@ function ArpPanel() {
 function DrivePanel() {
   return (
     <Panel title="DRIVE">
+      <DriveCurve />
       <div className="knobs spread">
         <Knob id="fxDrive" label="DRIVE" big />
         <Knob id="driveTone" label="TONE" bipolar big />
@@ -710,6 +759,7 @@ function DrivePanel() {
 function ChorusPanel() {
   return (
     <Panel title="CHORUS">
+      <SweepViz rateId="chorusRate" depthId="chorusDepth" />
       <div className="knobs spread">
         <Knob id="fxChorus" label="MIX" />
         <Knob id="chorusRate" label="RATE" />
@@ -723,6 +773,7 @@ function ChorusPanel() {
 function PhaserPanel() {
   return (
     <Panel title="PHASER">
+      <SweepViz rateId="phaserRate" depthId="phaserDepth" />
       <div className="knobs spread">
         <Knob id="fxPhaser" label="MIX" />
         <Knob id="phaserRate" label="RATE" />
@@ -737,7 +788,8 @@ function DelayPanel() {
   const [sync] = B.useToggle("delaySync");
   return (
     <Panel title="DELAY" accent="#6ac0d0">
-      <div className="knobs">
+      <DelayViz />
+      <div className="knobs spread">
         <Knob id="fxDelay" label="MIX" />
         {sync ? <Sel id="delayDiv" options={DIVISIONS} label="TIME" />
               : <Knob id="delayTimeMs" label="TIME" />}
@@ -755,7 +807,8 @@ function DelayPanel() {
 function ReverbPanel() {
   return (
     <Panel title="REVERB" accent="#7a9ad0">
-      <div className="knobs">
+      <ReverbViz />
+      <div className="knobs spread">
         <Knob id="fxReverb" label="MIX" />
         <Knob id="reverbSize" label="SIZE" />
         <Knob id="reverbTone" label="TONE" />

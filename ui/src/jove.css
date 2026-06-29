@@ -152,7 +152,13 @@ button, select, input { font-family: inherit; color: inherit; }
 .fxgrid { flex: 1; min-height: 0; display: grid;
   grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; }
 .fxgrid > .panel { min-height: 0; }
-.fxgrid .pbody { flex: 1; justify-content: center; gap: 16px; }
+.fxgrid .pbody { flex: 1; justify-content: flex-start; gap: 12px; }
+/* the hero viz grows to fill the panel; knobs anchor at the bottom */
+.fxgrid .viz { flex: 1 1 auto; height: auto; min-height: 70px; }
+.viz .grid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .55; }
+.viz.delayv .bar { fill: var(--accent); }
+.viz.reverbv .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
+.viz.drivecv polyline, .viz.sweepv polyline { filter: drop-shadow(0 0 2px var(--accent)); }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
