@@ -808,13 +808,16 @@ function LfoPanel({ n, accent }) {
 
 /* Abbreviated source names for the grid column headers (index-aligned to
    MOD_SRC; [0] is the unused OFF slot). */
-const SRC_ABBR = ["", "L1", "L2", "L3", "AEG", "FEG", "XEG", "VEL", "KEY", "MW", "AT", "BND", "RND", "NOT"];
+const SRC_ABBR = ["", "L1", "L2", "L3", "AEG", "FEG", "XEG", "VEL", "KEY", "MW", "AT", "BND", "RND", "NOT", "MPR", "MTM", "MBN", "S1", "S2", "S3", "S4"];
 const N_MOD_SLOTS = 32;
+const N_BAY_SLOTS = 24;
+// pre-patched default pins, mirror of kBayDefaultSlots in SynthParams.h (src,dst,amt)
+const BAY_DEFAULTS = [[5, 13, 0.5], [7, 16, 0.3], [1, 1, 0.03], [9, 13, 0.4], [8, 13, 0.2], [6, 26, 0.3]];
 
 /* One grid cell = one (source, destination) intersection. Drag vertically to
    set a bipolar amount; the fill grows from the centre line and an active cell
    glows with the live source*amount contribution. */
-function ModCell({ srcI, dstI, amt, live, onSet }) {
+function ModCell({ srcI, dstI, amt, live, onSet, def = 0 }) {
   const drag = useRef(null);
   const down = (e) => {
     e.preventDefault();
@@ -833,12 +836,13 @@ function ModCell({ srcI, dstI, amt, live, onSet }) {
     window.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
   };
   const mag = Math.min(1, Math.abs(amt) / 2);
-  const cls = "mg-cell" + (amt > 0.001 ? " pos" : amt < -0.001 ? " neg" : "");
+  const factory = def !== 0 && Math.abs(amt) < 0.001; // pre-patched pin, no user override
+  const cls = "mg-cell" + (amt > 0.001 ? " pos" : amt < -0.001 ? " neg" : "") + (factory ? " factory" : "");
   const lv = Math.min(1, Math.abs(live) / 1.2);
   return (
     <div className={cls} onMouseDown={down} onTouchStart={down}
          onDoubleClick={() => onSet(srcI, dstI, 0)}
-         title={MOD_SRC[srcI] + " → " + MOD_DST[dstI] + (amt ? "   " + amt.toFixed(2) : "")}
+         title={MOD_SRC[srcI] + " → " + MOD_DST[dstI] + (amt ? "   " + amt.toFixed(2) : (factory ? "   (factory " + def.toFixed(2) + ")" : ""))}
          style={{ "--m": mag.toFixed(3), "--lv": lv.toFixed(3) }}>
       <i />
     </div>
@@ -890,6 +894,68 @@ function ModGrid() {
               const amt = slot ? slot.amtN * 4 - 2 : 0;
               const live = slot ? ((mc.src && mc.src[srcI]) || 0) * amt : 0;
               return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} live={live} onSet={setCell} />;
+            }),
+          ];
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+/* EMS-style patchbay: a second routing bank over the full source x dest grid,
+   with a pre-patched/manual toggle. Independent of the MOD matrix bank. */
+function Patchbay() {
+  const mc = React.useContext(ModContext);
+  const [pre, setPre] = B.useToggle("bayPrePatched");
+  const slots = [];
+  for (let i = 1; i <= N_BAY_SLOTS; i++) {
+    const [src, setSrc] = B.useChoice("bay" + i + "Src");
+    const [dst, setDst] = B.useChoice("bay" + i + "Dst");
+    const [amtN, setAmt] = B.useSlider("bay" + i + "Amt");
+    slots.push({ src, dst, amtN, setSrc, setDst, setAmt });
+  }
+  const byPair = {};
+  let used = 0;
+  slots.forEach((s) => { if (s.src > 0 && s.dst > 0) { byPair[s.src + "_" + s.dst] = s; used++; } });
+  const defByPair = {};
+  if (pre) BAY_DEFAULTS.forEach(([s, d, a]) => { defByPair[s + "_" + d] = a; });
+
+  const setCell = (srcI, dstI, amt) => {
+    amt = Math.max(-2, Math.min(2, amt));
+    const key = srcI + "_" + dstI;
+    let s = byPair[key];
+    if (!s) {
+      if (Math.abs(amt) < 0.01) return;
+      s = slots.find((x) => x.src <= 0);
+      if (!s) return;
+      s.setSrc(srcI); s.setDst(dstI);
+    }
+    s.setAmt((amt + 2) / 4);
+    if (Math.abs(amt) < 0.01) s.setSrc(0);
+  };
+
+  const srcCols = SRC_ABBR.slice(1);
+  const dstRows = MOD_DST.slice(1);
+  return (
+    <Panel title={"PATCHBAY · " + used + "/" + N_BAY_SLOTS}>
+      <div className="row between pbhead">
+        <Switch id="bayPrePatched" label="PRE-PATCHED" />
+        <span className="pb-hint">{pre ? "factory pins shown dim · your pins overlay" : "manual — your pins only"}</span>
+      </div>
+      <div className="mgrid" style={{ "--cols": srcCols.length }}>
+        <div className="mg-corner" />
+        {srcCols.map((s, c) => <div key={c} className="mg-chead" title={MOD_SRC[c + 1]}>{s}</div>)}
+        {dstRows.map((dname, r) => {
+          const dstI = r + 1;
+          return [
+            <div key={"l" + r} className="mg-rlabel">{dname}</div>,
+            ...srcCols.map((_, c) => {
+              const srcI = c + 1;
+              const slot = byPair[srcI + "_" + dstI];
+              const amt = slot ? slot.amtN * 4 - 2 : 0;
+              const def = defByPair[srcI + "_" + dstI] || 0;
+              const live = ((mc.src && mc.src[srcI]) || 0) * (amt || def);
+              return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} def={def} live={live} onSet={setCell} />;
             }),
           ];
         })}
@@ -1174,37 +1240,9 @@ function SaveDialog({ onClose, cat }) {
 }
 
 /* ============================ app ============================ */
-/* one sequencer step: a vertical bipolar bar, drag to set (double-click = 0). */
-function SeqStep({ id, active, melodic }) {
-  const [v, set] = B.useSlider(id);   // 0..1 normalized of the -1..+1 range
-  const amt = v * 2 - 1;
-  const drag = useRef(null);
-  const down = (e) => {
-    e.preventDefault();
-    const p = e.touches ? e.touches[0] : e;
-    drag.current = { y: p.clientY, a: amt };
-    const move = (ev) => {
-      const q = ev.touches ? ev.touches[0] : ev;
-      const fine = ev.shiftKey ? 0.25 : 1;
-      const na = Math.max(-1, Math.min(1, drag.current.a + (drag.current.y - q.clientY) / 120 * fine));
-      set((na + 1) / 2);
-    };
-    const up = () => {
-      window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
-      window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up);
-    };
-    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
-    window.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', up);
-  };
-  const semi = Math.round(amt * 12);
-  const cls = "sq-cell" + (amt > 0.004 ? " pos" : amt < -0.004 ? " neg" : "") + (active ? " play" : "");
-  return (
-    <div className={cls} onMouseDown={down} onTouchStart={down} onDoubleClick={() => set(0.5)}
-         style={{ "--m": Math.abs(amt).toFixed(3) }}
-         title={melodic ? (semi >= 0 ? "+" : "") + semi + " st" : amt.toFixed(2)}><i /></div>
-  );
-}
-
+/* A sequencer's step lane is a paint surface: click + drag horizontally to draw
+   values across steps (vertical position = value); drag on one step to set just
+   it; double-click clears a step to centre. */
 function SeqPanel({ n }) {
   const p = "seq" + n;
   const [sync] = B.useToggle(p + "Sync");
@@ -1214,11 +1252,45 @@ function SeqPanel({ n }) {
   const L = Math.max(1, Math.round(lenV[2] ? lenV[2]() : 16));
   const meters = B.useEvent("meters", { seqStep: [0, 0, 0, 0] });
   const play = (meters.seqStep && meters.seqStep[n - 1]) || 0;
+  const steps = [];
+  for (let s = 0; s < 16; s++) steps.push(B.useSlider(p + "step" + (s + 1)));
+  const laneRef = useRef(null);
+  const paint = (clientX, clientY, snap) => {
+    const el = laneRef.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const col = Math.floor(((clientX - r.left) / r.width) * 16);
+    if (col < 0 || col > 15) return;
+    let v = 1 - (clientY - r.top) / r.height; // top = +1, bottom = -1 (normalized 0..1)
+    v = Math.max(0, Math.min(1, v));
+    if (snap) v = Math.round((v * 2 - 1) * 12) / 12 / 2 + 0.5; // melodic: snap to semitone
+    steps[col][1](v);
+  };
+  const down = (e) => {
+    e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+    paint(pt.clientX, pt.clientY, melodic);
+    const move = (ev) => { const q = ev.touches ? ev.touches[0] : ev; paint(q.clientX, q.clientY, melodic); };
+    const up = () => {
+      window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
+      window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up);
+    };
+    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', up);
+  };
+  const dbl = (e) => {
+    const el = laneRef.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    const col = Math.floor(((e.clientX - r.left) / r.width) * 16);
+    if (col >= 0 && col <= 15) steps[col][1](0.5);
+  };
   return (
     <Panel title={"SEQ " + n}>
-      <div className="seqgrid">
-        {Array.from({ length: 16 }).map((_, s) =>
-          <SeqStep key={s} id={p + "step" + (s + 1)} active={s === play && s < L} melodic={melodic} />)}
+      <div className="seqgrid" ref={laneRef} onMouseDown={down} onTouchStart={down} onDoubleClick={dbl}>
+        {steps.map((st, s) => {
+          const amt = st[0] * 2 - 1;
+          const cls = "sq-cell" + (amt > 0.004 ? " pos" : amt < -0.004 ? " neg" : "") + (s === play && s < L ? " play" : "") + (s >= L ? " dimstep" : "");
+          return <div key={s} className={cls} style={{ "--m": Math.abs(amt).toFixed(3) }}><i /></div>;
+        })}
       </div>
       <div className="row seqctl">
         <Switch id={p + "Sync"} label="SYNC" />
@@ -1236,7 +1308,7 @@ function SeqPanel({ n }) {
   );
 }
 
-const TABS = [["voice", "VOICE"], ["mod", "MOD"], ["seq", "SEQ"], ["fx", "FX · ARP"]];
+const TABS = [["voice", "VOICE"], ["mod", "MOD"], ["seq", "SEQ"], ["patch", "PATCH"], ["fx", "FX · ARP"]];
 
 function App() {
   const modMap = useModMap();
@@ -1295,6 +1367,10 @@ function App() {
         <div className="seqgrid2">
           <SeqPanel n={1} /><SeqPanel n={2} /><SeqPanel n={3} /><SeqPanel n={4} />
         </div>
+      </div>
+
+      <div className={"patchtab" + (tab === "patch" ? "" : " hide")}>
+        <Patchbay />
       </div>
 
       <div className={"fxtab" + (tab === "fx" ? "" : " hide")}>
