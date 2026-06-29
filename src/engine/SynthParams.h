@@ -108,12 +108,15 @@ enum class ModSource : int
     // per-voice MPE expression (append-only — keep before Count so existing
     // preset source indices never shift)
     MpePressure, MpeTimbre, MpeBend,
+    // step/curve sequencers (global modulation sources)
+    Seq1, Seq2, Seq3, Seq4,
     Count
 };
 inline constexpr const char* kModSourceNames[] = {
     "OFF",  "LFO1", "LFO2", "LFO3", "AMP EG", "FLT EG", "AUX EG",
     "VEL",  "KEY",  "MWHEEL", "ATOUCH", "BEND", "RAND", "NOTE",
-    "MPE PRS", "MPE TMB", "MPE BND"};
+    "MPE PRS", "MPE TMB", "MPE BND",
+    "SEQ1", "SEQ2", "SEQ3", "SEQ4"};
 
 enum class ModDest : int
 {
@@ -234,6 +237,33 @@ struct ArpParams
     int   ratchet = 1;   // 1..4 repeats per step
 };
 
+// ---- step/curve sequencers (modulation sources) -----------------------------
+inline constexpr int kNumSeq      = 4;
+inline constexpr int kSeqMaxSteps = 16;
+enum class SeqCurve : int { Step = 0, Linear, Smooth, Count };
+inline constexpr const char* kSeqCurveNames[] = {"STEP", "LIN", "SMOOTH"};
+enum class SeqDir : int { Forward = 0, Reverse, Pendulum, Random, Count };
+inline constexpr const char* kSeqDirNames[] = {"FWD", "REV", "PEND", "RND"};
+// CURVE = bipolar modulation; MELODIC = output quantised to semitones (an
+// in-tune note line when the seq is routed to a pitch destination).
+enum class SeqMode : int { Curve = 0, Melodic, Count };
+inline constexpr const char* kSeqModeNames[] = {"CURVE", "MELODIC"};
+
+struct SeqParams
+{
+    bool  sync    = true;   // lock step rate to host tempo
+    int   syncDiv = 4;      // kArpDivNames index (4 = 1/16)
+    float rate    = 4.0f;   // free mode: steps per second
+    int   length  = 16;     // 1..kSeqMaxSteps active steps (per-seq pattern length)
+    int   dir     = 0;      // SeqDir: forward / reverse / pendulum / random
+    int   mode    = 0;      // SeqMode: curve (mod) / melodic (semitone-quantised)
+    int   curve   = 0;      // SeqCurve: step / linear / smooth glide
+    float depth   = 1.0f;   // 0..2 (matches LFO depth)
+    bool  retrig  = false;  // restart at step 0 on a fresh note
+    float swing   = 0.0f;   // 0..0.66 swing on odd steps
+    float step[kSeqMaxSteps] = {0}; // bipolar -1..+1 per-step values
+};
+
 // ---- the full patch ---------------------------------------------------------
 struct SynthPatch
 {
@@ -284,6 +314,7 @@ struct SynthPatch
     LfoParams lfo[kNumLfo];
     EnvParams env[kNumEnv]; // 0 amp, 1 filter, 2 aux
     ModSlot   mod[kNumModSlots];
+    SeqParams seq[kNumSeq]; // step/curve sequencers (mod sources Seq1..Seq4)
 
     // arp
     ArpParams arp;

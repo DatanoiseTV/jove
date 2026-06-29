@@ -12,7 +12,10 @@ const SYNC_MODES  = ["OFF", "SOFT", "HARD"];
 const FILTER_MODES= ["MOOG", "LP", "HP", "BP", "NOTCH", "LPG", "STEINER"];
 const ARP_MODES   =["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV","CON-DIV","ASPLAYED","RANDOM","CHORD"];
 const DIVISIONS   = ["1/64","1/32T","1/32","1/16T","1/16","1/8T","1/16.","1/8","1/4T","1/8.","1/4","1/4.","1/2"];
-const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE","MPE PRS","MPE TMB","MPE BND"];
+const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE","MPE PRS","MPE TMB","MPE BND","SEQ1","SEQ2","SEQ3","SEQ4"];
+const SEQ_CURVES  = ["STEP","LIN","SMOOTH"];
+const SEQ_DIRS    = ["FWD","REV","PEND","RND"];
+const SEQ_MODES   = ["CURVE","MELODIC"];
 const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE"];
 const CHORUS_MODES= ["Chorus I", "Chorus II", "Ensemble", "Combine"];
 const QUALITY     = ["Eco", "HQ", "Ultra"];
@@ -1171,7 +1174,69 @@ function SaveDialog({ onClose, cat }) {
 }
 
 /* ============================ app ============================ */
-const TABS = [["voice", "VOICE"], ["mod", "MOD"], ["fx", "FX · ARP"]];
+/* one sequencer step: a vertical bipolar bar, drag to set (double-click = 0). */
+function SeqStep({ id, active, melodic }) {
+  const [v, set] = B.useSlider(id);   // 0..1 normalized of the -1..+1 range
+  const amt = v * 2 - 1;
+  const drag = useRef(null);
+  const down = (e) => {
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+    drag.current = { y: p.clientY, a: amt };
+    const move = (ev) => {
+      const q = ev.touches ? ev.touches[0] : ev;
+      const fine = ev.shiftKey ? 0.25 : 1;
+      const na = Math.max(-1, Math.min(1, drag.current.a + (drag.current.y - q.clientY) / 120 * fine));
+      set((na + 1) / 2);
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
+      window.removeEventListener('touchmove', move); window.removeEventListener('touchend', up);
+    };
+    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    window.addEventListener('touchmove', move, { passive: false }); window.addEventListener('touchend', up);
+  };
+  const semi = Math.round(amt * 12);
+  const cls = "sq-cell" + (amt > 0.004 ? " pos" : amt < -0.004 ? " neg" : "") + (active ? " play" : "");
+  return (
+    <div className={cls} onMouseDown={down} onTouchStart={down} onDoubleClick={() => set(0.5)}
+         style={{ "--m": Math.abs(amt).toFixed(3) }}
+         title={melodic ? (semi >= 0 ? "+" : "") + semi + " st" : amt.toFixed(2)}><i /></div>
+  );
+}
+
+function SeqPanel({ n }) {
+  const p = "seq" + n;
+  const [sync] = B.useToggle(p + "Sync");
+  const [mode] = B.useChoice(p + "Mode");
+  const melodic = mode === 1;
+  const lenV = B.useSlider(p + "Len");
+  const L = Math.max(1, Math.round(lenV[2] ? lenV[2]() : 16));
+  const meters = B.useEvent("meters", { seqStep: [0, 0, 0, 0] });
+  const play = (meters.seqStep && meters.seqStep[n - 1]) || 0;
+  return (
+    <Panel title={"SEQ " + n}>
+      <div className="seqgrid">
+        {Array.from({ length: 16 }).map((_, s) =>
+          <SeqStep key={s} id={p + "step" + (s + 1)} active={s === play && s < L} melodic={melodic} />)}
+      </div>
+      <div className="row seqctl">
+        <Switch id={p + "Sync"} label="SYNC" />
+        {sync ? <Sel id={p + "Div"} options={DIVISIONS} label="DIV" />
+              : <Knob id={p + "Rate"} label="RATE" small />}
+        <IntPick id={p + "Len"} label="LEN" min={1} max={16} />
+        <Seg id={p + "Dir"} options={SEQ_DIRS} label="DIR" />
+        <Seg id={p + "Mode"} options={SEQ_MODES} label="MODE" />
+        <Seg id={p + "Curve"} options={SEQ_CURVES} label="CURVE" />
+        <Knob id={p + "Depth"} label="DEPTH" small />
+        <Knob id={p + "Swing"} label="SWING" small />
+        <Switch id={p + "Retrig"} label="RTRG" />
+      </div>
+    </Panel>
+  );
+}
+
+const TABS = [["voice", "VOICE"], ["mod", "MOD"], ["seq", "SEQ"], ["fx", "FX · ARP"]];
 
 function App() {
   const modMap = useModMap();
@@ -1223,6 +1288,12 @@ function App() {
         </div>
         <div className="col modcol">
           <ModGrid />
+        </div>
+      </div>
+
+      <div className={"seqtab" + (tab === "seq" ? "" : " hide")}>
+        <div className="seqcol">
+          <SeqPanel n={1} /><SeqPanel n={2} /><SeqPanel n={3} /><SeqPanel n={4} />
         </div>
       </div>
 

@@ -16,6 +16,7 @@
 #include "SynthParams.h"
 #include "SynthPhaser.h"
 #include "SynthReverb.h"
+#include "SynthSeq.h"
 #include "Voice.h"
 #include <cstdint>
 
@@ -103,6 +104,10 @@ class SynthEngine
             case ModSource::ModWheel:   return wheel_;
             case ModSource::Aftertouch: return at_;
             case ModSource::PitchBend:  return bend_;
+            case ModSource::Seq1:       return seq_[0].value();
+            case ModSource::Seq2:       return seq_[1].value();
+            case ModSource::Seq3:       return seq_[2].value();
+            case ModSource::Seq4:       return seq_[3].value();
             default: break;
         }
         int best = -1; float bestAmp = -1.0f;
@@ -128,6 +133,8 @@ class SynthEngine
     }
     float lfoValue(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].value() : 0.0f; }
     float lfoPhase(int i) const noexcept { return (i >= 0 && i < kNumLfo) ? lfo_[i].phase() : 0.0f; }
+    float seqValue(int i) const noexcept { return (i >= 0 && i < kNumSeq) ? seq_[i].value() : 0.0f; }
+    int   seqStep(int i) const noexcept { return (i >= 0 && i < kNumSeq) ? seq_[i].stepIndex() : 0; }
     // Monotonic count of note triggers — bumps on every voice start (keyboard or
     // arp step). The UI uses the delta as an "arp pulse"; tests use it to confirm
     // the arp is actually stepping.
@@ -153,6 +160,7 @@ class SynthEngine
     const SynthPatch* patch_ = nullptr;
     Voice             voice_[kMaxVoices];
     SynthLfo          lfo_[kNumLfo];
+    Sequencer         seq_[kNumSeq];      // step/curve modulation sequencers
     Arpeggiator       arp_;
     MultibandSat      mbsat_;             // 3-band saturation on the filtered bus
     Chorus            chorus_;            // Juno-style ensemble on the voice bus

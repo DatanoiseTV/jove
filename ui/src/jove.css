@@ -161,6 +161,23 @@ button, select, input { font-family: inherit; color: inherit; }
 .modcol > .panel { flex: 1 1 0; min-height: 0; }
 .modcol .pbody { flex: 1; min-height: 0; }
 .modcol .modgrid { flex: 1; min-height: 0; justify-content: space-between; }
+/* SEQ tab: four full-width sequencer panels stacked, each a 16-step grid + ctl */
+.seqtab { display: flex; flex: 1; min-height: 0; }
+.seqtab.hide { display: none; }
+.seqcol { flex: 1; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.seqcol > .panel { flex: 1 1 0; min-height: 0; }
+.seqcol .pbody { flex: 1; gap: 8px; justify-content: space-between; }
+.seqgrid { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; flex: 1; min-height: 48px; }
+.sq-cell { position: relative; cursor: ns-resize; border-radius: 3px;
+  background: #0c0d10; border: 1px solid var(--line); overflow: hidden; }
+.sq-cell::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: var(--line2); }
+.sq-cell i { position: absolute; left: 2px; right: 2px; border-radius: 1px; }
+.sq-cell.pos i { bottom: 50%; height: calc(var(--m, 0) * 50%); background: var(--accent); }
+.sq-cell.neg i { top: 50%; height: calc(var(--m, 0) * 50%); background: var(--hot); }
+.sq-cell.play { border-color: var(--accent); box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 70%, transparent); }
+.seqctl { gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+
 /* FX·ARP tab: a clean 3x2 grid of equal panels */
 .fxtab { display: flex; flex: 1; min-height: 0; }
 .fxtab.hide { display: none; }
@@ -312,7 +329,7 @@ button, select, input { font-family: inherit; color: inherit; }
   text-align: center; align-self: end; padding-bottom: 2px; }
 .mg-rlabel { font-size: 7.5px; color: var(--ink2); display: flex; align-items: center;
   justify-content: flex-end; padding-right: 5px; white-space: nowrap; overflow: hidden; }
-.mg-cell { position: relative; min-height: 15px; border-radius: 3px; cursor: ns-resize;
+.mg-cell { position: relative; min-height: 19px; border-radius: 3px; cursor: ns-resize;
   background: #0c0d10; border: 1px solid var(--line); overflow: hidden; }
 .mg-cell::after { content: ""; position: absolute; left: 0; right: 0; top: 50%;
   height: 1px; background: var(--line); }

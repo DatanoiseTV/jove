@@ -125,6 +125,8 @@ namespace jID
     inline juce::String lfo (int i, const char* f)  { return "lfo"  + juce::String(i + 1) + f; }
     inline juce::String env (int i, const char* f)  { return "env"  + juce::String(i + 1) + f; }
     inline juce::String mod (int i, const char* f)  { return "mod"  + juce::String(i + 1) + f; }
+    inline juce::String seq (int i, const char* f)  { return "seq"  + juce::String(i + 1) + f; }
+    inline juce::String seqStep(int i, int s)       { return "seq"  + juce::String(i + 1) + "step" + juce::String(s + 1); }
 } // namespace jID
 
 // ---- small helpers ----------------------------------------------------------
@@ -300,6 +302,27 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         fparam(jID::mod(i, "Amt"), n + "Amount", FR(-2.0f, 2.0f), 0.0f);
     }
 
+    // ---- step/curve sequencers (mod sources Seq1..Seq4) ----
+    const auto seqCurves = namesToArray(kSeqCurveNames, (int)SeqCurve::Count);
+    const auto seqDirs   = namesToArray(kSeqDirNames, (int)SeqDir::Count);
+    const auto seqModes  = namesToArray(kSeqModeNames, (int)SeqMode::Count);
+    for(int i = 0; i < kNumSeq; ++i)
+    {
+        const juce::String n = "Seq " + juce::String(i + 1) + " ";
+        bparam(jID::seq(i, "Sync"),  n + "Sync", true);
+        cparam(jID::seq(i, "Div"),   n + "Division", arpDivs, 4);
+        fparam(jID::seq(i, "Rate"),  n + "Rate", FR(0.05f, 40.0f), 4.0f, "st/s");
+        iparam(jID::seq(i, "Len"),   n + "Length", 1, kSeqMaxSteps, 16);
+        cparam(jID::seq(i, "Dir"),   n + "Direction", seqDirs, 0);
+        cparam(jID::seq(i, "Mode"),  n + "Mode", seqModes, 0);
+        cparam(jID::seq(i, "Curve"), n + "Curve", seqCurves, 0);
+        fparam(jID::seq(i, "Depth"), n + "Depth", FR(0.0f, 2.0f), 1.0f);
+        bparam(jID::seq(i, "Retrig"),n + "Retrig", false);
+        fparam(jID::seq(i, "Swing"), n + "Swing", FR(0.0f, 0.66f), 0.0f);
+        for(int s = 0; s < kSeqMaxSteps; ++s)
+            fparam(jID::seqStep(i, s), n + "Step " + juce::String(s + 1), FR(-1.0f, 1.0f), 0.0f);
+    }
+
     // ---- arpeggiator ----
     bparam(jID::arpOn, "Arp On", false);
     cparam(jID::arpMode, "Arp Mode", namesToArray(kArpModeNames, (int)ArpMode::Count), 0);
@@ -442,6 +465,21 @@ class PatchBinding
             p.mod[i].amount = get(mod(i, "Amt"));
         }
 
+        for(int i = 0; i < kNumSeq; ++i)
+        {
+            p.seq[i].sync    = get(seq(i, "Sync")) > 0.5f;
+            p.seq[i].syncDiv = (int)get(seq(i, "Div"));
+            p.seq[i].rate    = get(seq(i, "Rate"));
+            p.seq[i].length  = (int)get(seq(i, "Len"));
+            p.seq[i].dir     = (int)get(seq(i, "Dir"));
+            p.seq[i].mode    = (int)get(seq(i, "Mode"));
+            p.seq[i].curve   = (int)get(seq(i, "Curve"));
+            p.seq[i].depth   = get(seq(i, "Depth"));
+            p.seq[i].retrig  = get(seq(i, "Retrig")) > 0.5f;
+            p.seq[i].swing   = get(seq(i, "Swing"));
+            for(int s = 0; s < kSeqMaxSteps; ++s) p.seq[i].step[s] = get(seqStep(i, s));
+        }
+
         p.arp.on      = get(arpOn) > 0.5f;
         p.arp.mode    = (int)get(arpMode);
         p.arp.octaves = (int)get(arpOctaves);
@@ -562,6 +600,21 @@ class PatchBinding
             set(mod(i, "Src"), (float)p.mod[i].source);
             set(mod(i, "Dst"), (float)p.mod[i].dest);
             set(mod(i, "Amt"), p.mod[i].amount);
+        }
+
+        for(int i = 0; i < kNumSeq; ++i)
+        {
+            set(seq(i, "Sync"), p.seq[i].sync ? 1.0f : 0.0f);
+            set(seq(i, "Div"), (float)p.seq[i].syncDiv);
+            set(seq(i, "Rate"), p.seq[i].rate);
+            set(seq(i, "Len"), (float)p.seq[i].length);
+            set(seq(i, "Dir"), (float)p.seq[i].dir);
+            set(seq(i, "Mode"), (float)p.seq[i].mode);
+            set(seq(i, "Curve"), (float)p.seq[i].curve);
+            set(seq(i, "Depth"), p.seq[i].depth);
+            set(seq(i, "Retrig"), p.seq[i].retrig ? 1.0f : 0.0f);
+            set(seq(i, "Swing"), p.seq[i].swing);
+            for(int s = 0; s < kSeqMaxSteps; ++s) set(seqStep(i, s), p.seq[i].step[s]);
         }
 
         set(arpOn, p.arp.on ? 1.0f : 0.0f);

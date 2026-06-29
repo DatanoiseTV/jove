@@ -75,6 +75,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     float getLfoPhase(int i) const { return (i >= 0 && i < jove::kNumLfo) ? lfoPhaseUI[(size_t) i].load(std::memory_order_relaxed) : 0.0f; }
     static constexpr int kNumModSources = (int) jove::ModSource::Count;
     float getModSourceValue(int i) const { return (i >= 0 && i < kNumModSources) ? modSrcUI[(size_t) i].load(std::memory_order_relaxed) : 0.0f; }
+    int   getSeqStep(int i) const { return (i >= 0 && i < jove::kNumSeq) ? seqStepUI[(size_t) i].load(std::memory_order_relaxed) : 0; }
     int   getLastMidiNote() const { return lastMidiNote.load(std::memory_order_relaxed); }
 
   private:
@@ -125,6 +126,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     std::array<std::atomic<float>, jove::kNumLfo> lfoPhaseUI {};
     std::array<std::atomic<float>, jove::kMaxVoices> voiceLevelUI {};
     std::array<std::atomic<float>, (size_t) jove::ModSource::Count> modSrcUI {};
+    std::array<std::atomic<int>, jove::kNumSeq> seqStepUI {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JoveAudioProcessor)
 };

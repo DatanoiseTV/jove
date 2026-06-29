@@ -241,6 +241,10 @@ void JoveWebEditor::emitMeters()
     for(int i = 0; i < JoveAudioProcessor::kNumModSources; ++i)
         ms.add(processor.getModSourceValue(i));
     o->setProperty("modSrc", juce::var(ms));
+    juce::Array<juce::var> seqSteps;
+    for(int i = 0; i < jove::kNumSeq; ++i)
+        seqSteps.add(processor.getSeqStep(i));
+    o->setProperty("seqStep", juce::var(seqSteps));
     webView->emitEventIfBrowserIsVisible("meters", juce::var(o));
 }
 

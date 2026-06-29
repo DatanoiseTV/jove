@@ -247,6 +247,8 @@ void JoveAudioProcessor::publishMeters(const float* l, const float* r, int n) no
         lfoValueUI[(size_t) i].store(engine.lfoValue(i), std::memory_order_relaxed);
         lfoPhaseUI[(size_t) i].store(engine.lfoPhase(i), std::memory_order_relaxed);
     }
+    for(int i = 0; i < jove::kNumSeq; ++i)
+        seqStepUI[(size_t) i].store(engine.seqStep(i), std::memory_order_relaxed);
 }
 
 juce::AudioProcessorEditor* JoveAudioProcessor::createEditor()

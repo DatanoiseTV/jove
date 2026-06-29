@@ -18,6 +18,8 @@ void SynthEngine::prepare(float sampleRate, int blockSize) noexcept
         voice_[i].prepare(sampleRate, blockRate_);
     for(int i = 0; i < kNumLfo; ++i)
         lfo_[i].prepare(sampleRate, blockRate_);
+    for(int i = 0; i < kNumSeq; ++i)
+        seq_[i].prepare(sampleRate, blockRate_);
     arp_.prepare(sampleRate);
     mbsat_.prepare(sampleRate);
     chorus_.prepare(sampleRate);
@@ -213,9 +215,14 @@ void SynthEngine::playNote(int note, float velocity) noexcept
     // phrase or a detached note — so delayed vibrato restarts each time, but a
     // held legato/chord keeps the wobble going.
     if(activeVoices() == 0)
+    {
         for(int i = 0; i < kNumLfo; ++i)
             if(patch_->lfo[i].retrig)
                 lfo_[i].retrigger(); // phase positioning is the continuous setPhase() offset
+        for(int i = 0; i < kNumSeq; ++i)
+            if(patch_->seq[i].retrig)
+                seq_[i].retrigger();
+    }
     pushHeld(note, (int)(velocity * 127.0f));
     const int   mode = patch_->voiceMode;
     const float newHz = midiToHz((float)note);
@@ -438,6 +445,10 @@ void SynthEngine::buildVoiceMod(int voiceIdx, VoiceMod& m) noexcept
     src[(int)ModSource::MpePressure] = v.mpePressureSource(); // 0..1
     src[(int)ModSource::MpeTimbre]   = v.mpeTimbreSource();   // bipolar around CC74 centre
     src[(int)ModSource::MpeBend]     = v.mpeBendSource();     // -1..+1
+    src[(int)ModSource::Seq1]        = seq_[0].value();
+    src[(int)ModSource::Seq2]        = seq_[1].value();
+    src[(int)ModSource::Seq3]        = seq_[2].value();
+    src[(int)ModSource::Seq4]        = seq_[3].value();
     evalMatrix(src, m);
     // per-note MPE pitch bend, applied on top of the matrix (the global
     // bend_ * bendRange still applies for master-channel / non-MPE bend).
@@ -473,6 +484,10 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
             case ModSource::ModWheel: return wheel_;
             case ModSource::Aftertouch: return at_;
             case ModSource::PitchBend: return bend_;
+            case ModSource::Seq1: return seq_[0].value();
+            case ModSource::Seq2: return seq_[1].value();
+            case ModSource::Seq3: return seq_[2].value();
+            case ModSource::Seq4: return seq_[3].value();
             default: return 0.0f;
         }
     };
@@ -519,6 +534,20 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         lfo_[i].setOffset(lp.offset);
         lfo_[i].setPhase(lp.phase);
         lfo_[i].advance();
+    }
+
+    // advance the step/curve sequencers (global mod sources), once per block
+    for(int i = 0; i < kNumSeq; ++i)
+    {
+        const SeqParams& sp = p.seq[i];
+        seq_[i].setLength(sp.length);
+        seq_[i].setDir(sp.dir);
+        seq_[i].setMode(sp.mode);
+        seq_[i].setCurve(sp.curve);
+        seq_[i].setDepth(sp.depth);
+        seq_[i].setSwing(sp.swing);
+        for(int s = 0; s < kSeqMaxSteps; ++s) seq_[i].setStep(s, sp.step[s]);
+        seq_[i].advance(n, tempoBpm_, sp.sync, sp.syncDiv, sp.rate);
     }
 
     // Render each voice with its own resolved modulation (global LFOs/controllers

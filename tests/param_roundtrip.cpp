@@ -113,6 +113,22 @@ int main()
             F(i, "modAmt", r.mod[s].amount, g.mod[s].amount);
         }
 
+        for(int q = 0; q < kNumSeq; ++q)
+        {
+            I(i, "seqSync",   r.seq[q].sync,    g.seq[q].sync);
+            I(i, "seqDiv",    r.seq[q].syncDiv, g.seq[q].syncDiv);
+            F(i, "seqRate",   r.seq[q].rate,    g.seq[q].rate);
+            I(i, "seqLen",    r.seq[q].length,  g.seq[q].length);
+            I(i, "seqDir",    r.seq[q].dir,     g.seq[q].dir);
+            I(i, "seqMode",   r.seq[q].mode,    g.seq[q].mode);
+            I(i, "seqCurve",  r.seq[q].curve,   g.seq[q].curve);
+            F(i, "seqDepth",  r.seq[q].depth,   g.seq[q].depth);
+            I(i, "seqRetrig", r.seq[q].retrig,  g.seq[q].retrig);
+            F(i, "seqSwing",  r.seq[q].swing,   g.seq[q].swing);
+            for(int s = 0; s < kSeqMaxSteps; ++s)
+                F(i, "seqStep", r.seq[q].step[s], g.seq[q].step[s]);
+        }
+
         I(i, "arpOn", r.arp.on, g.arp.on);
         I(i, "arpMode", r.arp.mode, g.arp.mode);
         I(i, "arpOct", r.arp.octaves, g.arp.octaves);
