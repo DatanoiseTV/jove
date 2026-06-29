@@ -45,6 +45,7 @@ namespace jID
     inline constexpr auto pan          = "pan";
     inline constexpr auto width        = "width";
     inline constexpr auto drift        = "drift";
+    inline constexpr auto masterTune   = "masterTune"; // global fine tune, cents
 
     // oscillator section
     inline constexpr auto oscMix     = "oscMix";
@@ -168,6 +169,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::pan, "Pan", bip, 0.0f);
     fparam(jID::width, "Width", lin01, 0.5f);
     fparam(jID::drift, "Analog Drift", lin01, 0.2f);
+    fparam(jID::masterTune, "Master Tune", FR(-100.0f, 100.0f), 0.0f, "ct");
 
     // ---- oscillators ----
     const auto footage = namesToArray(kFootageNames, kNumFootage);
@@ -182,6 +184,8 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         // percussion patches tune an oscillator up to ~19 st away for metallic tones.
         fparam(jID::osc(i, "Detune"), n + "Detune", FR(-24.0f, 24.0f), 0.0f, "st");
         fparam(jID::osc(i, "Level"),  n + "Level", lin01, 1.0f);
+        // bit-crush: 0 clean, up -> coarser quantisation for old-school DCO grit
+        fparam(jID::osc(i, "Crush"),  n + "Bit Crush", lin01, 0.0f);
     }
     fparam(jID::oscMix, "Osc Mix", lin01, 0.5f);
     fparam(jID::subLevel, "Sub Level", lin01, 0.0f);
@@ -303,6 +307,7 @@ class PatchBinding
         p.pan          = get(pan);
         p.width        = get(width);
         p.drift        = get(drift);
+        p.masterTune   = get(masterTune);
 
         for(int i = 0; i < kNumOsc; ++i)
         {
@@ -312,6 +317,7 @@ class PatchBinding
             p.osc[i].pw     = get(osc(i, "Pw"));
             p.osc[i].detune = get(osc(i, "Detune"));
             p.osc[i].level  = get(osc(i, "Level"));
+            p.osc[i].crush  = get(osc(i, "Crush"));
         }
         p.oscMix     = get(oscMix);
         p.subLevel   = get(subLevel);
@@ -399,6 +405,7 @@ class PatchBinding
         set(pan, p.pan);
         set(width, p.width);
         set(drift, p.drift);
+        set(masterTune, p.masterTune);
 
         for(int i = 0; i < kNumOsc; ++i)
         {
@@ -408,6 +415,7 @@ class PatchBinding
             set(osc(i, "Pw"), p.osc[i].pw);
             set(osc(i, "Detune"), p.osc[i].detune);
             set(osc(i, "Level"), p.osc[i].level);
+            set(osc(i, "Crush"), p.osc[i].crush);
         }
         set(oscMix, p.oscMix);
         set(subLevel, p.subLevel);

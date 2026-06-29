@@ -56,9 +56,11 @@ enum class FilterMode : int
     SvfHP,
     SvfBP,
     SvfNotch,
+    Lpg,      // low-pass gate: cutoff + amplitude track together (vactrol-ish)
+    Steiner,  // Steiner-Parker-ish: peaky, soft-saturated lowpass
     Count
 };
-inline constexpr const char* kFilterModeNames[] = {"MOOG", "LP", "HP", "BP", "NOTCH"};
+inline constexpr const char* kFilterModeNames[] = {"MOOG", "LP", "HP", "BP", "NOTCH", "LPG", "STEINER"};
 
 enum class LfoWave : int
 {
@@ -178,6 +180,7 @@ struct OscParams
     float pw      = 0.5f; // pulse width
     float detune  = 0.0f; // fine detune in semitones (+/-)
     float level   = 1.0f;
+    float crush   = 0.0f; // bit-crush amount (0 clean .. 1 heavy) for DCO grit
     bool  on      = true;
 };
 
@@ -259,6 +262,7 @@ struct SynthPatch
     // amp
     float ampGain  = 0.8f;
     float pan      = 0.0f;
+    float masterTune = 0.0f; // global fine tune, cents
 
     // modulation
     LfoParams lfo[kNumLfo];

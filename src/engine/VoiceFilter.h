@@ -45,7 +45,9 @@ class VoiceFilter
         SvfLP,
         SvfHP,
         SvfBP,
-        SvfNotch
+        SvfNotch,
+        Lpg,      // low-pass gate: output level tracks cutoff (vactrol-ish)
+        Steiner   // Steiner-Parker-ish: peaky, soft-saturated 2-pole lowpass
     };
 
     void prepare(float sampleRate) noexcept
@@ -97,10 +99,24 @@ class VoiceFilter
                 case Mode::SvfHP: t = 1; break;
                 case Mode::SvfBP: t = 2; break;
                 case Mode::SvfNotch: t = 3; break;
-                default: t = 0; break;
+                default: t = 0; break; // SvfLP, Lpg, Steiner -> lowpass
             }
             svfType_ = t;
-            svf_.setParams(cutoffHz, res_ * 0.97f);
+            // Steiner-Parker: a peakier resonance curve than the clean SVF LP.
+            float q = (mode_ == Mode::Steiner) ? (0.2f + res_ * 0.78f) : (res_ * 0.97f);
+            svf_.setParams(cutoffHz, q);
+
+            // Low-pass gate: amplitude follows cutoff (darker == quieter), so an
+            // envelope/LFO -> cutoff route gives the plucky vactrol "bongo" duck.
+            if(mode_ == Mode::Lpg)
+            {
+                const float maxHz = 0.45f * sr_;
+                float norm = std::log2(cutoffHz / 20.0f) / std::log2(maxHz / 20.0f);
+                norm = norm < 0.0f ? 0.0f : (norm > 1.0f ? 1.0f : norm);
+                gate_ = 0.12f + 0.88f * norm * norm; // never fully shut; quadratic open
+            }
+            else
+                gate_ = 1.0f;
         }
     }
 
@@ -109,9 +125,11 @@ class VoiceFilter
         if(mode_ != Mode::LadderLP)
         {
             in *= drive_;
-            if(svfType_ == 3) // notch = in - BP
-                return in - svf_.process(in, 2);
-            return svf_.process(in, svfType_);
+            float out = (svfType_ == 3) ? (in - svf_.process(in, 2)) // notch = in - BP
+                                        : svf_.process(in, svfType_);
+            if(mode_ == Mode::Steiner)
+                out = softSat(out * 1.5f); // diode-ish soft clip for the SP grit
+            return out * gate_;            // gate_ is 1.0 except in LPG mode
         }
 
         // Moog ladder at native rate (1x). Input drive, then the resonant
@@ -136,6 +154,7 @@ class VoiceFilter
     float        drive_  = 1.0f;
     float        g_      = 0.1f;
     float        k_      = 0.0f;
+    float        gate_   = 1.0f; // LPG amplitude (tracks cutoff); 1.0 otherwise
     float        z_[4]   = {0, 0, 0, 0};
     int          svfType_ = 0;
     doobie::Svf  svf_;

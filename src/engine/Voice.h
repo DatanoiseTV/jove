@@ -203,7 +203,7 @@ class Voice
         // at control rate, and computing exp2/exp/sqrt per sample per voice was
         // what overran the M7) ---------------------------------------------
         curHz_ = targetHz_ + (curHz_ - targetHz_) * glideCoef; // glide once/block
-        const float pitchMul = std::exp2((m.pitchSemis + driftSemi) * (1.0f / 12.0f));
+        const float pitchMul = std::exp2((m.pitchSemis + driftSemi + p.masterTune * 0.01f) * (1.0f / 12.0f));
         const float baseHz   = curHz_ * pitchMul;
         const float o1Hz = baseHz * footageMul(p.osc[0].footage);
         // detune spread: osc2 widens one way, osc3 the other (LFO -> living ensemble)
@@ -244,6 +244,14 @@ class Voice
             sub_.setMorph(1.0f);
             sub_.setPulseWidth(0.5f);
         }
+
+        // per-osc bit-crush: quantisation step count (0 => bypass). amount 0 is
+        // ~16-bit (clean), amount 1 ~2-bit for raw DCO/8-bit grit.
+        float crushLv[kNumOsc];
+        for(int i = 0; i < kNumOsc; ++i)
+            crushLv[i] = p.osc[i].crush > 0.001f
+                             ? std::exp2(15.0f - p.osc[i].crush * 13.0f)
+                             : 0.0f;
 
         // filter: base cutoff (env-independent part) + key + matrix mod, in
         // octaves; the per-sample env contribution is applied in the loop.
@@ -294,11 +302,19 @@ class Voice
             float subv = 0.0f;
             if(subOn) { bool ws; subv = sub_.process(0.0f, ws); }
 
+            if(crushLv[0] != 0.0f) o1 = std::round(o1 * crushLv[0]) / crushLv[0];
+            if(crushLv[1] != 0.0f) o2 = std::round(o2 * crushLv[1]) / crushLv[1];
+            if(crushLv[2] != 0.0f) o3 = std::round(o3 * crushLv[2]) / crushLv[2];
+
             float voice = o1 * g1 + o2 * g2 + o3 * g3
                           + subv * subG + (rngf() * 2.0f - 1.0f) * noiseG;
             for(int i = 3; i < kNumOsc; ++i)
                 if(p.osc[i].on)
-                { bool wi; voice += osc_[i].process(0.0f, wi) * p.osc[i].level; }
+                {
+                    bool wi; float oi = osc_[i].process(0.0f, wi);
+                    if(crushLv[i] != 0.0f) oi = std::round(oi * crushLv[i]) / crushLv[i];
+                    voice += oi * p.osc[i].level;
+                }
             // ring modulation: blend the osc1 x osc2 product in (bounded by 1, so
             // the master soft-clip never sees more than the dry oscs already give).
             if(ringG > 0.0001f)
