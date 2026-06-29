@@ -17,9 +17,12 @@ JoveAudioProcessor::JoveAudioProcessor()
 {
     binding.connect(apvts);
     presetManager.init(apvts, binding);
-    // NB: loading a preset does NOT kill held notes — held voices morph to the
-    // new patch so presets can be auditioned live on a sustained note. (CC123 /
-    // host all-notes-off still panic via engine.allNotesOff directly.)
+    // Loading a preset does NOT kill held notes — held voices morph to the new
+    // patch so presets can be auditioned live on a sustained note. It DOES flag a
+    // reconcile pass (engine.onPresetLoaded) that releases any orphaned/stuck
+    // voice no longer held, so a missed note-off can't hang across a preset
+    // change. (CC123 / host all-notes-off still panic via engine.allNotesOff.)
+    presetManager.setLoadCallback([this] { presetLoadPending.store(true, std::memory_order_relaxed); });
     InitDefaultPatch(patch);
     apvts.addParameterListener(jID::quality, this);
 }
@@ -156,14 +159,15 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
             if(auto bpm = pos->getBpm())
                 engine.setTempo((float) *bpm);
 
-    // a preset just loaded -> gate every voice off so held/stuck notes don't
-    // bleed into the new patch.
-    if(panicPending.exchange(false, std::memory_order_relaxed))
-        engine.allNotesOff();
-
     binding.readInto(patch);
     engine.setPatch(&patch);
     engine.setMaxVoices((int) apvts.getRawParameterValue(jID::maxVoices)->load());
+
+    // a preset just loaded -> release orphaned/stuck voices (held notes survive
+    // for live audition; see engine.onPresetLoaded). Done after the new patch is
+    // read so the arp-on guard sees the loaded patch.
+    if(presetLoadPending.exchange(false, std::memory_order_relaxed))
+        engine.onPresetLoaded();
 
     if(osFactor <= 1 || oversampling == nullptr || numCh < 2)
     {

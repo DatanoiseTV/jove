@@ -43,6 +43,7 @@ class SynthEngine
     void noteOn(int note, float velocity) noexcept;
     void noteOff(int note) noexcept;
     void allNotesOff() noexcept;
+    void onPresetLoaded() noexcept; // release orphaned (stuck) voices, keep held
     void pitchBend(float norm) noexcept;     // -1..+1
     void modWheel(float norm) noexcept;      // 0..1
     void aftertouch(float norm) noexcept;    // 0..1
@@ -142,6 +143,7 @@ class SynthEngine
     float             dcxL_ = 0.0f, dcyL_ = 0.0f, dcxR_ = 0.0f, dcyR_ = 0.0f;
     float             toneZL_ = 0.0f, toneZR_ = 0.0f; // drive-tone tilt LP state
     float             limEnv_ = 0.0f; // master limiter peak-envelope follower
+    float             busEnv_ = 0.0f; // voice-bus auto-gain follower (anti-chord-clip)
 
     float sr_        = 48000.0f;
     int   blockSize_ = 48;

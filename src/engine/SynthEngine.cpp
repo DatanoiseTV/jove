@@ -207,28 +207,26 @@ void SynthEngine::playNote(int note, float velocity) noexcept
 void SynthEngine::releaseNote(int note) noexcept
 {
     removeHeld(note);
-    const int mode = patch_->voiceMode;
 
     if(sustain_)
         return; // held by pedal; release handled on pedal-up
 
-    if(mode == (int)VoiceMode::Mono)
-    {
-        if(heldCount_ > 0)
-        {
-            const int n = held_[heldCount_ - 1]; // fall back to previous held note
-            startVoice(0, n, (float)heldVel_[heldCount_ - 1] / 127.0f, true, 0.0f, 0.0f, -1.0f);
-            lastNoteHz_ = midiToHz((float)n);
-        }
-        else
-            voice_[0].noteOff();
-        return;
-    }
-
-    // POLY / UNISON: release every voice currently playing this note.
+    // Catch-all: gate off EVERY sounding voice playing this note, regardless of
+    // the current voice mode. A voice may have been started under a different
+    // mode (e.g. before a preset change switched Poly->Mono); a mode-specific
+    // release alone would miss it and the note would hang. This loop runs in all
+    // modes so a note-off always reaches the voice that played it.
     for(int i = 0; i < kMaxVoices; ++i)
         if(voice_[i].active() && voice_[i].gateOn() && voice_[i].note() == note)
             voice_[i].noteOff();
+
+    // Mono legato: if keys are still held, fall back to the most-recent one.
+    if(patch_->voiceMode == (int)VoiceMode::Mono && heldCount_ > 0)
+    {
+        const int n = held_[heldCount_ - 1];
+        startVoice(0, n, (float)heldVel_[heldCount_ - 1] / 127.0f, true, 0.0f, 0.0f, -1.0f);
+        lastNoteHz_ = midiToHz((float)n);
+    }
 }
 
 void SynthEngine::allNotesOff() noexcept
@@ -237,6 +235,28 @@ void SynthEngine::allNotesOff() noexcept
     arp_.allOff();
     for(int i = 0; i < kMaxVoices; ++i)
         voice_[i].noteOff();
+}
+
+// Called once after a preset loads. Held notes keep sounding so a patch can be
+// auditioned on a sustained note, but any orphaned voice — still gated yet no
+// longer in the held-key set (a stuck note whose note-off was missed or routed
+// to the wrong voice under a previous mode) — is released so it can't hang. The
+// arp owns its own note lifetimes, so skip the sweep while it's running.
+void SynthEngine::onPresetLoaded() noexcept
+{
+    if(patch_ != nullptr && patch_->arp.on)
+        return;
+    for(int i = 0; i < kMaxVoices; ++i)
+    {
+        if(!voice_[i].active() || !voice_[i].gateOn())
+            continue;
+        bool stillHeld = false;
+        for(int h = 0; h < heldCount_; ++h)
+            if(held_[h] == voice_[i].note())
+                stillHeld = true;
+        if(!stillHeld)
+            voice_[i].noteOff();
+    }
 }
 
 // Advance the arpeggiator one control block and apply its step events.
@@ -464,6 +484,17 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     for(int i = 0; i < n; ++i)
     {
         float l = outL[i], r = outR[i];
+        // Voice-bus auto-gain: smoothly pull a hot stack down toward the glue
+        // ceiling BEFORE the saturator, so a held chord (N voices summing well
+        // past 1.0) is level-controlled instead of slammed into softSat — that
+        // hard clip on chords was the audible "clipping" across presets. Fast
+        // attack, slow release; single notes (peak ~0.35) pass untouched.
+        const float bpk = std::max(std::fabs(l), std::fabs(r));
+        if(bpk > busEnv_) busEnv_ += 0.30f * (bpk - busEnv_);
+        else              busEnv_ += 0.001f * (bpk - busEnv_);
+        constexpr float busCeil = 0.90f;
+        const float bg = busEnv_ > busCeil ? busCeil / busEnv_ : 1.0f;
+        l *= bg; r *= bg;
         if(mbActive) { l = mbsat_.process(0, l); r = mbsat_.process(1, r); }
         outL[i] = softSat(l);
         outR[i] = softSat(r);
