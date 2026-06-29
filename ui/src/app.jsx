@@ -393,6 +393,8 @@ function EnvViz({ n }) {
 // the curve at the engine-reported phase so motion is still visible and correct.
 function LfoScope({ n }) {
   const [wave] = B.useChoice("lfo" + n + "Wave");
+  const depth = B.useSlider("lfo" + n + "Depth")[0] * 2;   // 0..2
+  const offset = B.useSlider("lfo" + n + "Offset")[2]();   // -1..1 (bias)
   const meters = B.useEvent("meters", { lfoPhase: [0, 0, 0] });
   const ph = (meters.lfoPhase && meters.lfoPhase[n - 1]) || 0;
   const W = 140, H = 26, cy = H / 2, amp = H / 2 - 2.5, cycles = 2;
@@ -407,22 +409,28 @@ function LfoScope({ n }) {
       default: return 0;
     }
   };
+  // actual LFO output = shape*depth + offset (matches the engine), clamped to view
+  const val = (s) => Math.max(-1, Math.min(1, s * depth + offset));
   const phPos = ((ph * cycles) % cycles) / cycles; // 0..1 across the view
   const phx = phPos * W;
   let pointStr, phy;
   if (wave === 5) {                       // sample & hold: clean staircase
-    const steps = 4 * cycles;
-    pointStr = stairPoints(steps, W, cy, amp);
+    const steps = 4 * cycles, sp = [];
+    for (let i = 0; i < steps; i++) {
+      const yy = (cy - val(SNH_LEVELS[i % SNH_LEVELS.length]) * amp).toFixed(1);
+      sp.push((i / steps * W).toFixed(1) + "," + yy, ((i + 1) / steps * W).toFixed(1) + "," + yy);
+    }
+    pointStr = sp.join(" ");
     const si = Math.min(steps - 1, Math.floor(phPos * steps));
-    phy = cy - SNH_LEVELS[si % SNH_LEVELS.length] * amp;
+    phy = cy - val(SNH_LEVELS[si % SNH_LEVELS.length]) * amp;
   } else {
     const N = 96, pts = [];
     for (let i = 0; i <= N; i++) {
       const t = (i / N) * cycles;
-      pts.push(((i / N) * W).toFixed(1) + "," + (cy - shape(t) * amp).toFixed(1));
+      pts.push(((i / N) * W).toFixed(1) + "," + (cy - val(shape(t)) * amp).toFixed(1));
     }
     pointStr = pts.join(" ");
-    phy = cy - shape(ph * cycles) * amp;
+    phy = cy - val(shape(ph * cycles)) * amp;
   }
   return (
     <svg className="viz scope" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
@@ -450,27 +458,42 @@ function FilterCurve() {
   (mc.map && mc.map["cutoff"] || []).forEach((m) => { cutOct += ((mc.src && mc.src[m.src]) || 0) * m.amt * 4; });
   (mc.map && mc.map["resonance"] || []).forEach((m) => { resAdd += ((mc.src && mc.src[m.src]) || 0) * m.amt; });
   cutOct += efa * ((mc.src && mc.src[5]) || 0) * 6; // MOD_SRC[5] = FLT EG
-  const W = 180, H = 38, N = 72;
+  const W = 180, H = 38, N = 96;
   const fmin = Math.log2(20), fmax = Math.log2(20000);
-  const fc = 20 * Math.pow(2, cut * 9.6 + cutOct);  // engine cutoff mapping (Hz), live
-  const Q = 0.5 + Math.max(0, Math.min(1, res + resAdd)) * 11; // resonance -> Q, live
-  const ladder = mode === 0;
+  const fc = Math.max(20, Math.min(20000, 20 * Math.pow(2, cut * 9.6 + cutOct)));
+  const resL = Math.max(0, Math.min(1, res + resAdd));
+  const ladder = mode === 0, isLpg = mode === 5, isSteiner = mode === 6;
+  // exact engine mappings: SVF damping k = 2 - 1.9*res (Steiner is peakier);
+  // ladder feedback k = 4*res with the engine's (1 + 0.5k) output makeup.
+  const svfRes = isSteiner ? (0.2 + resL * 0.78) : (resL * 0.97);
+  const kSvf = 2 - 1.9 * Math.min(0.95, svfRes);
+  const kLad = 4 * resL;
+  // LPG amplitude gate tracks cutoff (matches engine gate_)
+  let gate = 1;
+  if (isLpg) { let nrm = Math.log2(fc / 20) / Math.log2(20000 / 20); nrm = Math.max(0, Math.min(1, nrm)); gate = 0.12 + 0.88 * nrm * nrm; }
   const mag = (f) => {
-    const w = f / fc, w2 = w * w;
-    const denom = Math.sqrt((1 - w2) * (1 - w2) + (w / Q) * (w / Q)) || 1e-9;
+    if (ladder) {                       // 4 one-pole stages + feedback (Stilson-Smith)
+      const wn = f / fc;
+      const gm = Math.pow(1 / Math.sqrt(1 + wn * wn), 4), gp = -4 * Math.atan(wn);
+      const gre = gm * Math.cos(gp), gim = gm * Math.sin(gp);
+      const dre = 1 + kLad * gre, dim = kLad * gim, dd = dre * dre + dim * dim;
+      const hre = (gre * dre + gim * dim) / dd, him = (gim * dre - gre * dim) / dd;
+      return Math.sqrt(hre * hre + him * him) * (1 + 0.5 * kLad);
+    }
+    const w = f / fc, w2 = w * w;        // 2-pole SVF family (TPT): denom |1-w² + j w k|
+    const denom = Math.sqrt((1 - w2) * (1 - w2) + (w * kSvf) * (w * kSvf)) || 1e-9;
     let h;
-    if (mode === 0 || mode === 1) h = 1 / denom;        // LP (moog/svf)
-    else if (mode === 2) h = w2 / denom;                 // HP
-    else if (mode === 3) h = (w / Q) / denom;            // BP
-    else h = Math.abs(1 - w2) / denom;                   // notch
-    if (ladder) h *= h;                                  // ~4-pole steepness
-    return h;
+    if (mode === 2) h = w2 / denom;                   // HP
+    else if (mode === 3) h = (w * kSvf) / denom;      // BP (unity at resonance)
+    else if (mode === 4) h = Math.abs(1 - w2) / denom; // notch
+    else h = 1 / denom;                               // LP, LPG, Steiner
+    return h * gate;
   };
   const pts = [];
   for (let i = 0; i <= N; i++) {
     const f = Math.pow(2, fmin + (i / N) * (fmax - fmin));
-    const db = 20 * Math.log10(Math.max(1e-3, mag(f)));  // ~-60..+20 dB
-    const y = Math.max(0, Math.min(1, (db + 42) / 54));   // -42dB->0, +12dB->1
+    const db = 20 * Math.log10(Math.max(1e-4, mag(f)));
+    const y = Math.max(0, Math.min(1, (db + 48) / 72)); // -48..+24 dB, peaks never clip
     pts.push(((i / N) * W).toFixed(1) + "," + (H - 2 - y * (H - 4)).toFixed(1));
   }
   const fcx = (Math.log2(fc) - fmin) / (fmax - fmin) * W;
