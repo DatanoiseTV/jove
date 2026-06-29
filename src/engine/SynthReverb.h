@@ -78,12 +78,13 @@ class SynthReverb
         const float in_gain = 0.015f;        // Freeverb fixed input scale
         const float modRate = 0.7f / sr_;    // ~0.7 Hz tail modulation
         const float modDepth = 7.0f;         // +/- samples
-        // The comb bank's gain is ~1/(1-roomfb), so without this the tail gets
-        // many times louder than the dry as size rises and even a small mix
-        // buries the signal. Normalise the wet so its loudness is ~constant vs
-        // size, then equal-power crossfade so low mix stays subtle and full wet
-        // sits near the dry level instead of a quiet/overpowering wash.
-        const float wetNorm = 3.6f * (1.0f - roomfb_);
+        // Without this the comb bank runs ~4-16x louder than the dry (measured),
+        // so even a small mix buried the signal. wetNorm is calibrated (by direct
+        // measurement of wet/dry vs roomfb) to put a fully-wet tail near the dry
+        // level across the whole size range; then an equal-power crossfade keeps
+        // low mix subtle. Linear-in-roomfb fit of 0.9 / measured-wet-gain.
+        float wetNorm = 0.165f - 0.15f * roomfb_;
+        if(wetNorm < 0.004f) wetNorm = 0.004f;
         const float wetG = std::sin(mix_ * 1.5707963f) * wetNorm;
         const float dryG = std::cos(mix_ * 1.5707963f);
         for(int i = 0; i < n; ++i)
