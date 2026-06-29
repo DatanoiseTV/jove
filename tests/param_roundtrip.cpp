@@ -113,6 +113,14 @@ int main()
             F(i, "modAmt", r.mod[s].amount, g.mod[s].amount);
         }
 
+        I(i, "bayPre", r.bayPrePatched, g.bayPrePatched);
+        for(int s = 0; s < kNumBaySlots; ++s)
+        {
+            I(i, "baySrc", r.bay[s].source, g.bay[s].source);
+            I(i, "bayDst", r.bay[s].dest,   g.bay[s].dest);
+            F(i, "bayAmt", r.bay[s].amount, g.bay[s].amount);
+        }
+
         for(int q = 0; q < kNumSeq; ++q)
         {
             I(i, "seqSync",   r.seq[q].sync,    g.seq[q].sync);

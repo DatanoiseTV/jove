@@ -124,7 +124,9 @@ namespace jID
     inline juce::String osc (int i, const char* f)  { return "osc"  + juce::String(i + 1) + f; }
     inline juce::String lfo (int i, const char* f)  { return "lfo"  + juce::String(i + 1) + f; }
     inline juce::String env (int i, const char* f)  { return "env"  + juce::String(i + 1) + f; }
+    inline constexpr auto bayPrePatched = "bayPrePatched";
     inline juce::String mod (int i, const char* f)  { return "mod"  + juce::String(i + 1) + f; }
+    inline juce::String bay (int i, const char* f)  { return "bay"  + juce::String(i + 1) + f; }
     inline juce::String seq (int i, const char* f)  { return "seq"  + juce::String(i + 1) + f; }
     inline juce::String seqStep(int i, int s)       { return "seq"  + juce::String(i + 1) + "step" + juce::String(s + 1); }
 } // namespace jID
@@ -302,6 +304,16 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         fparam(jID::mod(i, "Amt"), n + "Amount", FR(-2.0f, 2.0f), 0.0f);
     }
 
+    // ---- EMS-style patchbay (second routing bank, full source x dest) ----
+    bparam(jID::bayPrePatched, "Patchbay Pre-Patched", false);
+    for(int i = 0; i < kNumBaySlots; ++i)
+    {
+        const juce::String n = "Bay " + juce::String(i + 1) + " ";
+        cparam(jID::bay(i, "Src"), n + "Source", modSrc, 0);
+        cparam(jID::bay(i, "Dst"), n + "Dest", modDst, 0);
+        fparam(jID::bay(i, "Amt"), n + "Amount", FR(-2.0f, 2.0f), 0.0f);
+    }
+
     // ---- step/curve sequencers (mod sources Seq1..Seq4) ----
     const auto seqCurves = namesToArray(kSeqCurveNames, (int)SeqCurve::Count);
     const auto seqDirs   = namesToArray(kSeqDirNames, (int)SeqDir::Count);
@@ -465,6 +477,14 @@ class PatchBinding
             p.mod[i].amount = get(mod(i, "Amt"));
         }
 
+        p.bayPrePatched = get(bayPrePatched) > 0.5f;
+        for(int i = 0; i < kNumBaySlots; ++i)
+        {
+            p.bay[i].source = (int)get(bay(i, "Src"));
+            p.bay[i].dest   = (int)get(bay(i, "Dst"));
+            p.bay[i].amount = get(bay(i, "Amt"));
+        }
+
         for(int i = 0; i < kNumSeq; ++i)
         {
             p.seq[i].sync    = get(seq(i, "Sync")) > 0.5f;
@@ -600,6 +620,14 @@ class PatchBinding
             set(mod(i, "Src"), (float)p.mod[i].source);
             set(mod(i, "Dst"), (float)p.mod[i].dest);
             set(mod(i, "Amt"), p.mod[i].amount);
+        }
+
+        set(bayPrePatched, p.bayPrePatched ? 1.0f : 0.0f);
+        for(int i = 0; i < kNumBaySlots; ++i)
+        {
+            set(bay(i, "Src"), (float)p.bay[i].source);
+            set(bay(i, "Dst"), (float)p.bay[i].dest);
+            set(bay(i, "Amt"), p.bay[i].amount);
         }
 
         for(int i = 0; i < kNumSeq; ++i)

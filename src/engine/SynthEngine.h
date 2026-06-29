@@ -149,6 +149,7 @@ class SynthEngine
     int  stealVoice() const noexcept;
     void startVoice(int idx, int note, float velocity, bool glide, float detuneCents,
                     float pan, float glideFromHz) noexcept;
+    void evalSlots(const ModSlot* slots, int count, const float* src, VoiceMod& m) noexcept;
     void evalMatrix(const float* src, VoiceMod& m) noexcept;
     void buildVoiceMod(int voiceIdx, VoiceMod& m) noexcept;
     // shared note allocation (POLY/MONO/UNISON) used by both the live keyboard

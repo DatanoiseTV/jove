@@ -374,15 +374,14 @@ void SynthEngine::sustainPedal(bool down) noexcept
 // Evaluate the full mod matrix for one voice given its complete source array,
 // accumulating into the VoiceMod. Pure function of (slots, src) so the same
 // routing logic serves every voice.
-void SynthEngine::evalMatrix(const float* src, VoiceMod& m) noexcept
+// Evaluate one span of routing slots into the VoiceMod. Shared by the mod matrix
+// and the EMS patchbay bank (and the pre-patched overlay) so they route through
+// identical logic.
+void SynthEngine::evalSlots(const ModSlot* slots, int count, const float* src, VoiceMod& m) noexcept
 {
-    const SynthPatch& p = *patch_;
-    // pitch bend (range in semitones) applies to all voices as a base offset
-    m.pitchSemis += bend_ * (float)p.bendRange;
-
-    for(int i = 0; i < kNumModSlots; ++i)
+    for(int i = 0; i < count; ++i)
     {
-        const ModSlot& sl = p.mod[i];
+        const ModSlot& sl = slots[i];
         if(sl.source <= 0 || sl.dest <= 0 || sl.amount == 0.0f)
             continue;
         if(sl.source >= (int)ModSource::Count || sl.dest >= (int)ModDest::Count)
@@ -418,6 +417,18 @@ void SynthEngine::evalMatrix(const float* src, VoiceMod& m) noexcept
             default: break;
         }
     }
+}
+
+// Evaluate the full per-voice routing: the global pitch-bend offset, the mod
+// matrix bank, the EMS patchbay bank, and the patchbay's pre-patched overlay.
+void SynthEngine::evalMatrix(const float* src, VoiceMod& m) noexcept
+{
+    const SynthPatch& p = *patch_;
+    m.pitchSemis += bend_ * (float)p.bendRange; // base bend applies to all voices
+    evalSlots(p.mod, kNumModSlots, src, m);
+    evalSlots(p.bay, kNumBaySlots, src, m);
+    if(p.bayPrePatched)
+        evalSlots(kBayDefaultSlots, kNumBayDefaultSlots, src, m);
 }
 
 // Assemble one voice's complete mod-source array (global LFOs/controllers +

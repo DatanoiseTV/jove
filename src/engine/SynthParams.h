@@ -153,6 +153,20 @@ struct ModSlot
     float amount = 0.0f; // -1..+1
 };
 
+// EMS-style patchbay "pre-patched" board: a sensible default routing compiled
+// once so the engine, the round-trip/audit tests and the UI mirror agree. When
+// SynthPatch::bayPrePatched is true these pins are overlaid (summed) on top of
+// the user's bay[] pins. Source/dest indices are ModSource / ModDest values.
+inline constexpr ModSlot kBayDefaultSlots[] = {
+    {(int) ModSource::EnvFilter, (int) ModDest::Cutoff,    0.5f}, // filter EG -> cutoff
+    {(int) ModSource::Velocity,  (int) ModDest::Amp,       0.3f}, // velocity -> VCA
+    {(int) ModSource::Lfo1,      (int) ModDest::Pitch,     0.03f},// gentle vibrato
+    {(int) ModSource::ModWheel,  (int) ModDest::Cutoff,    0.4f}, // wheel -> brightness
+    {(int) ModSource::KeyTrack,  (int) ModDest::Cutoff,    0.2f}, // key -> cutoff track
+    {(int) ModSource::EnvAux,    (int) ModDest::FmAmount,  0.3f}, // aux EG -> FM bark
+};
+inline constexpr int kNumBayDefaultSlots = (int) (sizeof(kBayDefaultSlots) / sizeof(kBayDefaultSlots[0]));
+
 // ---- assignable performance macros (the 3 live panel pots) ------------------
 // Each pot writes one curated patch field absolutely (with soft-takeover on
 // preset load). The destination is per-patch, so a bass patch can put RESO on a
@@ -315,6 +329,8 @@ struct SynthPatch
     EnvParams env[kNumEnv]; // 0 amp, 1 filter, 2 aux
     ModSlot   mod[kNumModSlots];
     SeqParams seq[kNumSeq]; // step/curve sequencers (mod sources Seq1..Seq4)
+    ModSlot   bay[kNumBaySlots]; // EMS-style patchbay pins (reuse ModSource/ModDest)
+    bool      bayPrePatched = false; // overlay kBayDefaultSlots when true
 
     // arp
     ArpParams arp;
