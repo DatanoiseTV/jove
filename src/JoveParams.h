@@ -198,11 +198,13 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         cparam(jID::osc(i, "Foot"),   n + "Footage", footage, 2);
         fparam(jID::osc(i, "Morph"),  n + "Morph", lin01, 0.5f);
         fparam(jID::osc(i, "Pw"),     n + "Pulse Width", lin01, 0.5f);
-        // ±24 st with a strong symmetric skew: fine sub-semitone resolution
-        // around the centre (where most detuning lives) while the extremes still
-        // reach the ~19 st inharmonic-percussion tunings at the ends of the knob.
+        // ±24 st with a gentle symmetric skew (finer control near centre, full
+        // reach at the ends). NB the skew must stay moderate: skew applies as
+        // |dist|^(1/skew), so an extreme skew like 0.16 = |dist|^6.25 makes a
+        // detune of 0.001 st map to ~0.6 normalised — the knob reads "0.00" yet
+        // sits far off-centre. 0.5 keeps near-zero values visually centred.
         fparam(jID::osc(i, "Detune"), n + "Detune",
-               [] { juce::NormalisableRange<float> r(-24.0f, 24.0f, 0.0f, 0.16f, true); return r; }(), 0.0f, "st");
+               [] { juce::NormalisableRange<float> r(-24.0f, 24.0f, 0.0f, 0.5f, true); return r; }(), 0.0f, "st");
         fparam(jID::osc(i, "Level"),  n + "Level", lin01, 1.0f);
         // bit-crush: 0 clean, up -> coarser quantisation for old-school DCO grit
         fparam(jID::osc(i, "Crush"),  n + "Bit Crush", lin01, 0.0f);
@@ -227,13 +229,13 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::resonance, "Resonance", lin01, 0.1f);
     fparam(jID::filterDrive, "Filter Drive", lin01, 0.0f);
     fparam(jID::keyTrack, "Key Track", lin01, 0.5f);
-    fparam(jID::envFilterAmt, "Env > Cutoff", lin01, 0.4f);
+    fparam(jID::envFilterAmt, "Env > Cutoff", bip, 0.4f); // bipolar: -1 inverse env
     cparam(jID::filterRouting, "Filter Routing", {"SINGLE", "SERIAL", "PARALLEL"}, 0);
     cparam(jID::filter2Mode, "Filter 2 Mode", namesToArray(kFilterModeNames, (int)FilterMode::Count), 1);
     fparam(jID::filter2Cutoff, "Filter 2 Cutoff", lin01, 0.6f);
     fparam(jID::filter2Reso, "Filter 2 Resonance", lin01, 0.1f);
     fparam(jID::filter2Drive, "Filter 2 Drive", lin01, 0.0f);
-    fparam(jID::filter2EnvAmt, "Filter 2 Env > Cutoff", lin01, 0.0f);
+    fparam(jID::filter2EnvAmt, "Filter 2 Env > Cutoff", bip, 0.0f); // bipolar
 
     // ---- envelopes (0 amp, 1 filter, 2 aux) ----
     for(int i = 0; i < kNumEnv; ++i)

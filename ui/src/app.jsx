@@ -715,7 +715,7 @@ function FilterPanel() {
       <div className="knobs spread">
         <Knob id="cutoff" label="CUTOFF" small />
         <Knob id="resonance" label="RESO" small />
-        <Knob id="envFilterAmt" label="ENV>CUT" small />
+        <Knob id="envFilterAmt" label="ENV>CUT" bipolar small />
         <Knob id="filterDrive" label="DRIVE" small />
         <Knob id="keyTrack" label="KEYTRK" small />
       </div>
@@ -733,7 +733,7 @@ function FilterTwo() {
       <div className="knobs spread">
         <Knob id="filter2Cutoff" label="CUTOFF" small />
         <Knob id="filter2Reso" label="RESO" small />
-        <Knob id="filter2EnvAmt" label="ENV>CUT" small />
+        <Knob id="filter2EnvAmt" label="ENV>CUT" bipolar small />
         <Knob id="filter2Drive" label="DRIVE" small />
       </div>
     </div>

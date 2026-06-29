@@ -288,7 +288,8 @@ class Voice
         // param + key cutoff is smoothed (de-zipper); matrix mod stays per-sample
         const float baseCutHz  = cutoffHz(p.cutoff) * std::exp2(keyOffset);
         const float modCutOct  = m.cutoffOct;
-        const float fenvDepth  = clamp01(p.envFilterAmt + m.envFltAdd) * 6.0f; // octaves per env unit
+        // bipolar env depth (-1..+1): negative = inverse envelope sweeps cutoff down
+        const float fenvDepth  = clampBi(p.envFilterAmt + m.envFltAdd) * 6.0f; // +/- octaves per env unit
         const float res        = clamp01(p.resonance + m.resAdd);
         const float fdrive     = clamp01(p.filterDrive + m.driveAdd);
 
@@ -296,7 +297,7 @@ class Voice
         // (its own depth) and key tracking; the matrix mods only the main filter.
         const int   routing    = p.filterRouting;
         const float base2CutHz = cutoffHz(p.filter2Cutoff) * std::exp2(keyOffset);
-        const float fenv2Depth = clamp01(p.filter2EnvAmt) * 6.0f;
+        const float fenv2Depth = clampBi(p.filter2EnvAmt) * 6.0f; // bipolar
         const float res2       = clamp01(p.filter2Reso);
         const float fdrive2    = clamp01(p.filter2Drive);
 
@@ -432,6 +433,10 @@ class Voice
     static inline float clamp01(float v) noexcept
     {
         return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v);
+    }
+    static inline float clampBi(float v) noexcept
+    {
+        return v < -1.0f ? -1.0f : (v > 1.0f ? 1.0f : v);
     }
     static inline float semis(float s) noexcept
     {
