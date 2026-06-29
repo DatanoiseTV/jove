@@ -84,8 +84,23 @@ button, select, input { font-family: inherit; color: inherit; }
 .vled.on { box-shadow: 0 0 calc(3px + var(--g, 0) * 9px) var(--accent); border-color: var(--accent); }
 .tb-voices .vl { font-size: 8px; letter-spacing: 2px; color: var(--ink3); }
 
+/* ---- tab bar ---- */
+.tabbar { display: flex; align-items: center; gap: 6px; padding: 0 4px; }
+.tab {
+  height: 34px; padding: 0 20px; cursor: pointer; border: 0; border-radius: 9px 9px 0 0;
+  background: transparent; color: var(--ink3); font-size: 11.5px; font-weight: 700; letter-spacing: 2px;
+  border-bottom: 2px solid transparent;
+}
+.tab:hover { color: var(--ink2); }
+.tab.on { color: var(--ink); background: linear-gradient(180deg, rgba(138,155,255,.08), transparent);
+  border-bottom-color: var(--accent); }
+.tab-spacer { flex: 1; }
+.brandmark { font-size: 9.5px; letter-spacing: 1px; color: var(--ink3); padding-right: 8px; }
+
 /* ---- columns of panels (fill the canvas) ---- */
 .cols { display: flex; gap: 12px; flex: 1; min-height: 0; }
+.cols.hide { display: none; }
+.modcol { flex: 1.4 1 0; }   /* mod matrix gets a wider column */
 .col {
   flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px;
 }
@@ -102,11 +117,12 @@ button, select, input { font-family: inherit; color: inherit; }
 }
 .ph .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent, #8a9bff);
   box-shadow: 0 0 9px var(--accent, #8a9bff); }
-.pbody { padding: 8px 11px 10px; display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
+.pbody { padding: 11px 13px 12px; display: flex; flex-direction: column; gap: 11px; flex: 1; min-height: 0;
+  justify-content: center; }
 
-.row { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
 .row.dim, .knobs.dim { opacity: .4; pointer-events: none; }
-.knobs { display: flex; gap: 7px; flex-wrap: wrap; }
+.knobs { display: flex; gap: 10px; flex-wrap: wrap; }
 
 /* ---- knob ---- */
 .knob { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: ns-resize; }
@@ -184,13 +200,15 @@ button, select, input { font-family: inherit; color: inherit; }
   box-shadow: 0 0 calc(var(--g, 0) * 12px) var(--accent, #8a9bff); }
 
 /* ---- mod matrix ---- */
-.modgrid { display: flex; flex-direction: column; gap: 3px; }
+.modgrid { display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; }
 .modrow {
-  display: grid; grid-template-columns: 13px 6px 1fr 12px 1fr 38px; align-items: center; gap: 5px;
-  padding: 1px 5px; border-radius: 7px; background: rgba(255,255,255,.012);
+  display: grid; grid-template-columns: 16px 7px 1fr 14px 1fr 48px; align-items: center; gap: 7px;
+  padding: 3px 7px; border-radius: 8px; background: rgba(255,255,255,.012);
   border: 1px solid transparent; opacity: .5;
 }
-.smeter { width: 6px; height: 22px; align-self: center; position: relative; overflow: hidden;
+.modrow .sel { height: 29px; font-size: 11px; }
+.modrow .knob { transform: scale(.82); margin: -6px -2px; }
+.smeter { width: 7px; height: 28px; align-self: center; position: relative; overflow: hidden;
   border-radius: 3px; background: #0c0f17; border: 1px solid var(--line); }
 .smeter::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line2); }
 .smeter i { position: absolute; left: 1px; right: 1px; border-radius: 2px;

@@ -64,7 +64,7 @@ function Knob({ id, label, bipolar = false, big = false }) {
   const ref = useRef(null);
   const drag = useRef(null);
   const A0 = -135, SWEEP = 270;
-  const D = big ? 52 : 42, c = D / 2, sw = big ? 3.6 : 3, R = c - sw - 1;
+  const D = big ? 58 : 48, c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
   const ang = A0 + v * SWEEP;
   const rad = (d) => d * Math.PI / 180;
   const pt = (r, a) => [c + r * Math.sin(rad(a)), c - r * Math.cos(rad(a))];
@@ -645,47 +645,74 @@ function SaveDialog({ onClose, cat }) {
 }
 
 /* ============================ app ============================ */
+const TABS = [["voice", "VOICE"], ["mod", "MODULATION"], ["fx", "FX & ARP"]];
+
 function App() {
   const modMap = useModMap();
   const meters = B.useEvent("meters", { lfo: [0, 0, 0], modSrc: [] });
   const modCtx = useMemo(() => ({ map: modMap, lfo: meters.lfo || [0, 0, 0], src: meters.modSrc || [] }),
                          [modMap, meters.lfo, meters.modSrc]);
+  const [tab, setTab] = useState("voice");
+  const cols = (t) => "cols" + (tab === t ? "" : " hide");
   return (
     <ModContext.Provider value={modCtx}>
     <div id="app">
       <TopBar />
-      <div className="cols">
+      <nav className="tabbar">
+        {TABS.map(([id, label]) =>
+          <button key={id} className={"tab" + (tab === id ? " on" : "")} onClick={() => setTab(id)}>{label}</button>)}
+        <span className="tab-spacer" />
+        <span className="brandmark">{window.JOVE_VERSION_STR || ""}</span>
+      </nav>
+
+      {/* all tabs stay mounted (relays stay bound); inactive ones are hidden */}
+      <div className={cols("voice")}>
         <div className="col">
           <OscPanel n={1} accent="#e07a7a" />
           <OscPanel n={2} accent="#e0a05a" />
           <OscPanel n={3} accent="#e0d05a" />
+        </div>
+        <div className="col">
           <OscPanel n={4} accent="#c8d05a" />
           <OscPanel n={5} accent="#9ad05a" />
         </div>
         <div className="col">
           <MixerPanel />
           <VoicingPanel />
-          <FilterPanel />
         </div>
+        <div className="col">
+          <FilterPanel />
+          <MasterPanel />
+        </div>
+      </div>
+
+      <div className={cols("mod")}>
         <div className="col">
           <EnvPanel n={1} name="AMP ENV" accent="#7ad0a0" />
           <EnvPanel n={2} name="FILTER ENV" accent="#5ad0e0" />
           <EnvPanel n={3} name="AUX ENV" accent="#5a9ae0" />
-          <MasterPanel />
-          <ReverbPanel />
         </div>
         <div className="col">
           <LfoPanel n={1} accent="#c08ae0" />
           <LfoPanel n={2} accent="#b07ae0" />
           <LfoPanel n={3} accent="#a06ae0" />
         </div>
-        <div className="col">
+        <div className="col modcol">
           <ModMatrix />
-          <ArpPanel />
-          <FxPanel />
-          <DelayPanel />
         </div>
       </div>
+
+      <div className={cols("fx")}>
+        <div className="col">
+          <FxPanel />
+          <ArpPanel />
+        </div>
+        <div className="col">
+          <DelayPanel />
+          <ReverbPanel />
+        </div>
+      </div>
+
       <footer className="foot">
         <span>{window.JOVE_VERSION_STR || ""}</span>
         <span>DatanoiseTV</span>
