@@ -118,6 +118,17 @@ button, select, input { font-family: inherit; color: inherit; }
 .botband .pbody { flex: 1; justify-content: center; gap: 16px; }
 .row.between { width: 100%; justify-content: space-between; }
 .knobs.spread { justify-content: space-between; }
+/* LFO controls: one non-wrapping row of small knobs so the synced DIV dropdown
+   can't ragged-wrap a knob outside the panel, and the panel stays short */
+.knobs.lfo3 { display: flex; flex-wrap: nowrap; gap: 4px;
+  align-items: flex-end; justify-content: space-between; }
+.knobs.lfo3 > * { flex: 0 0 auto; }
+.knobs.lfo3 .dd-head { min-width: 66px; }
+.lfo-tail { display: flex; align-items: center; gap: 6px; }
+.lfo-tail .chip { height: 22px; padding: 0 8px; font-size: 9px; }
+/* live envelope output level (rides up/down as the note plays) */
+.env-live { stroke: var(--accent); stroke-width: 1; vector-effect: non-scaling-stroke; opacity: .7; }
+.env-dot { fill: #fff; }
 
 /* ---- MOD tab: aligned env/LFO grid + stretched FX column + wide matrix ---- */
 .modtab { display: flex; gap: 12px; flex: 1; min-height: 0; }
@@ -260,9 +271,16 @@ button, select, input { font-family: inherit; color: inherit; }
 .modrow {
   display: grid; grid-template-columns: 16px 7px 1fr 14px 1fr 48px; align-items: center; gap: 8px;
   padding: 5px 8px; border-radius: 7px; background: var(--sunk);
-  border: 1px solid var(--line); opacity: .55;
+  border: 1px solid var(--line);
 }
-.modrow.active { opacity: 1; border-color: var(--line2); }
+/* dim inactive rows via colour, NOT opacity — opacity makes a stacking context
+   that traps the open dropdown popup behind the rows below it */
+.modrow.active { border-color: var(--line2); }
+.modrow:not(.active) { background: #0c0d10; }
+.modrow:not(.active) .dd-head { color: var(--ink3); border-color: var(--line); }
+.modrow:not(.active) .mn, .modrow:not(.active) .arr { color: var(--line2); }
+.modrow:not(.active) .knob { opacity: .5; }
+.dd.open { z-index: 200; }
 .modrow .mn { font-size: 9px; color: var(--ink3); text-align: center; }
 .modrow .arr { color: var(--ink3); text-align: center; font-size: 11px; }
 .modrow .sel-wrap, .modrow .dd { width: 100%; }

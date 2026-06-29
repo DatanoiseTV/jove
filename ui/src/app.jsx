@@ -58,12 +58,12 @@ function fmt(v) {
   return v.toFixed(2);
 }
 
-function Knob({ id, label, bipolar = false, big = false }) {
+function Knob({ id, label, bipolar = false, big = false, small = false }) {
   const [v, set, scaled] = B.useSlider(id);
   const ref = useRef(null);
   const drag = useRef(null);
   const A0 = -135, SWEEP = 270;
-  const D = big ? 58 : 48, c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
+  const D = big ? 58 : (small ? 40 : 48), c = D / 2, sw = big ? 4 : 3.2, R = c - sw - 1;
   const ang = A0 + v * SWEEP;
   const rad = (d) => d * Math.PI / 180;
   const pt = (r, a) => [c + r * Math.sin(rad(a)), c - r * Math.cos(rad(a))];
@@ -358,10 +358,17 @@ function EnvViz({ n }) {
   x += dw * uw; pts.push([x, sy]);
   x += sw * uw; pts.push([x, sy]);
   x += rw * uw; pts.push([x, H - pad]);
+  // live output level (engine publishes each env as a mod source: amp=4, flt=5,
+  // aux=6) -> a glowing level line that rides up/down as the note plays.
+  const mc = React.useContext(ModContext);
+  const lvl = Math.max(0, Math.min(1, (mc.src && mc.src[n + 3]) || 0));
+  const ly = pad + (H - 2 * pad) * (1 - lvl);
   return (
     <svg className="viz env" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
       <polyline points={pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")} />
       <polygon className="fillz" points={`${pad},${H - pad} ${pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")} ${(x).toFixed(1)},${H - pad}`} />
+      {lvl > 0.01 && <line x1={pad} y1={ly.toFixed(1)} x2={W - pad} y2={ly.toFixed(1)} className="env-live" />}
+      {lvl > 0.01 && <circle cx={W - pad - 1} cy={ly.toFixed(1)} r="2.4" className="env-dot" />}
     </svg>
   );
 }
@@ -418,11 +425,20 @@ function LfoScope({ n }) {
 function FilterCurve() {
   const [cut] = B.useSlider("cutoff");
   const [res] = B.useSlider("resonance");
+  const [efa] = B.useSlider("envFilterAmt");
   const [mode] = B.useChoice("filterMode");
+  // live modulation reaching the filter: cutoff in octaves, resonance linear.
+  // Matrix routes use the same data the knobs paint with; the dedicated
+  // filter-env -> cutoff path adds envFilterAmt * (live FLT EG) * 6 octaves.
+  const mc = React.useContext(ModContext);
+  let cutOct = 0, resAdd = 0;
+  (mc.map && mc.map["cutoff"] || []).forEach((m) => { cutOct += ((mc.src && mc.src[m.src]) || 0) * m.amt * 4; });
+  (mc.map && mc.map["resonance"] || []).forEach((m) => { resAdd += ((mc.src && mc.src[m.src]) || 0) * m.amt; });
+  cutOct += efa * ((mc.src && mc.src[5]) || 0) * 6; // MOD_SRC[5] = FLT EG
   const W = 180, H = 38, N = 72;
   const fmin = Math.log2(20), fmax = Math.log2(20000);
-  const fc = 20 * Math.pow(2, cut * 9.6);          // engine cutoff mapping (Hz)
-  const Q = 0.5 + res * 11;                          // resonance -> Q
+  const fc = 20 * Math.pow(2, cut * 9.6 + cutOct);  // engine cutoff mapping (Hz), live
+  const Q = 0.5 + Math.max(0, Math.min(1, res + resAdd)) * 11; // resonance -> Q, live
   const ladder = mode === 0;
   const mag = (f) => {
     const w = f / fc, w2 = w * w;
@@ -545,21 +561,22 @@ function LfoPanel({ n, accent }) {
     <Panel title={"LFO " + n} accent={accent}>
       <LfoScope n={n} />
       <LfoWaveSelect id={p + "Wave"} />
-      <div className="row">
+      <div className="row between">
         <Switch id={p + "Sync"} label="SYNC" />
-        <div className="lfo-led" style={{ "--g": (lv * 0.5 + 0.5).toFixed(3) }} />
+        <div className="lfo-tail">
+          <Switch id={p + "Retrig"} label="RETRIG" />
+          <Switch id={p + "PerVoice"} label="PER-V" />
+          <div className="lfo-led" style={{ "--g": (lv * 0.5 + 0.5).toFixed(3) }} />
+        </div>
       </div>
-      <div className="knobs">
+      <div className="knobs lfo3">
         {sync ? <Sel id={p + "Div"} options={DIVISIONS} label="DIV" />
-              : <Knob id={p + "Rate"} label="RATE" />}
-        <Knob id={p + "Depth"} label="DEPTH" />
-        <Knob id={p + "Offset"} label="OFFSET" bipolar />
-        <Knob id={p + "Fade"} label="FADE" />
-        <Knob id={p + "Delay"} label="DELAY" />
-      </div>
-      <div className="row">
-        <Switch id={p + "Retrig"} label="RETRIG" />
-        <Switch id={p + "PerVoice"} label="PER-V" />
+              : <Knob id={p + "Rate"} label="RATE" small />}
+        <Knob id={p + "Depth"} label="DEPTH" small />
+        <Knob id={p + "Offset"} label="OFFSET" bipolar small />
+        <Knob id={p + "Phase"} label="PHASE" small />
+        <Knob id={p + "Fade"} label="FADE" small />
+        <Knob id={p + "Delay"} label="DELAY" small />
       </div>
     </Panel>
   );
