@@ -7,48 +7,44 @@
 (function (global) {
   const { useState, useEffect, useCallback } = React;
 
-  // Float param: relay publishes a normalised 0..1; JUCE maps to real range.
+  // Force a re-render. We read relay values directly during render (rather than
+  // snapshotting into state) so the value is always current, and re-render on
+  // BOTH value and properties changes — the initial value/range arrive async,
+  // after first render, so a stale snapshot would leave controls reading 0.
+  function useBind(relay) {
+    const [, bump] = useState(0);
+    useEffect(() => {
+      const cb = () => bump((x) => (x + 1) | 0);
+      relay.valueChangedEvent.addListener(cb);
+      if (relay.propertiesChangedEvent) relay.propertiesChangedEvent.addListener(cb);
+      cb(); // sync whatever arrived before this effect ran
+      return undefined; // JUCE relays expose no removeListener; cached relay -> fine
+    }, [relay]);
+  }
+
+  // Float param: relay publishes a normalised 0..1; JUCE maps to the real range.
   function useSlider(id) {
     const relay = global.Juce.getSliderState(id);
-    const [v, setV] = useState(relay.getNormalisedValue());
-    useEffect(() => {
-      const cb = () => setV(relay.getNormalisedValue());
-      relay.valueChangedEvent.addListener(cb);
-      return undefined;
-    }, [id]);
-    const set = useCallback((nv) => {
-      const c = Math.max(0, Math.min(1, nv));
-      relay.setNormalisedValue(c); setV(c);
-    }, [id]);
-    // scaledValue: the real engineering value (Hz, st, s, ...) for labels.
-    const scaled = () => { try { return relay.getScaledValue(); } catch (_) { return v; } };
-    return [v, set, scaled];
+    useBind(relay);
+    const set = useCallback((nv) => relay.setNormalisedValue(Math.max(0, Math.min(1, nv))), [relay]);
+    const scaled = () => { try { return relay.getScaledValue(); } catch (_) { return relay.getNormalisedValue(); } };
+    return [relay.getNormalisedValue(), set, scaled];
   }
 
   function useToggle(id) {
     const relay = global.Juce.getToggleState(id);
-    const [v, setV] = useState(!!relay.getValue());
-    useEffect(() => {
-      const cb = () => setV(!!relay.getValue());
-      relay.valueChangedEvent.addListener(cb);
-      return undefined;
-    }, [id]);
-    const set = useCallback((b) => { relay.setValue(!!b); setV(!!b); }, [id]);
-    return [v, set];
+    useBind(relay);
+    const set = useCallback((b) => relay.setValue(!!b), [relay]);
+    return [!!relay.getValue(), set];
   }
 
   // Choice param: stored as 0..N-1; the relay also carries the option labels.
   function useChoice(id) {
     const relay = global.Juce.getComboBoxState(id);
-    const [idx, setIdx] = useState(relay.getChoiceIndex());
-    useEffect(() => {
-      const cb = () => setIdx(relay.getChoiceIndex());
-      relay.valueChangedEvent.addListener(cb);
-      return undefined;
-    }, [id]);
+    useBind(relay);
     const options = (relay.properties && relay.properties.choices) || [];
-    const set = useCallback((i) => { relay.setChoiceIndex(i); setIdx(i); }, [id]);
-    return [idx, set, options];
+    const set = useCallback((i) => relay.setChoiceIndex(i), [relay]);
+    return [relay.getChoiceIndex(), set, options];
   }
 
   // Native events emitted by the editor (meters, preset).

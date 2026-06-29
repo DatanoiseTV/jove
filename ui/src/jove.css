@@ -29,9 +29,9 @@ body {
 }
 button, select, input { font-family: inherit; color: inherit; }
 
-/* fixed-width design canvas; index.html scales it to fit the window */
+/* fixed design canvas; index.html scales it to fill the (aspect-locked) window */
 #app {
-  position: absolute; top: 0; left: 0; width: 1500px;
+  position: absolute; top: 0; left: 0; width: 1500px; height: 1000px;
   transform-origin: top left;
   display: flex; flex-direction: column; padding: 14px; gap: 12px;
 }
@@ -91,24 +91,24 @@ button, select, input { font-family: inherit; color: inherit; }
 .tab-spacer { flex: 1; }
 .brandmark { font-size: 9.5px; letter-spacing: 1px; color: var(--ink3); padding-right: 6px; }
 
-/* ---- columns: content-sized panels, top-aligned ---- */
-.cols { display: flex; gap: 12px; align-items: flex-start; }
+/* ---- columns: panels grow to fill the canvas (>=3 per column => modest) ---- */
+.cols { display: flex; gap: 12px; flex: 1; min-height: 0; }
 .cols.hide { display: none; }
 .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .modcol { flex: 1.35 1 0; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-  display: flex; flex-direction: column; overflow: visible; flex: 0 0 auto;
+  display: flex; flex-direction: column; overflow: visible;
+  flex: 1 1 auto; min-height: 0;
 }
-.ph { border-radius: 10px 10px 0 0; }
 .ph {
-  display: flex; align-items: center; gap: 8px; padding: 8px 13px;
+  display: flex; align-items: center; gap: 8px; padding: 9px 14px;
   font-size: 10px; letter-spacing: 2px; font-weight: 700; color: var(--ink2);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--line); border-radius: 10px 10px 0 0;
 }
-.ph .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.pbody { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 12px; }
+.pbody { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 13px; flex: 1; min-height: 0;
+  justify-content: center; }
 
 .row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
 .row.dim, .knobs.dim { opacity: .35; pointer-events: none; }
@@ -151,8 +151,20 @@ button, select, input { font-family: inherit; color: inherit; }
 .seg button:last-child { border-right: 0; }
 .seg button:hover { color: var(--ink2); }
 .seg button.on { background: var(--accent); color: #06080c; }
-.seg.wave { align-self: stretch; }
-.seg.wave button { flex: 1; padding: 6px 0; }
+
+/* ---- waveform icon selector (oscillators + LFOs) ---- */
+.waveico { display: flex; gap: 5px; }
+.wbtn {
+  flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+  height: 28px; padding: 0; cursor: pointer; border-radius: 6px;
+  background: var(--sunk); border: 1px solid var(--line2);
+}
+.wbtn:hover { border-color: var(--accent); }
+.wbtn.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--sunk)); }
+.wico { display: block; }
+.wico polyline { fill: none; stroke: var(--ink2); stroke-width: 1.4; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; }
+.wbtn.on .wico polyline { stroke: var(--accent); }
 
 /* ---- custom dropdown (replaces native <select>) ---- */
 .dd { position: relative; }

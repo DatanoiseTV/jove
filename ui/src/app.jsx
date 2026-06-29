@@ -10,8 +10,7 @@ const GLIDE_MODES = ["OFF", "ON", "LEGATO"];
 const FOOTAGE     = ["32'", "16'", "8'", "4'", "2'"];
 const SYNC_MODES  = ["OFF", "SOFT", "HARD"];
 const FILTER_MODES= ["MOOG", "LP", "HP", "BP", "NOTCH"];
-const LFO_WAVES   = ["SINE", "TRI", "SAW+", "SAW-", "SQR", "S&H"];
-const ARP_MODES   = ["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV","CON-DIV","ASPLAYED","RANDOM","CHORD"];
+const ARP_MODES   =["UP","DOWN","UP-DN","UP-DN+","DN-UP","PINGPONG","CONV","DIV","CON-DIV","ASPLAYED","RANDOM","CHORD"];
 const DIVISIONS   = ["1/64","1/32T","1/32","1/16T","1/16","1/8T","1/16.","1/8","1/4T","1/8.","1/4","1/4.","1/2"];
 const MOD_SRC     = ["OFF","LFO1","LFO2","LFO3","AMP EG","FLT EG","AUX EG","VEL","KEY","MWHEEL","ATOUCH","BEND","RAND","NOTE"];
 const MOD_DST     = ["OFF","PITCH","O2 PIT","O3 PIT","MORPH1","MORPH2","MORPH3","PW1","PW2","PW3","OSCMIX","SUB","NOISE","CUTOFF","RESO","FDRIVE","AMP","PAN","L1 RATE","L2 RATE","L3 RATE","L1 DPT","L2 DPT","L3 DPT","FXSEND","FXPARM","FM","RING","ENVFLT","DETUNE"];
@@ -222,43 +221,92 @@ function IntPick({ id, label, min, max }) {
 function Panel({ title, children }) {
   return (
     <section className="panel">
-      <header className="ph"><span className="dot" />{title}</header>
+      <header className="ph">{title}</header>
       <div className="pbody">{children}</div>
     </section>
   );
 }
 
-/* Discrete waveform selector — sets morph (+ pulse width for the pulse variants)
-   to named shapes, while the MORPH knob still allows continuous in-between. */
-const WAVES = [
-  ["SIN", 0.0, 0.5], ["TRI", 0.25, 0.5], ["SAW", 0.5, 0.5],
-  ["SQR", 1.0, 0.5], ["PLS", 1.0, 0.3], ["NAR", 1.0, 0.15],
+/* SVG waveform icon. Type: 0 sine, 1 tri, 2 saw-up, 3 saw-dn, 4 square, 5 pulse,
+   6 sample&hold. Drawn as ~1.6 cycles. */
+function wavePoints(type, pw, W, H) {
+  const mid = H / 2, a = H / 2 - 2.5, N = 60, cyc = 1.6;
+  const shape = (t) => {
+    t = (t % 1 + 1) % 1;
+    switch (type) {
+      case 0: return Math.sin(2 * Math.PI * t);
+      case 1: return t < 0.5 ? 4 * t - 1 : 3 - 4 * t;
+      case 2: return 2 * t - 1;
+      case 3: return 1 - 2 * t;
+      case 4: return t < 0.5 ? 1 : -1;
+      case 5: return t < (pw || 0.3) ? 1 : -1;
+      case 6: { const k = Math.floor(t * 4); const r = Math.sin((k + 1) * 78.233) * 43758.5; return (r - Math.floor(r)) * 2 - 1; }
+      default: return 0;
+    }
+  };
+  const pts = [];
+  for (let i = 0; i <= N; i++) { const t = (i / N) * cyc; pts.push(((i / N) * W).toFixed(1) + "," + (mid - shape(t) * a).toFixed(1)); }
+  return pts.join(" ");
+}
+function WaveIcon({ w, pw }) {
+  const W = 28, H = 15;
+  return <svg className="wico" width={W} height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <polyline points={wavePoints(w, pw, W, H)} /></svg>;
+}
+
+/* Oscillator waveform selector (icons). Sets morph + pulse width to named
+   shapes; the MORPH knob still allows continuous in-between morphing. */
+const OSC_WAVES = [
+  { ico: 0, m: 0.0, pw: 0.5 }, { ico: 1, m: 0.25, pw: 0.5 }, { ico: 2, m: 0.5, pw: 0.5 },
+  { ico: 4, m: 1.0, pw: 0.5 }, { ico: 5, m: 1.0, pw: 0.3 }, { ico: 5, m: 1.0, pw: 0.15 },
 ];
 function WaveSelect({ morphId, pwId }) {
   const [m, setM] = B.useSlider(morphId);
   const [pw, setPw] = B.useSlider(pwId);
   let best = 0, bd = 9;
-  WAVES.forEach((w, i) => {
-    const d = Math.abs(m - w[1]) + (w[1] >= 0.999 ? Math.abs(pw - w[2]) : 0);
+  OSC_WAVES.forEach((w, i) => {
+    const d = Math.abs(m - w.m) + (w.m >= 0.999 ? Math.abs(pw - w.pw) : 0);
     if (d < bd) { bd = d; best = i; }
   });
   return (
-    <div className="seg wave">
-      {WAVES.map((w, i) =>
-        <button key={i} className={i === best ? "on" : ""}
-                onClick={() => { setM(w[1]); setPw(w[2]); }}>{w[0]}</button>)}
+    <div className="waveico">
+      {OSC_WAVES.map((w, i) =>
+        <button key={i} tabIndex={-1} className={"wbtn" + (i === best ? " on" : "")}
+                onMouseDown={(e) => { e.preventDefault(); setM(w.m); setPw(w.pw); }}>
+          <WaveIcon w={w.ico} pw={w.pw} />
+        </button>)}
+    </div>
+  );
+}
+
+/* LFO waveform selector (icons), driving the choice param. Index order matches
+   LFO_WAVES: SINE, TRI, SAW+, SAW-, SQR, S&H. */
+const LFO_ICO = [0, 1, 2, 3, 4, 6];
+function LfoWaveSelect({ id }) {
+  const [idx, set] = B.useChoice(id);
+  return (
+    <div className="waveico">
+      {LFO_ICO.map((ic, i) =>
+        <button key={i} tabIndex={-1} className={"wbtn" + (i === idx ? " on" : "")}
+                onMouseDown={(e) => { e.preventDefault(); set(i); }}>
+          <WaveIcon w={ic} />
+        </button>)}
     </div>
   );
 }
 
 /* ============================ visualizers ============================ */
 function EnvViz({ n }) {
-  const [a] = B.useSlider("env" + n + "Attack");
-  const [d] = B.useSlider("env" + n + "Decay");
-  const [s] = B.useSlider("env" + n + "Sustain");
-  const [r] = B.useSlider("env" + n + "Release");
+  // Use REAL engineering values, not the skewed 0..1 normals: A/D/R in seconds,
+  // S as a 0..1 level. Segment widths are sqrt-compressed seconds so a long
+  // attack doesn't swamp the view but proportions stay truthful.
+  const a = B.useSlider("env" + n + "Attack")[2]();
+  const d = B.useSlider("env" + n + "Decay")[2]();
+  const s = B.useSlider("env" + n + "Sustain")[0];
+  const r = B.useSlider("env" + n + "Release")[2]();
   const W = 140, H = 40, pad = 3;
-  const aw = 0.05 + a, dw = 0.05 + d, sw = 0.34, rw = 0.05 + r;
+  const cw = (t) => Math.sqrt(Math.max(0, t));
+  const aw = 0.12 + cw(a), dw = 0.12 + cw(d), sw = 0.85, rw = 0.12 + cw(r);
   const tot = aw + dw + sw + rw, uw = (W - 2 * pad) / tot;
   const sy = pad + (H - 2 * pad) * (1 - s);
   let x = pad;
@@ -433,8 +481,8 @@ function LfoPanel({ n, accent }) {
   return (
     <Panel title={"LFO " + n} accent={accent}>
       <LfoScope n={n} />
+      <LfoWaveSelect id={p + "Wave"} />
       <div className="row">
-        <Sel id={p + "Wave"} options={LFO_WAVES} />
         <Switch id={p + "Sync"} label="SYNC" />
         <div className="lfo-led" style={{ "--g": (lv * 0.5 + 0.5).toFixed(3) }} />
       </div>
@@ -705,7 +753,7 @@ function SaveDialog({ onClose, cat }) {
 }
 
 /* ============================ app ============================ */
-const TABS = [["voice", "VOICE"], ["mod", "MODULATION"], ["fx", "FX & ARP"]];
+const TABS = [["voice", "VOICE"], ["modfx", "MOD · FX · ARP"]];
 
 function App() {
   const modMap = useModMap();
@@ -735,18 +783,16 @@ function App() {
         <div className="col">
           <OscPanel n={4} />
           <OscPanel n={5} />
-        </div>
-        <div className="col">
           <MixerPanel />
-          <VoicingPanel />
         </div>
         <div className="col">
           <FilterPanel />
+          <VoicingPanel />
           <MasterPanel />
         </div>
       </div>
 
-      <div className={cols("mod")}>
+      <div className={cols("modfx")}>
         <div className="col">
           <EnvPanel n={1} name="AMP ENV" />
           <EnvPanel n={2} name="FILTER ENV" />
@@ -760,13 +806,12 @@ function App() {
         <div className="col modcol">
           <ModMatrix />
         </div>
-      </div>
-
-      <div className={cols("fx")}>
-        <div className="col"><FxPanel /></div>
-        <div className="col"><ArpPanel /></div>
-        <div className="col"><DelayPanel /></div>
-        <div className="col"><ReverbPanel /></div>
+        <div className="col">
+          <FxPanel />
+          <DelayPanel />
+          <ReverbPanel />
+          <ArpPanel />
+        </div>
       </div>
 
       <footer className="foot">

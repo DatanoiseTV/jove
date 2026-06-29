@@ -62,36 +62,33 @@
       if (a.tagName === 'BUTTON' || a.tagName === 'SELECT') { a.blur(); e.preventDefault(); }
     }, true);
 
-    /* Fit-to-window: scale the fixed 1440px-wide #app design canvas to fill
-       whatever bounds the host gives us, centred, so the whole UI is always
-       visible without scrolling. offsetHeight is the natural (pre-transform)
-       layout height, so this self-adjusts when content reflows (e.g. unison
-       knobs appearing). Re-fit on resize, on a ResizeObserver of #app, and a
-       cheap watchdog for the case where JUCE sets WebView bounds from C++
+    /* Fit-to-window: scale the fixed 1500x1000 #app design canvas to fill the
+       host window. The editor locks its aspect ratio to 1500:1000, so the
+       canvas fills edge-to-edge with at most a hair of centering. Re-fit on
+       resize and a cheap watchdog for when JUCE sets WebView bounds from C++
        without bubbling a DOM resize event. */
     (function () {
-      var DW = 1500, lastKey = '';   // fixed design width; height is natural (per tab)
+      var DW = 1500, DH = 1000, lastKey = '';
       function fit() {
         var el = document.getElementById('app'); if (!el) return;
         var w = window.innerWidth || document.documentElement.clientWidth;
         var h = window.innerHeight || document.documentElement.clientHeight;
-        var nh = el.offsetHeight; if (!w || !h || !nh) return;
-        var s = Math.min(w / DW, h / nh, 1.5);  // cap so sparse tabs don't blow up
-        var sw = DW * s, sh = nh * s;
+        if (!w || !h) return;
+        var s = Math.min(w / DW, h / DH);
+        var sw = DW * s, sh = DH * s;
         el.style.transform = 'translate(' + Math.max(0, (w - sw) / 2) + 'px,' + Math.max(0, (h - sh) / 2) + 'px) scale(' + s + ')';
-        lastKey = w + 'x' + h + 'x' + nh;
+        lastKey = w + 'x' + h;
       }
       window.addEventListener('resize', fit);
       window.addEventListener('load', fit);
       window.fitJove = fit;
       (function poll(n) {
         var el = document.getElementById('app');
-        if (el) { fit(); try { new ResizeObserver(fit).observe(el); } catch (_) {} return; }
+        if (el) { fit(); return; }
         if (n > 0) setTimeout(function () { poll(n - 1); }, 30);
       })(120);
       setInterval(function () {
-        var el = document.getElementById('app'); if (!el) return;
-        if (window.innerWidth + 'x' + window.innerHeight + 'x' + el.offsetHeight !== lastKey) fit();
+        if ((window.innerWidth + 'x' + window.innerHeight) !== lastKey) fit();
       }, 350);
     })();
   </script>

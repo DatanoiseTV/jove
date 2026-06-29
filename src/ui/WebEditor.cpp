@@ -82,7 +82,12 @@ JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
 {
     setResizable(true, true);
     if(auto* c = getConstrainer())
+    {
         c->setSizeLimits(820, 520, 3200, 2000);
+        // Lock to the 1500x1000 design aspect so the scaled WebView canvas always
+        // fills the host window edge-to-edge (no letterbox margins).
+        c->setFixedAspectRatio(1500.0 / 1000.0);
+    }
 
     auto& apvts = processor.getValueTreeState();
 
