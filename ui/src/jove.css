@@ -190,6 +190,22 @@ button, select, input { font-family: inherit; color: inherit; }
 .pb-hint { font-size: 9px; letter-spacing: .5px; color: var(--ink3); }
 .mg-cell.factory::before { content: ""; position: absolute; inset: 2px;
   border: 1px dashed var(--ink3); border-radius: 2px; opacity: .45; }
+.mg-cell.sel { box-shadow: inset 0 0 0 1px var(--accent), 0 0 5px color-mix(in srgb, var(--accent) 60%, transparent); z-index: 2; }
+/* mod-matrix fine-adjust detail bar under the grid */
+.mdetail { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; margin-top: 8px;
+  padding: 7px 12px; background: var(--sunk); border: 1px solid var(--line2); border-radius: 8px;
+  font-size: 10px; letter-spacing: .5px; }
+.mdetail.empty { color: var(--ink3); justify-content: center; }
+.md-route { color: var(--ink); font-weight: 700; min-width: 130px; }
+.md-arrow { color: var(--accent); }
+.md-slider { flex: 1; accent-color: var(--accent); }
+.md-val { font-variant-numeric: tabular-nums; color: var(--accent); min-width: 48px; text-align: right; }
+.md-nudge { width: 22px; height: 22px; border-radius: 5px; background: var(--panel2);
+  border: 1px solid var(--line2); color: var(--ink2); cursor: pointer; font-size: 13px; line-height: 1; }
+.md-nudge:hover { color: var(--ink); border-color: var(--accent); }
+.md-clear { height: 22px; padding: 0 9px; border-radius: 5px; background: var(--panel2);
+  border: 1px solid var(--line2); color: var(--ink2); cursor: pointer; font-size: 9px; font-weight: 700; }
+.md-clear:hover { color: var(--hot); border-color: var(--hot); }
 /* audio patchbay grid: fewer, larger cells than the mod matrix */
 .abgrid { display: grid; grid-template-columns: 70px repeat(var(--cols), 1fr);
   gap: 4px; align-content: start; flex: 1; min-height: 0; }

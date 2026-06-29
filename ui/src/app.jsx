@@ -820,10 +820,11 @@ const N_MOD_SLOTS = 32;
 /* One grid cell = one (source, destination) intersection. Drag vertically to
    set a bipolar amount; the fill grows from the centre line and an active cell
    glows with the live source*amount contribution. */
-function ModCell({ srcI, dstI, amt, live, onSet, def = 0 }) {
+function ModCell({ srcI, dstI, amt, live, onSet, def = 0, onSelect, selected }) {
   const drag = useRef(null);
   const down = (e) => {
     e.preventDefault();
+    if (onSelect) onSelect(srcI, dstI);
     const p = e.touches ? e.touches[0] : e;
     drag.current = { y: p.clientY, a: amt };
     const move = (ev) => {
@@ -840,7 +841,7 @@ function ModCell({ srcI, dstI, amt, live, onSet, def = 0 }) {
   };
   const mag = Math.min(1, Math.abs(amt) / 2);
   const factory = def !== 0 && Math.abs(amt) < 0.001; // pre-patched pin, no user override
-  const cls = "mg-cell" + (amt > 0.001 ? " pos" : amt < -0.001 ? " neg" : "") + (factory ? " factory" : "");
+  const cls = "mg-cell" + (amt > 0.001 ? " pos" : amt < -0.001 ? " neg" : "") + (factory ? " factory" : "") + (selected ? " sel" : "");
   const lv = Math.min(1, Math.abs(live) / 1.2);
   return (
     <div className={cls} onMouseDown={down} onTouchStart={down}
@@ -852,8 +853,28 @@ function ModCell({ srcI, dstI, amt, live, onSet, def = 0 }) {
   );
 }
 
+/* fine-adjust editor for the selected mod-matrix cell, shown under the grid */
+function ModDetail({ sel, byPair, setCell }) {
+  if (!sel) return <div className="mdetail empty">click a routing cell to fine-tune its amount</div>;
+  const slot = byPair[sel.s + "_" + sel.d];
+  const amt = slot ? slot.amtN * 4 - 2 : 0;
+  const nudge = (dx) => setCell(sel.s, sel.d, Math.max(-2, Math.min(2, amt + dx)));
+  return (
+    <div className="mdetail">
+      <span className="md-route">{MOD_SRC[sel.s]} <span className="md-arrow">→</span> {MOD_DST[sel.d]}</span>
+      <button className="md-nudge" onClick={() => nudge(-0.01)}>−</button>
+      <input className="md-slider" type="range" min="-2" max="2" step="0.005" value={amt}
+             onChange={(e) => setCell(sel.s, sel.d, parseFloat(e.target.value))} />
+      <button className="md-nudge" onClick={() => nudge(0.01)}>+</button>
+      <span className="md-val">{amt.toFixed(3)}</span>
+      <button className="md-clear" onClick={() => setCell(sel.s, sel.d, 0)}>CLEAR</button>
+    </div>
+  );
+}
+
 function ModGrid() {
   const mc = React.useContext(ModContext);
+  const [sel, setSel] = useState(null); // {s,d} selected cell for the detail editor
   // read every sparse slot once; build a (src,dst) -> slot lookup
   const slots = [];
   for (let i = 1; i <= N_MOD_SLOTS; i++) {
@@ -896,11 +917,13 @@ function ModGrid() {
               const slot = byPair[srcI + "_" + dstI];
               const amt = slot ? slot.amtN * 4 - 2 : 0;
               const live = slot ? ((mc.src && mc.src[srcI]) || 0) * amt : 0;
-              return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} live={live} onSet={setCell} />;
+              return <ModCell key={r + "_" + c} srcI={srcI} dstI={dstI} amt={amt} live={live} onSet={setCell}
+                              onSelect={(s, d) => setSel({ s, d })} selected={sel && sel.s === srcI && sel.d === dstI} />;
             }),
           ];
         })}
       </div>
+      <ModDetail sel={sel} byPair={byPair} setCell={setCell} />
     </Panel>
   );
 }
