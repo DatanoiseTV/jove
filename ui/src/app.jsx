@@ -797,15 +797,20 @@ function App() {
 
       {/* all tabs stay mounted (relays stay bound); inactive ones are hidden */}
       <div className={cols("voice")}>
-        <div className="col">
-          <OscPanel n={1} />
-          <OscPanel n={2} />
-          <OscPanel n={3} />
-        </div>
-        <div className="col">
-          <OscPanel n={4} />
-          <OscPanel n={5} />
-          <MixerPanel />
+        <div className="oscgroup">
+          <div className="group-label">OSCILLATORS</div>
+          <div className="group-cols">
+            <div className="col">
+              <OscPanel n={1} />
+              <OscPanel n={2} />
+              <OscPanel n={3} />
+            </div>
+            <div className="col">
+              <OscPanel n={4} />
+              <OscPanel n={5} />
+              <MixerPanel />
+            </div>
+          </div>
         </div>
         <div className="col">
           <FilterPanel />
@@ -825,14 +830,14 @@ function App() {
           <LfoPanel n={2} />
           <LfoPanel n={3} />
         </div>
-        <div className="col modcol">
-          <ModMatrix />
-        </div>
         <div className="col">
           <FxPanel />
           <DelayPanel />
           <ReverbPanel />
           <ArpPanel />
+        </div>
+        <div className="col modcol">
+          <ModMatrix />
         </div>
       </div>
 

@@ -100,6 +100,15 @@ button, select, input { font-family: inherit; color: inherit; }
 .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .modcol { flex: 1.35 1 0; }
 
+/* oscillator group: the 5 oscillators + their source mixer fenced into one
+   labelled region so they read as a single section (signal sources) */
+.oscgroup { flex: 2 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px;
+  border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px 10px;
+  background: rgba(255, 255, 255, 0.012); }
+.group-label { font-size: 9px; letter-spacing: 3px; font-weight: 700; color: var(--ink3);
+  padding: 1px 4px 2px; }
+.group-cols { display: flex; gap: 12px; flex: 1; min-width: 0; }
+
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
   display: flex; flex-direction: column; overflow: visible;
