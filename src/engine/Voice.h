@@ -309,6 +309,13 @@ class Voice
 
         const float ampBase = p.ampGain * ampVelo * m.ampMul;
 
+        // control-rate mix/cross-mod/pan targets. These are applied as per-sample
+        // multipliers and are de-zippered in the loop (~5 ms one-pole) so moving
+        // ANY level/mix/pan/ring/FM control is click-free, not just cutoff/amp.
+        float oscGt[kNumOsc];
+        oscGt[0] = g1; oscGt[1] = g2; oscGt[2] = g3;
+        for(int i = 3; i < kNumOsc; ++i) oscGt[i] = p.osc[i].on ? p.osc[i].level : 0.0f;
+
         // ---- per-sample render (cheap ops only) ---------------------------
         for(int s = 0; s < n; ++s)
         {
@@ -324,6 +331,9 @@ class Voice
                 {
                     cutSm_ = baseCutHz; resSm_ = res; drvSm_ = fdrive;
                     cut2Sm_ = base2CutHz; res2Sm_ = res2; drv2Sm_ = fdrive2;
+                    for(int i = 0; i < kNumOsc; ++i) gSm_[i] = oscGt[i];
+                    subGSm_ = subG; noiseGSm_ = noiseG; ringSm_ = ringG;
+                    fmSm_ = fmAmt; glSm_ = gl; grSm_ = gr;
                     filtSmInit_ = true;
                 }
                 constexpr float sc = 0.0025f;
@@ -340,6 +350,15 @@ class Voice
                     const float cut2Hz = cut2Sm_ * std::exp2(modCutOct + fenv2Depth * fltEnv);
                     filter2_.setParams(cut2Hz, res2Sm_, drv2Sm_);
                 }
+                // mix / cross-mod / pan de-zipper (~5 ms)
+                constexpr float gc = 0.004f;
+                for(int i = 0; i < kNumOsc; ++i) gSm_[i] += gc * (oscGt[i] - gSm_[i]);
+                subGSm_   += gc * (subG   - subGSm_);
+                noiseGSm_ += gc * (noiseG - noiseGSm_);
+                ringSm_   += gc * (ringG  - ringSm_);
+                fmSm_     += gc * (fmAmt  - fmSm_);
+                glSm_     += gc * (gl - glSm_);
+                grSm_     += gc * (gr - grSm_);
             }
 
             // sample-rate reduction (decimate) then bit-crush, per oscillator
@@ -359,7 +378,7 @@ class Voice
             // replaces the BLEP path for that oscillator; FM/sync apply to BLEP.
             bool  w0 = false, w1 = false, w2 = false;
             float o2 = !o1on ? 0.0f : (wtO[1] ? wt_[1].process() : osc_[1].process(0.0f, w1));
-            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmAmt * 0.5f * o2, w0));
+            float o1 = !o0on ? 0.0f : (wtO[0] ? wt_[0].process() : osc_[0].process(fmSm_ * 0.5f * o2, w0));
             float o3 = !o2on ? 0.0f : (wtO[2] ? wt_[2].process() : osc_[2].process(0.0f, w2));
             if(w0)
             {
@@ -373,18 +392,18 @@ class Voice
 
             o1 = post(0, o1); o2 = post(1, o2); o3 = post(2, o3);
 
-            float voice = o1 * g1 + o2 * g2 + o3 * g3
-                          + subv * subG + (rngf() * 2.0f - 1.0f) * noiseG;
+            float voice = o1 * gSm_[0] + o2 * gSm_[1] + o3 * gSm_[2]
+                          + subv * subGSm_ + (rngf() * 2.0f - 1.0f) * noiseGSm_;
             for(int i = 3; i < kNumOsc; ++i)
                 if(p.osc[i].on)
                 {
                     bool wi; float oi = wtO[i] ? wt_[i].process() : osc_[i].process(0.0f, wi);
-                    voice += post(i, oi) * p.osc[i].level;
+                    voice += post(i, oi) * gSm_[i];
                 }
             // ring modulation: blend the osc1 x osc2 product in (bounded by 1, so
             // the master soft-clip never sees more than the dry oscs already give).
-            if(ringG > 0.0001f)
-                voice += (o1 * o2 - o1 * g1) * ringG; // crossfade osc1 -> ring product
+            if(ringSm_ > 0.0001f)
+                voice += (o1 * o2 - o1 * gSm_[0]) * ringSm_; // crossfade osc1 -> ring product
 
             float fout = filter_.process(voice);
             if(routing == 1)        fout = filter2_.process(fout);                  // serial
@@ -394,8 +413,8 @@ class Voice
             ampSmooth_ += 0.25f * (g - ampSmooth_); // de-zipper block-rate gain
             fout *= ampSmooth_;
 
-            outL[s] += fout * gl;
-            outR[s] += fout * gr;
+            outL[s] += fout * glSm_;
+            outR[s] += fout * grSm_;
         }
 
         ++age_;
@@ -450,6 +469,9 @@ class Voice
     float        srPhase_[kNumOsc] = {0};  // sample-rate-reduction decimator phase
     float        srHold_[kNumOsc]  = {0};  // and held sample, per oscillator
     float        cutSm_ = 0.0f, resSm_ = 0.0f, drvSm_ = 0.0f; // de-zipper filter params
+    float        gSm_[kNumOsc] = {0};                          // de-zipper osc mix gains
+    float        subGSm_ = 0.0f, noiseGSm_ = 0.0f, ringSm_ = 0.0f, fmSm_ = 0.0f;
+    float        glSm_ = 0.0f, grSm_ = 0.0f;                   // de-zipper pan
     bool         filtSmInit_ = false;
     BlepOsc     sub_;
     VoiceFilter filter_;
