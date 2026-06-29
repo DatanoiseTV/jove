@@ -227,10 +227,25 @@ function Panel({ title, children }) {
   );
 }
 
+/* Fixed pseudo-random levels (-1..1) for sample & hold — deterministic so the
+   icon and scope draw clean, recognisable stepped art instead of spiky noise. */
+const SNH_LEVELS = [0.55, -0.35, 0.85, -0.7, 0.2, -0.55, 0.45, -0.15];
+
+/* Stairstep point list for S&H: horizontal holds joined by vertical jumps. */
+function stairPoints(steps, W, mid, a) {
+  const pts = [];
+  for (let i = 0; i < steps; i++) {
+    const y = (mid - SNH_LEVELS[i % SNH_LEVELS.length] * a).toFixed(1);
+    pts.push((i / steps * W).toFixed(1) + "," + y, ((i + 1) / steps * W).toFixed(1) + "," + y);
+  }
+  return pts.join(" ");
+}
+
 /* SVG waveform icon. Type: 0 sine, 1 tri, 2 saw-up, 3 saw-dn, 4 square, 5 pulse,
    6 sample&hold. Drawn as ~1.6 cycles. */
 function wavePoints(type, pw, W, H) {
   const mid = H / 2, a = H / 2 - 2.5, N = 60, cyc = 1.6;
+  if (type === 6) return stairPoints(6, W, mid, a); // clean staircase, not noise
   const shape = (t) => {
     t = (t % 1 + 1) % 1;
     switch (type) {
@@ -240,7 +255,6 @@ function wavePoints(type, pw, W, H) {
       case 3: return 1 - 2 * t;
       case 4: return t < 0.5 ? 1 : -1;
       case 5: return t < (pw || 0.3) ? 1 : -1;
-      case 6: { const k = Math.floor(t * 4); const r = Math.sin((k + 1) * 78.233) * 43758.5; return (r - Math.floor(r)) * 2 - 1; }
       default: return 0;
     }
   };
@@ -330,7 +344,7 @@ function LfoScope({ n }) {
   const [wave] = B.useChoice("lfo" + n + "Wave");
   const meters = B.useEvent("meters", { lfoPhase: [0, 0, 0] });
   const ph = (meters.lfoPhase && meters.lfoPhase[n - 1]) || 0;
-  const W = 140, H = 26, cy = H / 2, amp = H / 2 - 2.5;
+  const W = 140, H = 26, cy = H / 2, amp = H / 2 - 2.5, cycles = 2;
   const shape = (t) => {
     t = t - Math.floor(t);
     switch (wave) {
@@ -339,22 +353,30 @@ function LfoScope({ n }) {
       case 2: return 2 * t - 1;
       case 3: return 1 - 2 * t;
       case 4: return t < 0.5 ? 1 : -1;
-      case 5: { const k = Math.floor(t * 6); const r = Math.sin(k * 12.9898) * 43758.5; return (r - Math.floor(r)) * 2 - 1; }
       default: return 0;
     }
   };
-  const N = 96, cycles = 2;
-  const pts = [];
-  for (let i = 0; i <= N; i++) {
-    const t = (i / N) * cycles;
-    pts.push(((i / N) * W).toFixed(1) + "," + (cy - shape(t) * amp).toFixed(1));
+  const phPos = ((ph * cycles) % cycles) / cycles; // 0..1 across the view
+  const phx = phPos * W;
+  let pointStr, phy;
+  if (wave === 5) {                       // sample & hold: clean staircase
+    const steps = 4 * cycles;
+    pointStr = stairPoints(steps, W, cy, amp);
+    const si = Math.min(steps - 1, Math.floor(phPos * steps));
+    phy = cy - SNH_LEVELS[si % SNH_LEVELS.length] * amp;
+  } else {
+    const N = 96, pts = [];
+    for (let i = 0; i <= N; i++) {
+      const t = (i / N) * cycles;
+      pts.push(((i / N) * W).toFixed(1) + "," + (cy - shape(t) * amp).toFixed(1));
+    }
+    pointStr = pts.join(" ");
+    phy = cy - shape(ph * cycles) * amp;
   }
-  const phx = ((ph * cycles) % cycles) / cycles * W;
-  const phy = cy - shape(ph * cycles) * amp;
   return (
     <svg className="viz scope" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
       <line x1="0" y1={cy} x2={W} y2={cy} className="mid" />
-      <polyline points={pts.join(" ")} />
+      <polyline points={pointStr} />
       <circle cx={phx.toFixed(1)} cy={phy.toFixed(1)} r="2" className="scope-dot" />
     </svg>
   );

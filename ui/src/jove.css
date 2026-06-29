@@ -94,21 +94,23 @@ button, select, input { font-family: inherit; color: inherit; }
 /* ---- columns: panels grow to fill the canvas (>=3 per column => modest) ---- */
 .cols { display: flex; gap: 12px; flex: 1; min-height: 0; }
 .cols.hide { display: none; }
+/* panels are content-sized and top-aligned so every column's top edge lines up
+   under the tab bar; spare vertical space pools at the column foot rather than
+   stretching voids inside each panel */
 .col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .modcol { flex: 1.35 1 0; }
 
 .panel {
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
   display: flex; flex-direction: column; overflow: visible;
-  flex: 1 1 auto; min-height: 0;
+  flex: 0 0 auto;
 }
 .ph {
-  display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+  display: flex; align-items: center; gap: 8px; padding: 7px 14px;
   font-size: 10px; letter-spacing: 2px; font-weight: 700; color: var(--ink2);
   border-bottom: 1px solid var(--line); border-radius: 10px 10px 0 0;
 }
-.pbody { padding: 13px 15px 14px; display: flex; flex-direction: column; gap: 13px; flex: 1; min-height: 0;
-  justify-content: center; }
+.pbody { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 9px; }
 
 .row { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
 .row.dim, .knobs.dim { opacity: .35; pointer-events: none; }
@@ -192,16 +194,17 @@ button, select, input { font-family: inherit; color: inherit; }
 .dd-opt:hover { background: var(--line); color: var(--ink); }
 .dd-opt.on { background: var(--accent); color: #06080c; }
 
-/* ---- LFO led ---- */
-.lfo-led { width: 11px; height: 11px; border-radius: 50%; margin-left: auto; align-self: center;
+/* ---- LFO output led (sits beside SYNC, glows with live LFO level) ---- */
+.lfo-led { width: 11px; height: 11px; border-radius: 50%; margin-left: 6px; align-self: center;
+  border: 1px solid var(--line2);
   background: color-mix(in srgb, var(--accent) calc(var(--g, 0) * 100%), var(--sunk));
   box-shadow: 0 0 calc(var(--g, 0) * 10px) var(--accent); }
 
 /* ---- visualizers ---- */
 .viz { width: 100%; display: block; border-radius: 7px; background: var(--sunk); border: 1px solid var(--line); }
-.viz.env { height: 46px; }
-.viz.scope { height: 40px; }
-.viz.filter { height: 52px; }
+.viz.env { height: 38px; }
+.viz.scope { height: 30px; }
+.viz.filter { height: 46px; }
 .viz polyline { fill: none; stroke: var(--accent); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
 .viz.env .fillz { fill: color-mix(in srgb, var(--accent) 12%, transparent); stroke: none; }
 .viz.scope .mid { stroke: var(--line2); stroke-width: 1; vector-effect: non-scaling-stroke; }
