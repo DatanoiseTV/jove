@@ -47,8 +47,9 @@ class SynthReverb
         }
         for(int d = 0; d < kNumDiff; ++d)
             diff_[d].init((int)(diffTune[d] * k), 0.7f);
-        // pre-delay (~18 ms) — a touch of space before the tail builds.
-        preLen_ = (int)(0.018f * sampleRate) + 1;
+        // pre-delay (~8 ms) — a touch of space before the tail builds, short
+        // enough not to leave an audible gap when the mix is fully wet.
+        preLen_ = (int)(0.008f * sampleRate) + 1;
         pre_.assign((size_t)preLen_, 0.0f);
         prePos_ = 0;
         reset();
@@ -77,6 +78,14 @@ class SynthReverb
         const float in_gain = 0.015f;        // Freeverb fixed input scale
         const float modRate = 0.7f / sr_;    // ~0.7 Hz tail modulation
         const float modDepth = 7.0f;         // +/- samples
+        // The comb bank's gain is ~1/(1-roomfb), so without this the tail gets
+        // many times louder than the dry as size rises and even a small mix
+        // buries the signal. Normalise the wet so its loudness is ~constant vs
+        // size, then equal-power crossfade so low mix stays subtle and full wet
+        // sits near the dry level instead of a quiet/overpowering wash.
+        const float wetNorm = 3.6f * (1.0f - roomfb_);
+        const float wetG = std::sin(mix_ * 1.5707963f) * wetNorm;
+        const float dryG = std::cos(mix_ * 1.5707963f);
         for(int i = 0; i < n; ++i)
         {
             modPhase_ += modRate;
@@ -103,8 +112,8 @@ class SynthReverb
                 wl = apL_[a].process(wl);
                 wr = apR_[a].process(wr);
             }
-            L[i] = L[i] * (1.0f - mix_) + wl * mix_;
-            R[i] = R[i] * (1.0f - mix_) + wr * mix_;
+            L[i] = L[i] * dryG + wl * wetG;
+            R[i] = R[i] * dryG + wr * wetG;
         }
     }
 
