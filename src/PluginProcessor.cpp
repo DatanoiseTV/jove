@@ -187,9 +187,14 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         {
             if(auto bpm = pos->getBpm())
                 engine.setTempo((float) *bpm);
-            // Re-align the arp / tempo-synced mod to the bar on a stop->start edge
-            // so a running host transport keeps the arp locked to the beat grid.
-            const bool playing = pos->getIsPlaying();
+            // Feed the host transport so the arp locks its step grid to the song
+            // position (and free-runs at tempo when stopped). ppq is the position
+            // at this block's start; 0 when the host doesn't report one.
+            const bool   playing = pos->getIsPlaying();
+            const double ppq     = pos->getPpqPosition().orFallback(0.0);
+            engine.setTransport(playing, ppq);
+            // On a stop->start edge also re-align the tempo-synced LFOs/seqs to the
+            // bar (the arp re-locks on its own via ppq).
             if(playing && !wasPlaying_) engine.syncToBar();
             wasPlaying_ = playing;
         }

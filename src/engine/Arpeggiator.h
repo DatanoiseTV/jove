@@ -8,6 +8,7 @@
 #pragma once
 
 #include "SynthParams.h"
+#include <cmath>
 #include <cstdint>
 
 namespace jove
@@ -104,14 +105,20 @@ class Arpeggiator
 
     // Re-align the step clock to the bar (called when host transport starts), so
     // the arp lands on the beat grid instead of free-running from the first note.
-    void syncToBar() noexcept { phase_ = 0.0f; seqPos_ = 0; }
+    // lastSub_ = -1 forces the next clocked block to re-derive the grid from ppq.
+    void syncToBar() noexcept { phase_ = 0.0f; seqPos_ = 0; lastSub_ = -1; }
 
     void notePressed() noexcept { physicalDown_++; }
 
     // ---- clock + step ------------------------------------------------------
     // Advance one control block. Returns an event (possibly empty). tempoBpm and
-    // the arp params set the step period; n is the block size in samples.
-    ArpEvent process(int n, float tempoBpm, const ArpParams& ap) noexcept
+    // the arp params set the step period; n is the block size in samples. When
+    // clocked is true, ppq is the host song position (quarter-notes) at the start
+    // of this block and the step grid is locked to it (so the arp tracks the
+    // transport, loops and seeks sample-accurately); otherwise the arp free-runs
+    // at tempoBpm from where it was.
+    ArpEvent process(int n, float tempoBpm, const ArpParams& ap,
+                     bool clocked = false, double ppq = 0.0) noexcept
     {
         ArpEvent ev;
         if(!running_ || !ap.on)
@@ -152,8 +159,37 @@ class Arpeggiator
         int          di            = ap.syncDiv;
         if(di < 0) di = 0;
         if(di >= kNumArpDiv) di = kNumArpDiv - 1;
-        const double stepSec = secPerQuarter * kArpDivQuarters[di];
-        // swing: lengthen even steps, shorten odd — classic shuffle
+        const double stepQ   = kArpDivQuarters[di];        // quarter-notes per step
+        const double stepSec = secPerQuarter * stepQ;
+        const int    R       = ap.ratchet < 1 ? 1 : ap.ratchet;
+
+        if(clocked)
+        {
+            // Host-locked: derive the absolute (sub)step index straight from the
+            // song position. ratchet subdivides the step into R equal sub-steps.
+            // (Swing is intentionally straight here — when chained to a DAW the
+            // host's own groove governs; swing still applies when free-running.)
+            const double subQ   = stepQ / (double) R;
+            const long   curSub = (long) std::floor(ppq / subQ);
+            if(lastSub_ < 0) lastSub_ = curSub - 1; // first clocked block: fire now
+            long steps = curSub - lastSub_;
+            if(steps < 0 || steps > 8) steps = 1;   // loop/seek -> single resync step
+            const float g        = ap.gate < 0.05f ? 0.05f : (ap.gate > 2.0f ? 2.0f : ap.gate);
+            const int   gateSamp = (int) (g * subQ * secPerQuarter * (double) sr_);
+            for(long k = 0; k < steps; ++k)
+            {
+                const long fireSub = lastSub_ + 1 + k;
+                const long r       = ((fireSub % R) + R) % R; // 0 = new step, >0 ratchet
+                if(r == 0) advanceSeqPos();                   // ratchet repeats hold pos
+                emitStep(ap, ev, gateSamp);
+            }
+            lastSub_ = curSub;
+            phase_   = (float) (ppq / stepQ - std::floor(ppq / stepQ)); // UI progress
+            return ev;
+        }
+
+        // free-run (transport stopped / no host): accumulate phase at host tempo.
+        lastSub_ = -1; // invalidate the clocked grid so the next clocked block re-locks
         double thisStepSec = stepSec;
         if(ap.swing > 0.001f)
         {
@@ -183,16 +219,7 @@ class Arpeggiator
             // per-note release; no bulk release here.
             const float g = ap.gate < 0.05f ? 0.05f : (ap.gate > 2.0f ? 2.0f : ap.gate);
             const int gateSamp = (int)(g * thisStepSec * (double)sr_);
-
-            if(isChord_)
-            {
-                for(int i = 0; i < seqLen_ && ev.onCount < kArpMaxStepNotes; ++i)
-                    emitOn(ev, seq_[i], seqVel_[i], gateSamp);
-            }
-            else
-            {
-                emitOn(ev, seq_[seqPos_], seqVel_[seqPos_], gateSamp);
-            }
+            emitStep(ap, ev, gateSamp);
         }
         return ev;
     }
@@ -211,6 +238,19 @@ class Arpeggiator
         for(int i = 0; i < soundingCount_ && ev.offCount < kArpMaxStepNotes; ++i)
             ev.offNotes[ev.offCount++] = sounding_[i];
         soundingCount_ = 0;
+    }
+
+    // emit the current step (single note, or the whole set in CHORD mode)
+    void emitStep(const ArpParams& ap, ArpEvent& ev, int gateSamp) noexcept
+    {
+        (void)ap;
+        if(isChord_)
+        {
+            for(int i = 0; i < seqLen_ && ev.onCount < kArpMaxStepNotes; ++i)
+                emitOn(ev, seq_[i], seqVel_[i], gateSamp);
+        }
+        else
+            emitOn(ev, seq_[seqPos_], seqVel_[seqPos_], gateSamp);
     }
 
     void emitOn(ArpEvent& ev, int note, int vel, int gateSamp) noexcept
@@ -470,6 +510,7 @@ class Arpeggiator
     int  seqPos_ = 0;
 
     float phase_   = 0.0f;
+    long  lastSub_ = -1;   // last absolute sub-step index fired in host-locked mode
     bool  running_ = false;
     bool  rebuild_ = false;
     int   bounceDir_ = 1;

@@ -80,6 +80,14 @@ class SynthEngine
 
     // External tempo for LFO/arp sync (BPM). 0 = use internal.
     void setTempo(float bpm) noexcept { tempoBpm_ = bpm > 1.0f ? bpm : 120.0f; }
+    // Host transport: playing + song position (quarter-notes) at this block's
+    // start. When playing, the arp locks its step grid to ppq; when stopped it
+    // free-runs at tempo. Call once per processBlock before render().
+    void setTransport(bool playing, double ppqQuarters) noexcept
+    {
+        transportPlaying_ = playing;
+        transportPpq_     = ppqQuarters;
+    }
 
     // Render one stereo block (pre-FX). Buffers are overwritten (not summed).
     void render(float* outL, float* outR, int n) noexcept;
@@ -202,6 +210,8 @@ class SynthEngine
     int   blockSize_ = 48;
     float blockRate_ = 1000.0f;
     float tempoBpm_  = 120.0f;
+    bool   transportPlaying_ = false; // host transport running (arp ppq-locks)
+    double transportPpq_     = 0.0;   // host song position in quarter-notes
 
     // controllers
     float bend_      = 0.0f; // -1..+1

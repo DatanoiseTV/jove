@@ -337,7 +337,7 @@ void SynthEngine::serviceArp(int n) noexcept
         return;
     }
     arpWasOn_ = true;
-    ArpEvent ev = arp_.process(n, tempoBpm_, patch_->arp);
+    ArpEvent ev = arp_.process(n, tempoBpm_, patch_->arp, transportPlaying_, transportPpq_);
     for(int i = 0; i < ev.offCount; ++i)
         releaseNote(ev.offNotes[i]);
     for(int i = 0; i < ev.onCount; ++i)
@@ -489,6 +489,12 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
 
     // arpeggiator: advance its clock and trigger/release voices for this block
     serviceArp(n);
+    // Advance the host song position across control blocks so the arp keeps
+    // ~control-rate timing within a single processBlock; the processor overwrites
+    // transportPpq_ with the host's authoritative value each block, so this only
+    // interpolates and never drifts.
+    if(transportPlaying_)
+        transportPpq_ += (double) n / (double) sr_ * (double) tempoBpm_ / 60.0;
 
     // value of a GLOBAL mod source (the only kind that can drive a shared LFO's
     // depth/rate); per-voice sources return 0 here.
