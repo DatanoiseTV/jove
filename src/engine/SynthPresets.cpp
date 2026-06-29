@@ -567,7 +567,7 @@ void fx_riser(SynthPatch& p)
     lfo(p, 0, LfoWave::Sine, 4.0f);
     mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 1.0f);   // pitch rise
     mod(p, 1, ModSource::EnvAux, ModDest::Cutoff, 0.6f);
-    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.1f);
+    mod(p, 2, ModSource::Lfo1, ModDest::Pitch, 0.06f);
     mod(p, 3, ModSource::EnvAux, ModDest::Lfo1Rate, 1.5f); // accelerating wobble
     p.fxReverb = 0.5f; p.fxDelay = 0.3f;
 }
@@ -590,7 +590,7 @@ void fx_siren(SynthPatch& p)
     filt(p, FilterMode::SvfBP, 0.5f, 0.3f, 0.1f);
     p.env[0] = EnvParams{0.05f, 0.5f, 1.0f, 0.3f, 0.0f};
     lfo(p, 0, LfoWave::Triangle, 1.2f, 1.0f);
-    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.5f);  // wailing pitch
+    mod(p, 0, ModSource::Lfo1, ModDest::Pitch, 0.18f); // wailing pitch (tamed)
     mod(p, 1, ModSource::ModWheel, ModDest::Lfo1Rate, 1.0f);
     mod(p, 2, ModSource::Lfo1, ModDest::Cutoff, 0.3f);
     p.fxDelay = 0.4f; p.fxReverb = 0.4f;
@@ -1098,7 +1098,7 @@ void fx_wind(SynthPatch& p){ setName(p,"WIND"); p.category=7; p.width=0.95f; p.a
 void fx_alien(SynthPatch& p){ setName(p,"ALIEN"); p.category=7; p.width=0.8f; p.ampGain=0.6f;
     osc(p,0,SAW,0,1.0f); osc(p,1,PULSE,0,1.0f); p.ringMod=0.5f; p.fm2to1=0.3f; p.drift=0.3f;
     filt(p,FilterMode::SvfBP,0.5f,0.4f,0.1f); p.env[0]=EnvParams{0.1f,0.5f,0.8f,0.5f,0};
-    lfo(p,0,LfoWave::SampleHold,4.0f); lfo(p,1,LfoWave::Sine,0.3f); mod(p,0,ModSource::Lfo1,ModDest::Pitch,0.4f);
+    lfo(p,0,LfoWave::SampleHold,4.0f); lfo(p,1,LfoWave::Sine,0.3f); mod(p,0,ModSource::Lfo1,ModDest::Pitch,0.2f);
     mod(p,1,ModSource::Lfo1,ModDest::RingMod,0.3f); mod(p,2,ModSource::Lfo2,ModDest::Cutoff,0.3f); p.fxDelay=0.4f; p.fxReverb=0.5f; }
 // ---- DRONE ----
 void drone_choir(SynthPatch& p){ setName(p,"DRONE CHOIR"); p.category=8; p.width=0.9f; p.ampGain=0.5f; p.chorusMode=2;
