@@ -122,8 +122,12 @@ class SynthDelay
             bufR_[wr_] = sat(wR * satDrive);
             if(++wr_ >= maxLen_) wr_ = 0;
 
-            L[i] = L[i] * (1.0f - 0.5f * mix_) + dL * mix_;
-            R[i] = R[i] * (1.0f - 0.5f * mix_) + dR * mix_;
+            // Wet tap is the FILTERED signal (fL/fR), not the raw read — so the
+            // LP/HP/BP type, FREQ and Q audibly shape every echo, not just the
+            // recirculating tail. (Previously the first echo bypassed the filter,
+            // which made the controls feel inert at high cutoffs.)
+            L[i] = L[i] * (1.0f - 0.5f * mix_) + fL * mix_;
+            R[i] = R[i] * (1.0f - 0.5f * mix_) + fR * mix_;
         }
     }
 
