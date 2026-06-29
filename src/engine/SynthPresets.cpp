@@ -249,7 +249,7 @@ void pad_wide(SynthPatch& p)
     mod(p, 1, ModSource::Lfo2, ModDest::Detune, 0.30f);
     mod(p, 2, ModSource::ModWheel, ModDest::Cutoff, 0.40f);
     mod(p, 3, ModSource::Aftertouch, ModDest::Detune, 0.25f);
-    p.fxChorus = 0.45f; p.fxPhaser = 0.20f; p.fxReverb = 0.50f;
+    p.fxChorus = 0.45f; p.fxPhaser = 0.20f; p.fxReverb = 0.15f;
 }
 void pad_mellow(SynthPatch& p)
 {

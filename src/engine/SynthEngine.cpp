@@ -601,7 +601,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         const float bpk = std::max(std::fabs(l), std::fabs(r));
         if(bpk > busEnv_) busEnv_ += 0.006f * (bpk - busEnv_);  // ~slow attack
         else              busEnv_ += 0.0006f * (bpk - busEnv_); // slower release
-        constexpr float busCeil = 0.95f;
+        constexpr float busCeil = 0.85f;
         const float bg = busEnv_ > busCeil ? busCeil / busEnv_ : 1.0f;
         l *= bg; r *= bg;
         if(mbActive) { l = mbsat_.process(0, l); r = mbsat_.process(1, r); }
@@ -647,7 +647,7 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // made the old chain warble out of tune.
     if(fxDriveOn_ && (p.fxDrive > 0.001f || std::fabs(p.driveTone) > 0.001f))
     {
-        const float g = 1.0f + p.fxDrive * 6.0f;
+        const float g = 1.0f + p.fxDrive * 4.0f;
         const float tone = p.driveTone; // -1 dark .. +1 bright, tilt around a LP
         const int   dm = p.driveMode;
         // selectable drive models: SOFT cubic, TUBE asymmetric (even harmonics),
@@ -726,6 +726,12 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     // linear up to 0.95 and only soft-saturates above, so normal content (held
     // under the 0.92 ceiling by the limiter) passes through untouched.
     constexpr float ceiling = 0.92f;
+    // Master headroom trim: the bank was mastered hot (high ampGain + drive +
+    // resonance), so loud patches slammed the limiter — squashed and perceived
+    // as clipping. Pull the whole feed down so most patches sit below the
+    // ceiling (dynamics preserved, limiter rarely engages); raise host gain to
+    // taste. ~-4 dB.
+    constexpr float kMasterTrim = 0.62f;
     auto limClip = [](float x) noexcept -> float {
         constexpr float t = 0.95f;
         if(x >  t) return  t + (1.0f - t) * std::tanh((x - t) / (1.0f - t));
@@ -737,8 +743,8 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         // final DC blocker: the pre-FX blocker runs before the drive stage, so an
         // asymmetric drive model (DIODE/tube) or hard sync can re-introduce DC
         // downstream. A one-pole high-pass at ~5 Hz here removes it at the output.
-        const float xl = outL[i]; mdcyL_ = xl - mdcxL_ + 0.9993f * mdcyL_; mdcxL_ = xl; outL[i] = mdcyL_;
-        const float xr = outR[i]; mdcyR_ = xr - mdcxR_ + 0.9993f * mdcyR_; mdcxR_ = xr; outR[i] = mdcyR_;
+        const float xl = outL[i] * kMasterTrim; mdcyL_ = xl - mdcxL_ + 0.9993f * mdcyL_; mdcxL_ = xl; outL[i] = mdcyL_;
+        const float xr = outR[i] * kMasterTrim; mdcyR_ = xr - mdcxR_ + 0.9993f * mdcyR_; mdcxR_ = xr; outR[i] = mdcyR_;
 
         const float peak = std::max(std::fabs(outL[i]), std::fabs(outR[i]));
         if(peak > limEnv_) limEnv_ += 0.5f * (peak - limEnv_);      // fast attack
