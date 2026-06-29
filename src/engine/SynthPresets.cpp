@@ -537,7 +537,8 @@ void pluck_mallet(SynthPatch& p)
 {
     setName(p, "MALLET"); p.category = 6; p.width = 0.5f; p.ampGain = 0.8f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.5f, 4); p.drift = 0.05f;
-    filt(p, FilterMode::SvfLP, 0.7f, 0.06f, 0.3f);
+    filt(p, FilterMode::Lpg, 0.85f, 0.05f, 0.6f);   // vactrol low-pass gate pluck
+    p.env[1] = EnvParams{0.001f, 0.22f, 0.0f, 0.18f, 0.0f}; // fast filter env drives the LPG duck
     p.env[0] = EnvParams{0.001f, 0.3f, 0.0f, 0.25f, 0.2f};
     p.env[2] = EnvParams{0.001f, 0.05f, 0.0f, 0.05f, 0.0f};
     mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 0.15f); // tiny attack pitch click
@@ -882,7 +883,7 @@ void seq_hoover(SynthPatch& p)
 
 // ===================== second wave (to 128) =====================
 // ---- PAD ----
-void pad_sweep(SynthPatch& p){ setName(p,"SWEEP PAD"); p.category=0; p.width=0.85f; p.ampGain=0.7f; p.chorusMode=2;
+void pad_sweep(SynthPatch& p){ setName(p,"SWEEP PAD"); p.category=0; p.width=0.85f; p.ampGain=0.7f; p.chorusMode=3;
     osc(p,0,SAW,0,1.0f); osc(p,1,SAW,0.14f,0.9f); osc(p,3,PULSE,-0.1f,0.5f); p.drift=0.3f;
     filt(p,FilterMode::LadderLP,0.3f,0.3f,0.5f,0.2f,0.3f); p.env[0]=EnvParams{1.0f,1.6f,0.85f,2.0f,0.2f};
     p.env[1]=EnvParams{2.2f,2.0f,0.3f,1.8f,0}; lfo(p,0,LfoWave::Sine,0.12f,1,0.1f);
@@ -894,7 +895,7 @@ void pad_fm(SynthPatch& p){ setName(p,"FM PAD"); p.category=0; p.width=0.82f; p.
     lfo(p,0,LfoWave::Sine,0.1f); lfo(p,1,LfoWave::Triangle,0.07f);
     mod(p,0,ModSource::Lfo1,ModDest::FmAmount,0.3f); mod(p,1,ModSource::Lfo2,ModDest::Detune,0.3f);
     mod(p,2,ModSource::ModWheel,ModDest::FmAmount,0.4f); p.fxReverb=0.55f; p.fxChorus=0.2f; }
-void pad_air(SynthPatch& p){ setName(p,"AIR PAD"); p.category=0; p.width=0.92f; p.ampGain=0.6f; p.chorusMode=2;
+void pad_air(SynthPatch& p){ setName(p,"AIR PAD"); p.category=0; p.width=0.92f; p.ampGain=0.6f; p.chorusMode=3;
     osc(p,0,TRI,0,1.0f,3); osc(p,1,SINE,0.06f,0.7f,4); osc(p,3,SAW,0.1f,0.3f,3); p.noiseLevel=0.06f; p.drift=0.3f;
     filt(p,FilterMode::SvfHP,0.3f,0.1f,0.1f); p.env[0]=EnvParams{1.6f,2.0f,0.85f,3.0f,0.15f};
     lfo(p,0,LfoWave::Sine,0.08f); mod(p,0,ModSource::Lfo1,ModDest::Detune,0.4f);
@@ -1050,7 +1051,7 @@ void keys_organ(SynthPatch& p){ setName(p,"ORGAN"); p.category=5; p.width=0.6f; 
     lfo(p,0,LfoWave::Sine,6.5f); mod(p,0,ModSource::Lfo1,ModDest::Pitch,0.03f);
     mod(p,1,ModSource::ModWheel,ModDest::Lfo1Rate,0.6f); p.fxChorus=0.35f; p.fxReverb=0.25f; }
 void keys_toy(SynthPatch& p){ setName(p,"TOY PIANO"); p.category=5; p.width=0.5f; p.ampGain=0.78f;
-    osc(p,0,PULSE,0,1.0f); p.osc[0].pw=0.3f; osc(p,1,SINE,0,0.5f,4); p.ringMod=0.2f; p.drift=0.08f;
+    osc(p,0,PULSE,0,1.0f); p.osc[0].pw=0.3f; p.osc[0].crush=0.28f; osc(p,1,SINE,0,0.5f,4); p.ringMod=0.2f; p.drift=0.08f;
     filt(p,FilterMode::SvfLP,0.7f,0.08f,0.3f); p.env[0]=EnvParams{0.001f,0.5f,0.0f,0.4f,0.2f};
     mod(p,0,ModSource::Velocity,ModDest::Cutoff,0.4f); p.fxReverb=0.3f; p.fxDelay=0.1f; }
 void keys_fmclassic(SynthPatch& p){ setName(p,"FM CLASSIC"); p.category=5; p.width=0.6f; p.ampGain=0.78f; p.chorusMode=1;
@@ -1222,7 +1223,7 @@ void seq_arpbass(SynthPatch& p){ setName(p,"ARP BASS"); p.category=11; p.width=0
     p.env[1]=EnvParams{0.003f,0.16f,0.05f,0.12f,0}; arp_setup(p,4,ArpMode::Up,1); p.arp.gate=0.5f;
     mod(p,0,ModSource::EnvFilter,ModDest::Cutoff,0.5f); mod(p,1,ModSource::Velocity,ModDest::Cutoff,0.3f); p.fxDelay=0.26f; p.fxReverb=0.18f; }
 void seq_8bit(SynthPatch& p){ setName(p,"8-BIT"); p.category=11; p.width=0.5f; p.ampGain=0.72f;
-    osc(p,0,PULSE,0,1.0f); p.osc[0].pw=0.5f; p.drift=0; filt(p,FilterMode::SvfLP,0.85f,0.05f,0.05f);
+    osc(p,0,PULSE,0,1.0f); p.osc[0].pw=0.5f; p.osc[0].crush=0.55f; p.drift=0; filt(p,FilterMode::SvfLP,0.85f,0.05f,0.05f);
     p.env[0]=EnvParams{0.001f,0.1f,0.4f,0.08f,0}; arp_setup(p,4,ArpMode::UpDown,2); p.arp.gate=0.5f;
     lfo(p,0,LfoWave::Square,8.0f); mod(p,0,ModSource::Lfo1,ModDest::Pw1,0.3f); mod(p,1,ModSource::Lfo1,ModDest::Pitch,0.02f);
     p.fxDelay=0.28f; p.fxReverb=0.15f; }
