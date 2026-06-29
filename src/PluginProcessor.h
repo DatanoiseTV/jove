@@ -120,10 +120,12 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     int  mpeBendRange_ = 48;
     bool wasPlaying_   = false; // host transport stop->start edge (arp bar-sync)
 
-    // audition: auto-play a looping test phrase so presets can be browsed by ear
-    bool auditionOn_  = false;
-    long auditionPos_ = 0; // sample position within the phrase loop
-    int  auditionCat_ = 0; // preset category -> which demo phrase to play
+    // audition: auto-play a looping demo phrase so presets can be browsed by ear
+    bool   auditionOn_     = false;
+    long   auditionPos_    = 0; // sample position within the phrase loop
+    int    auditionCat_    = 0; // preset category -> which demo phrase set
+    int    auditionVariant_= 0; // rotates 0..4 each preset load -> a fresh variety
+    double hostBpm_        = 120.0; // host tempo; tempo-scales the demo to the DAW
 
     std::atomic<int>   activeVoices { 0 };
     std::atomic<int>   lastMidiNote { -1 };

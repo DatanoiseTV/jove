@@ -187,7 +187,10 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         if(auto pos = ph->getPosition())
         {
             if(auto bpm = pos->getBpm())
+            {
+                if(*bpm > 1.0) hostBpm_ = *bpm; // also used to tempo-match the audition demo
                 engine.setTempo((float) *bpm);
+            }
             // Feed the host transport so the arp locks its step grid to the song
             // position (and free-runs at tempo when stopped). ppq is the position
             // at this block's start; 0 when the host doesn't report one.
@@ -224,11 +227,15 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // user can browse presets by ear. Restarts on each preset load.
     {
         const bool aud = apvts.getRawParameterValue(jID::auditionOn)->load() > 0.5f;
-        // Cache the category so the audition plays a phrase that fits the patch
-        // type (bassline for BASS, swell for PAD, stabs for STAB, held chord for
-        // ARP/SEQ, ...). Refreshed on a preset load and on each audition start.
+        // Cache the category + advance the variant so the audition plays a phrase
+        // that fits the patch type (bassline for BASS, swell for PAD, stabs for
+        // STAB, held chord for ARP/SEQ, ...) and a different one of the 5 varieties
+        // each time a new preset is loaded. Refreshed on preset load / audition start.
         if((aud && !auditionOn_) || presetJustLoaded)
+        {
             auditionCat_ = presetManager.currentCategory();
+            if(presetJustLoaded) ++auditionVariant_;
+        }
         if(aud != auditionOn_)
         {
             auditionOn_ = aud;
@@ -239,13 +246,16 @@ void JoveAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         if(aud)
         {
             const double sr = sampleRate;
-            const AuditionPhrase ph = auditionPhraseFor(auditionCat_);
-            const long loopLen = (long) (ph.loop * sr);
+            const AuditionPhrase ph = auditionPhraseFor(auditionCat_, auditionVariant_);
+            // The phrases are written at a 120 BPM reference; stretch/compress to the
+            // host tempo so the demo plays in the DAW's BPM (1.0 when no host tempo).
+            const double scale   = 120.0 / (hostBpm_ > 1.0 ? hostBpm_ : 120.0);
+            const long   loopLen = (long) (ph.loop * scale * sr);
             const long bStart = auditionPos_, bEnd = auditionPos_ + numSamples;
             for(int i = 0; i < ph.count; ++i)
             {
                 const AuditionEvent& e = ph.ev[i];
-                const long es = (long) (e.t * sr);
+                const long es = (long) (e.t * scale * sr);
                 if(es >= bStart && es < bEnd)
                 {
                     if(e.on) engine.noteOn(e.note, e.vel);
