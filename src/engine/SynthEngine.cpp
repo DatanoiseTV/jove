@@ -726,6 +726,12 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
     };
     for(int i = 0; i < n; ++i)
     {
+        // final DC blocker: the pre-FX blocker runs before the drive stage, so an
+        // asymmetric drive model (DIODE/tube) or hard sync can re-introduce DC
+        // downstream. A one-pole high-pass at ~5 Hz here removes it at the output.
+        const float xl = outL[i]; mdcyL_ = xl - mdcxL_ + 0.9993f * mdcyL_; mdcxL_ = xl; outL[i] = mdcyL_;
+        const float xr = outR[i]; mdcyR_ = xr - mdcxR_ + 0.9993f * mdcyR_; mdcxR_ = xr; outR[i] = mdcyR_;
+
         const float peak = std::max(std::fabs(outL[i]), std::fabs(outR[i]));
         if(peak > limEnv_) limEnv_ += 0.5f * (peak - limEnv_);      // fast attack
         else               limEnv_ += 0.0006f * (peak - limEnv_);  // slow release (~30 ms)

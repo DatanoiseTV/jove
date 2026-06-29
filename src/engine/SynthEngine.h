@@ -181,6 +181,7 @@ class SynthEngine
     uint32_t          noteTriggers_ = 0;
     // output DC-blocker state (one-pole high-pass per channel)
     float             dcxL_ = 0.0f, dcyL_ = 0.0f, dcxR_ = 0.0f, dcyR_ = 0.0f;
+    float             mdcxL_ = 0.0f, mdcyL_ = 0.0f, mdcxR_ = 0.0f, mdcyR_ = 0.0f; // master DC blocker
     float             toneZL_ = 0.0f, toneZR_ = 0.0f; // drive-tone tilt LP state
     float             limEnv_ = 0.0f; // master limiter peak-envelope follower
     float             busEnv_ = 0.0f; // voice-bus auto-gain follower (anti-chord-clip)
