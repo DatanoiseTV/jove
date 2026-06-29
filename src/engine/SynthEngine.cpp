@@ -161,7 +161,7 @@ void SynthEngine::playNote(int note, float velocity) noexcept
     if(activeVoices() == 0)
         for(int i = 0; i < kNumLfo; ++i)
             if(patch_->lfo[i].retrig)
-                lfo_[i].retrigger();
+                lfo_[i].retrigger(patch_->lfo[i].phase);
     pushHeld(note, (int)(velocity * 127.0f));
     const int   mode = patch_->voiceMode;
     const float newHz = midiToHz((float)note);

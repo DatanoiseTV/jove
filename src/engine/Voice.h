@@ -245,12 +245,13 @@ class Voice
             sub_.setPulseWidth(0.5f);
         }
 
-        // per-osc bit-crush: quantisation step count (0 => bypass). amount 0 is
-        // ~16-bit (clean), amount 1 ~2-bit for raw DCO/8-bit grit.
+        // per-osc bit-crush: quantisation step count (0 => bypass). The useful
+        // range is spread across the whole knob: amount ~0.1 is gentle ~8-bit,
+        // 0.5 is gritty ~5-bit, 1.0 is a destroyed ~1.5-bit DCO.
         float crushLv[kNumOsc];
         for(int i = 0; i < kNumOsc; ++i)
             crushLv[i] = p.osc[i].crush > 0.001f
-                             ? std::exp2(15.0f - p.osc[i].crush * 13.0f)
+                             ? std::exp2(9.0f - p.osc[i].crush * 7.5f)
                              : 0.0f;
 
         // filter: base cutoff (env-independent part) + key + matrix mod, in

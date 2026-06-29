@@ -232,6 +232,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
         fparam(jID::lfo(i, "Fade"), n + "Fade", FR(0.0f, 5.0f), 0.0f, "s");
         fparam(jID::lfo(i, "Delay"), n + "Delay", FR(0.0f, 5.0f), 0.0f, "s");
         fparam(jID::lfo(i, "Offset"), n + "Offset", bip, 0.0f);
+        fparam(jID::lfo(i, "Phase"),  n + "Start Phase", lin01, 0.0f);
     }
 
     // ---- mod matrix ----
@@ -356,6 +357,7 @@ class PatchBinding
             p.lfo[i].fade     = get(lfo(i, "Fade"));
             p.lfo[i].delay    = get(lfo(i, "Delay"));
             p.lfo[i].offset   = get(lfo(i, "Offset"));
+            p.lfo[i].phase    = get(lfo(i, "Phase"));
         }
 
         for(int i = 0; i < kNumModSlots; ++i)
@@ -454,6 +456,7 @@ class PatchBinding
             set(lfo(i, "Fade"), p.lfo[i].fade);
             set(lfo(i, "Delay"), p.lfo[i].delay);
             set(lfo(i, "Offset"), p.lfo[i].offset);
+            set(lfo(i, "Phase"), p.lfo[i].phase);
         }
 
         for(int i = 0; i < kNumModSlots; ++i)
