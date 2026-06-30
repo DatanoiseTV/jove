@@ -376,6 +376,9 @@ button, select, input { font-family: inherit; color: inherit; }
 .hzscale .hzcur { color: var(--accent); font-weight: 700; }
 /* second filter section (serial/parallel) */
 .flt2 { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); padding-top: 6px; }
+/* shown but inactive in SINGLE routing: dim it and lock out interaction so it's
+   clearly disabled until the user picks SERIES / PARALLEL. */
+.flt2.disabled { opacity: .38; pointer-events: none; filter: saturate(.35); }
 .botband .viz.filter { height: 62px; }   /* hero filter graph (compact for dual-filter room) */
 /* when filter 2 is shown, compact the whole FILTER panel so it fits the band
    cell without scrolling: smaller graph, tighter gaps, shorter Hz scale. */

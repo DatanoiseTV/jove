@@ -767,10 +767,13 @@ function FilterPanel() {
 
 function FilterTwo() {
   const [routing] = B.useChoice("filterRouting");
-  if (routing === 0) return null; // single filter -> hide the 2nd
+  // Always visible so the layout is stable; the second filter only does anything
+  // in SERIES / PARALLEL routing, so dim + lock it out when routing is SINGLE.
+  const active = routing !== 0;
+  const tag = routing === 1 ? "SERIES" : routing === 2 ? "PARALLEL" : "INACTIVE";
   return (
-    <div className="flt2">
-      <Seg id="filter2Mode" options={FILTER_MODES} label={"FILTER 2 · " + (routing === 1 ? "SERIES" : "PARALLEL")} />
+    <div className={"flt2" + (active ? "" : " disabled")} aria-disabled={!active}>
+      <Seg id="filter2Mode" options={FILTER_MODES} label={"FILTER 2 · " + tag} />
       <div className="knobs spread">
         <Knob id="filter2Cutoff" label="CUTOFF" small />
         <Knob id="filter2Reso" label="RESO" small />
