@@ -187,7 +187,7 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     const auto arpDivs = namesToArray(kArpDivNames, kNumArpDiv);
 
     // ---- global plugin settings (not patch state) ----
-    iparam(jID::maxVoices, "Max Polyphony", 1, kMaxVoices, 8); // up to 16, default 8
+    iparam(jID::maxVoices, "Max Polyphony", 1, kMaxVoices, kMaxVoices); // up to 16, default 16 (lush pads need the headroom)
     cparam(jID::quality, "Quality", {"Eco", "HQ", "Ultra"}, 1); // default HQ (2x)
     // MPE: global plugin settings (not patch state — presets never change them,
     // so they stay out of PatchBinding and never touch param_roundtrip).

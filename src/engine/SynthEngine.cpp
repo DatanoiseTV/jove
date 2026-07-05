@@ -89,26 +89,36 @@ int SynthEngine::findFreeVoice() const noexcept
 
 int SynthEngine::stealVoice() const noexcept
 {
-    // Prefer the oldest released (gate-off) voice; else the oldest of all.
-    int best = -1;
-    uint32_t bestStamp = 0xFFFFFFFFu;
-    bool foundReleased = false;
+    // Voice-steal strategy tuned so the cut is the least audible and fresh notes
+    // survive:
+    //   * If any voice is RELEASED (gate-off, a decaying tail), steal the QUIETEST
+    //     one — its amp-env is closest to silence, so the splice is inaudible.
+    //     This is the common case on long-release pads: you lift a chord, its
+    //     notes enter release, and the next chord recycles those tails instead of
+    //     chopping a note you can still clearly hear.
+    //   * If every voice is still HELD (gate-on), steal the OLDEST. Not the
+    //     quietest — a quiet held voice is usually one still in its attack, and
+    //     cutting a just-pressed note is exactly the "missed note" we want to
+    //     avoid; the oldest note is the safest victim when a cut is unavoidable.
+    // The old strategy stole the oldest voice unconditionally, which on lush pads
+    // chopped audible held notes and read as notes cutting out / dropping.
+    int      relBest = -1;  float relLvl = 2.0f;   // quietest released
+    int      heldBest = -1; uint32_t heldStamp = 0xFFFFFFFFu; // oldest held
     for(int i = 0; i < maxVoices_; ++i)
     {
-        const bool released = !voice_[i].gateOn();
-        if(released && !foundReleased)
+        if(!voice_[i].gateOn())
         {
-            foundReleased = true;
-            best = i;
-            bestStamp = startStamp_[i];
+            const float lvl = voice_[i].ampEnvLevel();
+            if(lvl < relLvl) { relLvl = lvl; relBest = i; }
         }
-        else if(released == foundReleased && startStamp_[i] < bestStamp)
+        else if(startStamp_[i] < heldStamp)
         {
-            best = i;
-            bestStamp = startStamp_[i];
+            heldStamp = startStamp_[i]; heldBest = i;
         }
     }
-    return best < 0 ? 0 : best;
+    if(relBest >= 0)  return relBest;
+    if(heldBest >= 0) return heldBest;
+    return 0;
 }
 
 void SynthEngine::startVoice(int idx, int note, float velocity, bool glide,
