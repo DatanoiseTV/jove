@@ -299,23 +299,32 @@ void SynthEngine::allNotesOff() noexcept
 }
 
 // Called once after a preset loads. Held notes keep sounding so a patch can be
-// auditioned on a sustained note, but any orphaned voice — still gated yet no
-// longer in the held-key set (a stuck note whose note-off was missed or routed
-// to the wrong voice under a previous mode) — is released so it can't hang. The
-// arp owns its own note lifetimes, so skip the sweep while it's running.
+// auditioned on a sustained note, but any orphaned voice — still gated yet with
+// nothing that will ever release it — is gated off so it can't hang.
+//
+// Who "owns" a gate-on voice depends on the loaded patch's note regime:
+//   * arp OFF: the keyboard owns it — a voice is legitimate only while its key is
+//     in the held set (catches a note-off missed or routed to the wrong voice
+//     under a previous mode).
+//   * arp ON:  the arp owns note lifetimes (the direct releaseNote path is
+//     bypassed while arp.on), so a voice is legitimate only while the arp still
+//     holds that note. This is the case the old early-return missed: holding a
+//     chord under an arp-off patch, then loading an arp-ON patch, left those
+//     direct voices with no path to a note-off — they sustained forever.
 void SynthEngine::onPresetLoaded() noexcept
 {
-    if(patch_ != nullptr && patch_->arp.on)
-        return;
+    const bool arpOn = patch_ != nullptr && patch_->arp.on;
     for(int i = 0; i < kMaxVoices; ++i)
     {
         if(!voice_[i].active() || !voice_[i].gateOn())
             continue;
-        bool stillHeld = false;
-        for(int h = 0; h < heldCount_; ++h)
-            if(held_[h] == voice_[i].note())
-                stillHeld = true;
-        if(!stillHeld)
+        bool owned = false;
+        if(arpOn)
+            owned = arp_.isSounding(voice_[i].note());
+        else
+            for(int h = 0; h < heldCount_ && !owned; ++h)
+                owned = (held_[h] == voice_[i].note());
+        if(!owned)
             voice_[i].noteOff();
     }
 }

@@ -225,6 +225,18 @@ class Arpeggiator
     }
 
     bool running() const noexcept { return running_; }
+
+    // True while the arp is actively holding `note` (its gate hasn't expired).
+    // Lets the engine distinguish an orphaned direct voice from one the arp still
+    // owns when a preset loads mid-note.
+    bool isSounding(int note) const noexcept
+    {
+        for(int i = 0; i < soundingCount_; ++i)
+            if(sounding_[i] == note)
+                return true;
+        return false;
+    }
+
     int  stepIndex() const noexcept { return seqPos_ < 0 ? 0 : seqPos_; }
     int  sequenceLen() const noexcept { return seqLen_; }
 
