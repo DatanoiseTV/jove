@@ -39,6 +39,7 @@ set_target_properties(JoveUI PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 target_sources(Jove PRIVATE
     src/PluginProcessor.cpp
     src/ui/WebEditor.cpp
+    src/ui/WebKeyboardFocus_mac.mm
     src/engine/SynthEngine.cpp
     src/engine/SynthPresets.cpp
     src/presets/PresetManager.cpp)
@@ -112,6 +113,7 @@ if(JOVE_TESTS)
         tests/param_roundtrip.cpp
         src/PluginProcessor.cpp
         src/ui/WebEditor.cpp
+        src/ui/WebKeyboardFocus_mac.mm
         src/engine/SynthEngine.cpp
         src/engine/SynthPresets.cpp
         src/presets/PresetManager.cpp)
@@ -131,6 +133,7 @@ if(JOVE_TESTS)
         tests/preset_dump.cpp
         src/PluginProcessor.cpp
         src/ui/WebEditor.cpp
+        src/ui/WebKeyboardFocus_mac.mm
         src/engine/SynthEngine.cpp
         src/engine/SynthPresets.cpp
         src/presets/PresetManager.cpp)

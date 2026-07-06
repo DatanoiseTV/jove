@@ -50,6 +50,8 @@ class JoveWebEditor : public juce::AudioProcessorEditor,
 
     std::unique_ptr<juce::WebBrowserComponent> webView;
 
+    bool         keyFwdInstalled_ = false; // one-shot: forward WKWebView keys to host
+
     juce::String lastPresetName;
     int          lastPresetIndex = -2;
     // Force re-announcing the current preset for the first ~1.3 s after the editor

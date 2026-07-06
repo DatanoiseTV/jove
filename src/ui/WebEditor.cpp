@@ -6,6 +6,7 @@
 */
 
 #include "WebEditor.h"
+#include "WebKeyboardFocus.h"
 #include "../PluginProcessor.h"
 
 #include <JoveUIData.h>
@@ -138,6 +139,15 @@ JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
                     if(auto* prm = processor.getValueTreeState().getParameter(a[0].toString()))
                         prm->setValueNotifyingHost(prm->getDefaultValue());
                 c(juce::var());
+            })
+        // The UI reports when a text field (preset search / name) is focused, so
+        // the macOS key-forwarding lets those keys type instead of going to the
+        // host. Everything else forwards to the host's computer-keyboard MIDI.
+        .withNativeFunction(juce::Identifier{"setTextEditing"},
+            [](const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            {
+                if(a.size() >= 1) jove::setUiTextEditing((bool) a[0]);
+                c(juce::var());
             });
 
     // ---- generic relay creation: one per parameter, typed by its class ----
@@ -194,7 +204,11 @@ JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
     startTimerHz(30);
 }
 
-JoveWebEditor::~JoveWebEditor() { stopTimer(); }
+JoveWebEditor::~JoveWebEditor()
+{
+    jove::disableHostKeyForwarding(); // no stray key event touches this editor
+    stopTimer();
+}
 
 void JoveWebEditor::paint(juce::Graphics& g) { g.fillAll(juce::Colour(0xff0b0d12)); }
 
@@ -222,6 +236,11 @@ juce::var JoveWebEditor::presetCatalogue() const
 
 void JoveWebEditor::timerCallback()
 {
+    // The WKWebView isn't in the view tree on the first paint; retry until found,
+    // then install the host key-forwarding once.
+    if(! keyFwdInstalled_)
+        keyFwdInstalled_ = jove::installHostKeyForwarding(*this);
+
     emitMeters();
     emitPresetInfo();
 }

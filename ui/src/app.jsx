@@ -1358,6 +1358,26 @@ function App() {
                          [modMap, meters.lfo, meters.modSrc]);
   const [tab, setTab] = useState("voice");
   const cols = (t) => "cols" + (tab === t ? "" : " hide");
+
+  // Tell the native side when a text field (preset search / name) is focused, so
+  // macOS routes those keys to the WebView for typing. Everything else forwards
+  // to the host, so the DAW's computer-keyboard MIDI keeps working over the UI.
+  useEffect(() => {
+    const setEditing = B.nativeFn("setTextEditing");
+    const NONTEXT = ["range", "checkbox", "radio", "button", "submit", "reset", "color"];
+    const isText = (el) =>
+      el && (el.isContentEditable || el.tagName === "TEXTAREA" ||
+             (el.tagName === "INPUT" && !NONTEXT.includes((el.type || "text").toLowerCase())));
+    const onIn = (e) => { if (isText(e.target)) { try { setEditing(true); } catch (_) {} } };
+    const onOut = (e) => { if (isText(e.target)) { try { setEditing(false); } catch (_) {} } };
+    document.addEventListener("focusin", onIn);
+    document.addEventListener("focusout", onOut);
+    return () => {
+      document.removeEventListener("focusin", onIn);
+      document.removeEventListener("focusout", onOut);
+    };
+  }, []);
+
   return (
     <ModContext.Provider value={modCtx}>
     <div id="app">
