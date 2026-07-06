@@ -1,11 +1,34 @@
 # -----------------------------------------------------------------------------
-# Jove — analog-inspired polysynth instrument plugin.
-#
-# Self-contained target that reuses the parent repo's vendored JUCE (added by
-# the root CMakeLists before this subdirectory). Doobie and Jove share nothing
-# but the JUCE checkout, so this builds/ships independently. Rename / split the
-# repo later without touching the engine.
+# Jove — analog-inspired polysynth instrument plugin (JUCE 8, AU/VST3/Standalone).
 # -----------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.22)
+
+project(Jove VERSION 0.1.0 LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+# Universal binary for distributable plugins; override with
+# -DCMAKE_OSX_ARCHITECTURES=arm64 for fast local iteration.
+if(APPLE)
+    if(NOT CMAKE_OSX_ARCHITECTURES)
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures")
+    endif()
+    if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
+    endif()
+endif()
+
+# JUCE, vendored as a git submodule under external/JUCE.
+add_subdirectory(external/JUCE)
+
+# Local-install copy is on by default for developer iteration; CI sets
+# -DJOVE_INSTALL_LOCAL=OFF so it doesn't write into ~/Library/Audio/Plug-Ins.
+option(JOVE_INSTALL_LOCAL "Copy built plugins into the user's plug-in dirs" ON)
 
 juce_add_plugin(Jove
     COMPANY_NAME             "DatanoiseTV"
@@ -21,7 +44,7 @@ juce_add_plugin(Jove
     IS_MIDI_EFFECT           FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE   # let the host keep keys (computer-MIDI); WebView focuses its own inputs on click
     NEEDS_WEB_BROWSER        TRUE
-    COPY_PLUGIN_AFTER_BUILD  ${DOOBIE_INSTALL_LOCAL}
+    COPY_PLUGIN_AFTER_BUILD  ${JOVE_INSTALL_LOCAL}
     VST3_CATEGORIES          Instrument Synth
     AU_MAIN_TYPE             kAudioUnitType_MusicDevice)
 
@@ -80,7 +103,7 @@ if(APPLE)
             add_custom_command(TARGET Jove_${_fmt} POST_BUILD
                 COMMAND codesign --force -s - "$<TARGET_BUNDLE_DIR:Jove_${_fmt}>"
                 VERBATIM)
-            if(DOOBIE_INSTALL_LOCAL)
+            if(JOVE_INSTALL_LOCAL)
                 if(_fmt STREQUAL AU)
                     set(_jove_dest "$ENV{HOME}/Library/Audio/Plug-Ins/Components/Jove.component")
                 else()
