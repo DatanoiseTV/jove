@@ -11,47 +11,44 @@
 
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
-#import <objc/message.h>
 #include <atomic>
 
-// The objc runtime getters (object_getClass, class_getName, ...) are annotated
-// _Nullable but are non-null for a live view/class here; silence the benign
-// nullable->nonnull conversions rather than litter the glue with casts.
+// The objc runtime getters (object_getClass, ...) are annotated _Nullable but
+// are non-null for a live view/class here; silence the benign nullable->nonnull
+// conversions rather than litter the glue with casts.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullable-to-nonnull-conversion"
+
+// ---------------------------------------------------------------------------
+// Make the host's computer-MIDI keyboard work while a Jove editor is focused.
+//
+// A focused WKWebView swallows key events, so the DAW never sees them. We must
+// redirect keys up the responder chain (which reaches the host) UNLESS the user
+// is typing into a WebView text field.
+//
+// We deliberately do NOT subclass the WKWebView (no objc_allocateClassPair /
+// object_setClass). A runtime-created subclass breaks macOS 26's NSDynamicProperty
+// / KVO machinery: on window move or close JUCE reparents the WebView, WebKit's
+// internal KVO fires `_viewDidChangeEffectiveCornerRadii`, and the computed-property
+// descriptor lookup asserts on the synthetic class -> the whole host aborts
+// (SIGABRT in NSDP_getComputedPropertyValue). Instead we install one app-local
+// NSEvent key monitor and redirect only for the WebViews we tag, leaving every
+// instance's real isa untouched.
+// ---------------------------------------------------------------------------
 
 namespace jove
 {
 namespace
 {
-// While a WebView text field is focused, keys must reach the WebView (typing);
-// otherwise they forward to the host so its musical typing works.
+// A WebView text field is focused -> keys must reach the WebView (typing).
 std::atomic<bool> gTextEditing { false };
-// Cleared on editor teardown so a stray key can't run the forwarding path.
-std::atomic<bool> gForwardingActive { false };
 
-// Call the instance's inherited (WKWebView default) implementation.
-void callSuper(id self, SEL cmd, NSEvent* ev)
-{
-    struct objc_super sup = { self, class_getSuperclass(object_getClass(self)) };
-    ((void (*)(struct objc_super*, SEL, NSEvent*)) objc_msgSendSuper)(&sup, cmd, ev);
-}
+// Tags the WKWebViews Jove owns, so the shared monitor only ever redirects keys
+// for our own views — never another plugin's WebView. Address used as the key.
+const void* kJoveMarkKey = &kJoveMarkKey;
 
-void joveKeyDown(id self, SEL cmd, NSEvent* ev)
-{
-    if (! gForwardingActive.load(std::memory_order_relaxed) || gTextEditing.load(std::memory_order_relaxed))
-        callSuper(self, cmd, ev);              // let the WebView handle it (typing)
-    else if (NSResponder* nr = [(NSView*) self nextResponder])
-        [nr keyDown: ev];                       // hand off up the chain -> host
-}
-
-void joveKeyUp(id self, SEL cmd, NSEvent* ev)
-{
-    if (! gForwardingActive.load(std::memory_order_relaxed) || gTextEditing.load(std::memory_order_relaxed))
-        callSuper(self, cmd, ev);
-    else if (NSResponder* nr = [(NSView*) self nextResponder])
-        [nr keyUp: ev];
-}
+id  gMonitor      = nil; // single app-local key monitor shared by all editors
+int gEditorCount  = 0;   // ref-count: remove the monitor when the last editor closes
 
 NSView* findWKWebView(NSView* v)
 {
@@ -64,9 +61,18 @@ NSView* findWKWebView(NSView* v)
     return nullptr;
 }
 
-// Marker method: proves an instance is already our forwarding subclass, so a
-// retried install never swizzles the same view twice.
-BOOL joveIsForwarderImp(id, SEL) { return YES; }
+// One of our tagged WKWebViews in the responder chain of `responder`? When web
+// content is focused the first responder is an internal WKContentView subview,
+// so we walk up nextResponder until we hit our tagged WKWebView (or nil).
+NSView* markedWebViewInChain(NSResponder* responder)
+{
+    Class wk = objc_getClass("WKWebView");
+    for (NSResponder* r = responder; r != nil; r = [r nextResponder])
+        if (wk != nullptr && [r isKindOfClass: wk]
+            && objc_getAssociatedObject(r, kJoveMarkKey) != nil)
+            return (NSView*) r;
+    return nullptr;
+}
 } // namespace
 
 bool installHostKeyForwarding(juce::Component& editorTopLevel)
@@ -83,24 +89,37 @@ bool installHostKeyForwarding(juce::Component& editorTopLevel)
     if (wk == nullptr)
         return false; // not realised yet — caller retries
 
-    // Per-instance subclass (KVO-style isa-swizzle): keeps every other WKWebView
-    // in the process — including other plugins' — completely untouched.
-    Class base = object_getClass(wk);
-    if (! class_respondsToSelector(base, @selector(joveIsForwarder)))
-    {
-        NSString* name = [NSString stringWithFormat: @"JoveKeyFwd_%s_%p", class_getName(base), (void*) wk];
-        Class sub = objc_allocateClassPair(base, [name UTF8String], 0);
-        if (sub == nullptr)
-            return false;
-        class_addMethod(sub, @selector(keyDown:), (IMP) joveKeyDown, "v@:@");
-        class_addMethod(sub, @selector(keyUp:),   (IMP) joveKeyUp,   "v@:@");
-        // marker so we never double-swizzle the same instance
-        class_addMethod(sub, @selector(joveIsForwarder), (IMP) joveIsForwarderImp, "c@:");
-        objc_registerClassPair(sub);
-        object_setClass(wk, sub);
-    }
+    if (objc_getAssociatedObject(wk, kJoveMarkKey) != nil)
+        return true;  // already managed
 
-    gForwardingActive.store(true, std::memory_order_relaxed);
+    objc_setAssociatedObject(wk, kJoveMarkKey, wk, OBJC_ASSOCIATION_ASSIGN);
+    ++gEditorCount;
+
+    if (gMonitor == nil)
+    {
+        gMonitor = [NSEvent addLocalMonitorForEventsMatchingMask: (NSEventMaskKeyDown | NSEventMaskKeyUp)
+                    handler: ^NSEvent* (NSEvent* ev)
+        {
+            if (gTextEditing.load(std::memory_order_relaxed))
+                return ev;                       // typing into a WebView field — leave it
+
+            NSWindow* w = [ev window];
+            if (w == nil)
+                return ev;
+
+            NSView* mk = markedWebViewInChain([w firstResponder]);
+            if (mk == nil)
+                return ev;                       // not aimed at one of our WebViews
+
+            if (NSResponder* nr = [mk nextResponder])
+            {
+                if ([ev type] == NSEventTypeKeyDown) [nr keyDown: ev];
+                else                                 [nr keyUp:   ev];
+                return nil;                      // consumed: host got it, WebView won't
+            }
+            return ev;
+        }];
+    }
     return true;
 }
 
@@ -111,7 +130,14 @@ void setUiTextEditing(bool editing)
 
 void disableHostKeyForwarding()
 {
-    gForwardingActive.store(false, std::memory_order_relaxed);
+    if (gEditorCount > 0)
+        --gEditorCount;
+
+    if (gEditorCount == 0 && gMonitor != nil)
+    {
+        [NSEvent removeMonitor: gMonitor];
+        gMonitor = nil;
+    }
 }
 } // namespace jove
 
