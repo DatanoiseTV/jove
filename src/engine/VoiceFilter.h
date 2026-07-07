@@ -68,14 +68,30 @@ class VoiceFilter
     // cutoff Hz, res 0..1 (1 = self-oscillation), drive 0..1 pre-filter overdrive.
     void setParams(float cutoffHz, float res, float drive) noexcept
     {
+        res_   = res < 0.0f ? 0.0f : (res > 1.0f ? 1.0f : res);
+        drive_ = 1.0f + drive * 4.0f; // 1x .. 5x pre-gain
+
+        // Per-mode brightness match. The Moog ladder's effective -3 dB corner sits
+        // well below its nominal cutoff at low resonance (measured ~0.44x the dial),
+        // rising toward ~1x as the feedback lifts the corner. The other lowpass-family
+        // modes read much brighter at the same dial (Steiner ~0.86x, SVF ~0.64x at
+        // res 0), so switching models jumps in brightness. Reference = Moog (left
+        // untouched so its ~120 presets are unchanged); scale the LP-family modes onto
+        // its curve. Taper to ~1x as resonance rises — every mode's resonant peak
+        // already converges on the dial frequency up top, so no compensation is needed
+        // there. Constants measured against the ladder (filtmeas harness).
+        if(mode_ == Mode::Steiner || mode_ == Mode::SvfLP || mode_ == Mode::Lpg)
+        {
+            const float base = (mode_ == Mode::Steiner) ? 0.52f : 0.69f;
+            cutoffHz *= base + (1.0f - base) * std::pow(res_, 0.4f);
+        }
+
         if(cutoffHz < 20.0f)
             cutoffHz = 20.0f;
         const float maxHz = 0.45f * sr_;
         if(cutoffHz > maxHz)
             cutoffHz = maxHz;
         cutoff_ = cutoffHz;
-        res_    = res < 0.0f ? 0.0f : (res > 1.0f ? 1.0f : res);
-        drive_  = 1.0f + drive * 4.0f; // 1x .. 5x pre-gain
 
         if(mode_ == Mode::LadderLP)
         {
