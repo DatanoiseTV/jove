@@ -48,8 +48,10 @@ two-way bound to every parameter.
 - A/B compare with copy, patch randomizer (DICE = new patch from a musical
   archetype, VARY = perturb the current sound), revert-to-preset, unsaved-edits
   indicator
-- 140 factory presets in 12 categories, selectable via MIDI program change and
-  the host program list; user presets with category tags and in-browser delete
+- 140 factory presets in 12 categories, loudness-matched across the whole bank
+  (K-weighted peak momentary loudness, ±1 dB) with a per-preset TRIM control;
+  selectable via MIDI program change and the host program list; user presets
+  with category tags and in-browser delete
 - Audition mode: browse presets by ear with category-appropriate demo phrases
   in the host tempo
 - Eco / HQ / Ultra quality (1× / 2× / 4× oversampling of the whole voice path)

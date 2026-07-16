@@ -4,6 +4,20 @@ All notable changes to Jove are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [semver](https://semver.org/).
 
+## [1.1.0] - 2026-07-07
+
+### Added
+- `postGain` parameter: per-preset loudness trim (post-FX, pre-limiter,
+  -26..+18 dB), exposed as the TRIM knob in the MASTER panel
+
+### Changed
+- Every factory preset's peak momentary loudness (ITU-R BS.1770
+  K-weighted, 400 ms window, measured over a long hold so slow-attack
+  pads are judged at the loudness they actually reach) is level-matched
+  to the bank median. Spread reduced from 39.2 dB to 4.2 dB; 139/140
+  presets within +/-1 dB. Boosts are capped so the pre-limiter true peak
+  stays under -1 dBFS.
+
 ## [1.0.0] - 2026-07-07
 
 First public release.
