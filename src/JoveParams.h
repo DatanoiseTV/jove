@@ -51,6 +51,7 @@ namespace jID
     inline constexpr auto glideTime    = "glideTime";
     inline constexpr auto bendRange    = "bendRange";
     inline constexpr auto ampGain      = "ampGain";
+    inline constexpr auto postGain     = "postGain";
     inline constexpr auto pan          = "pan";
     inline constexpr auto width        = "width";
     inline constexpr auto drift        = "drift";
@@ -375,6 +376,11 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createJoveLayout()
     fparam(jID::fxReverb, "Reverb", lin01, 0.25f);
     fparam(jID::reverbSize, "Reverb Size", lin01, 0.6f);
     fparam(jID::reverbTone, "Reverb Tone", lin01, 0.4f);
+    // appended after 1.0 layout freeze — keep at the end. Wide range (-26..+18 dB):
+    // the bank's raw peak-momentary loudness spans ~39 dB (quiet perc one-shots
+    // vs unison walls), and this is the lever that levels it.
+    fparam(jID::postGain, "Preset Level",
+           [] { auto r = FR(0.05f, 8.0f); r.setSkewForCentre(1.0f); return r; }(), 1.0f, "x");
 
     return { p.begin(), p.end() };
 }
@@ -407,6 +413,7 @@ class PatchBinding
         p.glideTime    = get(glideTime);
         p.bendRange    = (int)get(bendRange);
         p.ampGain      = get(ampGain);
+        p.postGain     = get(postGain);
         p.pan          = get(pan);
         p.width        = get(width);
         p.drift        = get(drift);
@@ -550,6 +557,7 @@ class PatchBinding
         set(glideTime, p.glideTime);
         set(bendRange, (float)p.bendRange);
         set(ampGain, p.ampGain);
+        set(postGain, p.postGain);
         set(pan, p.pan);
         set(width, p.width);
         set(drift, p.drift);

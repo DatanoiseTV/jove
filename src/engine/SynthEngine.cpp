@@ -772,13 +772,17 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
         if(x < -t) return -t + (1.0f - t) * std::tanh((x + t) / (1.0f - t));
         return x;
     };
+    // Preset loudness trim (postGain): post-FX, pre-limiter, so level-matching
+    // the bank is linear for trims AND boosts (a boosted quiet patch is still
+    // caught by the limiter below if it ever spikes).
+    const float outGain = kMasterTrim * (p.postGain > 0.0f ? p.postGain : 1.0f);
     for(int i = 0; i < n; ++i)
     {
         // final DC blocker: the pre-FX blocker runs before the drive stage, so an
         // asymmetric drive model (DIODE/tube) or hard sync can re-introduce DC
         // downstream. A one-pole high-pass at ~5 Hz here removes it at the output.
-        const float xl = outL[i] * kMasterTrim; mdcyL_ = xl - mdcxL_ + 0.9993f * mdcyL_; mdcxL_ = xl; outL[i] = mdcyL_;
-        const float xr = outR[i] * kMasterTrim; mdcyR_ = xr - mdcxR_ + 0.9993f * mdcyR_; mdcxR_ = xr; outR[i] = mdcyR_;
+        const float xl = outL[i] * outGain; mdcyL_ = xl - mdcxL_ + 0.9993f * mdcyL_; mdcxL_ = xl; outL[i] = mdcyL_;
+        const float xr = outR[i] * outGain; mdcyR_ = xr - mdcxR_ + 0.9993f * mdcyR_; mdcxR_ = xr; outR[i] = mdcyR_;
 
         const float peak = std::max(std::fabs(outL[i]), std::fabs(outR[i]));
         if(peak > limEnv_) limEnv_ += 0.5f * (peak - limEnv_);      // fast attack

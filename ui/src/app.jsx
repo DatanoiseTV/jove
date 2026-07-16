@@ -1159,6 +1159,7 @@ function MasterPanel() {
     <Panel title="MASTER">
       <div className="knobs spread">
         <Knob id="ampGain" label="LEVEL" big />
+        <Knob id="postGain" label="TRIM" />
         <Knob id="width" label="WIDTH" />
         <Knob id="pan" label="PAN" bipolar />
         <Knob id="masterTune" label="TUNE" bipolar />

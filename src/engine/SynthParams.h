@@ -328,6 +328,8 @@ struct SynthPatch
 
     // amp
     float ampGain  = 0.8f;
+    float postGain = 1.0f;   // preset loudness trim, post-FX pre-limiter
+                             // (0.25..4 = +/-12 dB); used to level-match the bank
     float pan      = 0.0f;
     float masterTune = 0.0f; // global fine tune, cents
 
