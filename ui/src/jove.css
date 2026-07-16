@@ -38,9 +38,9 @@ button, select, input { font-family: inherit; color: inherit; }
 
 /* ---- top bar ---- */
 .topbar {
-  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-  padding: 10px 16px;
+  padding: 10px 14px;
 }
 .brand { display: flex; flex-direction: column; line-height: 1; }
 .logo { font-weight: 800; font-size: 24px; letter-spacing: 3px; color: var(--ink); }
@@ -54,7 +54,7 @@ button, select, input { font-family: inherit; color: inherit; }
 .nav:hover { color: var(--ink); border-color: var(--accent); }
 .pname {
   display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
-  min-width: 210px; height: 36px; padding: 0 14px; cursor: pointer;
+  min-width: 168px; height: 36px; padding: 0 12px; cursor: pointer;
   background: var(--sunk); border: 1px solid var(--line2); border-radius: 8px;
 }
 .pname:hover { border-color: var(--accent); }
@@ -62,10 +62,18 @@ button, select, input { font-family: inherit; color: inherit; }
 .pname .nm  { font-size: 13.5px; font-weight: 600; letter-spacing: .5px; }
 
 .tb-actions { display: flex; gap: 6px; }
+/* unsaved-edits dot on the preset name */
+.pdirty { display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%;
+  background: var(--accent); vertical-align: middle;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 80%, transparent); }
+/* generator + A/B tool cluster */
+.tb-tools { padding-left: 10px; border-left: 1px solid var(--line); }
+.abbtn b { color: var(--ink3); font-weight: 700; }
+.abbtn b.cur { color: var(--accent); }
 .tbtn {
-  height: 30px; padding: 0 13px; border-radius: 7px; cursor: pointer;
+  height: 30px; padding: 0 9px; border-radius: 7px; cursor: pointer;
   background: var(--panel2); border: 1px solid var(--line2); color: var(--ink2);
-  font-size: 10.5px; letter-spacing: 1px; font-weight: 600;
+  font-size: 10px; letter-spacing: .7px; font-weight: 600; white-space: nowrap;
 }
 .tbtn:hover { color: var(--ink); border-color: var(--accent); }
 .tbtn.save { background: var(--accent); color: #06080c; border-color: var(--accent); margin-top: 4px; }
@@ -83,7 +91,7 @@ button, select, input { font-family: inherit; color: inherit; }
 .fxbtn.on { background: color-mix(in srgb, var(--accent) 22%, transparent);
   border-color: var(--accent); color: var(--ink); }
 
-.tb-global { display: flex; gap: 14px; margin-left: auto; }
+.tb-global { display: flex; gap: 10px; margin-left: auto; }
 .tb-voices { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .vleds { display: flex; flex-wrap: wrap; gap: 4px; width: 92px; justify-content: flex-end; }
 .vled { width: 8px; height: 8px; border-radius: 2px; border: 1px solid var(--line2);
@@ -210,9 +218,16 @@ button, select, input { font-family: inherit; color: inherit; }
 .abgrid { display: grid; grid-template-columns: 70px repeat(var(--cols), 1fr);
   gap: 4px; align-content: start; flex: 1; min-height: 0; }
 .abgrid.dim { opacity: .5; }
-.abgrid .mg-chead { font-size: 9px; }
+.abgrid .mg-chead { font-size: 9px; color: var(--ink2); }
 .abgrid .mg-rlabel { font-size: 9px; }
-.abgrid .mg-cell { min-height: 30px; }
+.abgrid .mg-cell { min-height: 38px; }
+/* patchbay explainer: fills the dead space under the grid with useful recipes */
+.pb-legend { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; margin-top: 12px;
+  padding: 12px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunk); }
+.pb-legend b { font-size: 9px; letter-spacing: 2px; color: var(--ink2); }
+.pb-legend p { margin: 6px 0 0; font-size: 10.5px; line-height: 1.65; color: var(--ink3); }
+.pb-legend .lg-pos { color: var(--accent); }
+.pb-legend .lg-neg { color: var(--hot); }
 
 /* SEQ tab: a 2x2 grid of compact sequencer cards (step lane + tight controls) */
 .seqtab { display: flex; flex: 1; min-height: 0; }
@@ -396,9 +411,9 @@ button, select, input { font-family: inherit; color: inherit; }
 .mgrid { display: grid; grid-template-columns: 56px repeat(var(--cols), 1fr);
   gap: 2px; align-content: start; flex: 1; min-height: 0; }
 .mg-corner { }
-.mg-chead { font-size: 7px; font-weight: 700; letter-spacing: .3px; color: var(--ink3);
+.mg-chead { font-size: 8px; font-weight: 700; letter-spacing: .3px; color: var(--ink2);
   text-align: center; align-self: end; padding-bottom: 2px; }
-.mg-rlabel { font-size: 7.5px; color: var(--ink2); display: flex; align-items: center;
+.mg-rlabel { font-size: 8px; color: var(--ink2); display: flex; align-items: center;
   justify-content: flex-end; padding-right: 5px; white-space: nowrap; overflow: hidden; }
 .mg-cell { position: relative; min-height: 19px; border-radius: 3px; cursor: ns-resize;
   background: #0c0d10; border: 1px solid var(--line); overflow: hidden; }
@@ -467,6 +482,12 @@ button, select, input { font-family: inherit; color: inherit; }
 .cats .usercat { color: var(--good); border-color: var(--accent-dim); }
 .cats .usercat.on { background: var(--good); color: #06080c; border-color: var(--good); }
 .pitem.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--sunk)); }
+/* user-preset delete: appears on hover; first click arms, second deletes */
+.pi-del { margin-left: auto; padding: 2px 7px; border-radius: 5px; font-size: 9px;
+  color: var(--ink3); opacity: 0; transition: opacity .12s; }
+.pitem:hover .pi-del { opacity: 1; }
+.pi-del:hover { color: var(--hot); background: color-mix(in srgb, var(--hot) 14%, transparent); }
+.pi-del.arm { opacity: 1; color: #06080c; background: var(--hot); font-weight: 700; }
 .pitem .pi-num { font-size: 9px; font-variant-numeric: tabular-nums; color: var(--ink3);
   width: 26px; flex: none; }
 .pitem.user .pi-num { color: var(--good); }

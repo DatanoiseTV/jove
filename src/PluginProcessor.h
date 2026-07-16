@@ -26,7 +26,8 @@
 // chunks and carries the unread tail of a chunk across callbacks. MIDI events are
 // applied at chunk boundaries (<= kControlBlock samples of quantisation).
 class JoveAudioProcessor : public juce::AudioProcessor,
-                           private juce::AudioProcessorValueTreeState::Listener
+                           private juce::AudioProcessorValueTreeState::Listener,
+                           private juce::AsyncUpdater
 {
   public:
     JoveAudioProcessor();
@@ -46,11 +47,18 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     bool isMidiEffect() const override { return false; }
     double getTailLengthSeconds() const override { return 6.0; }
 
-    int getNumPrograms() override { return 1; }
-    int getCurrentProgram() override { return 0; }
-    void setCurrentProgram(int) override {}
-    const juce::String getProgramName(int) override { return {}; }
+    // Factory bank exposed as host programs; MIDI program change (any channel)
+    // selects the same bank. Loads are marshalled to the message thread.
+    int getNumPrograms() override { return jove::kNumFactoryPresets; }
+    int getCurrentProgram() override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
     void changeProgramName(int, const juce::String&) override {}
+
+    // ---- A/B compare (state-level; survives editor close) -------------------
+    void abToggle(); // stash current into the inactive slot, recall the other
+    void abCopy();   // copy the current state onto the inactive slot
+    bool abIsB() const { return abSideB; }
 
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
@@ -79,6 +87,7 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     int   getLastMidiNote() const { return lastMidiNote.load(std::memory_order_relaxed); }
 
   private:
+    void handleAsyncUpdate() override; // apply a MIDI/host program change (message thread)
     void handleMidiMessage(const juce::MidiMessage& m) noexcept;
     void publishMeters(const float* l, const float* r, int n) noexcept;
     // Render exactly `n` samples (at the engine's internal/oversampled rate) into
@@ -111,6 +120,11 @@ class JoveAudioProcessor : public juce::AudioProcessor,
     juce::CriticalSection renderLock;
     std::atomic<int> pendingQuality { -1 };
     std::atomic<bool> presetLoadPending { false }; // set on preset load -> release orphaned voices
+    std::atomic<int> pendingProgram { -1 };        // MIDI/host program change, applied async
+
+    // A/B compare: the inactive side's full APVTS state (invalid until first use)
+    juce::ValueTree abSlot;
+    bool abSideB = false;
 
     double sampleRate = 44100.0;
     int    hostBlockSize = 512;

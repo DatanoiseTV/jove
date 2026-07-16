@@ -140,6 +140,31 @@ JoveWebEditor::JoveWebEditor(JoveAudioProcessor& proc)
                         prm->setValueNotifyingHost(prm->getDefaultValue());
                 c(juce::var());
             })
+        // Smart randomizer: DICE = fresh musical patch, VARY = perturb current.
+        .withNativeFunction(juce::Identifier{"randomPatch"},
+            [this](const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            {
+                const bool vary = a.size() > 0 && (bool) a[0];
+                if(vary) processor.getPresetManager().randomizeVary();
+                else     processor.getPresetManager().randomizeDice();
+                c(juce::var());
+            })
+        // A/B compare: toggle between two full parameter states / copy current
+        // onto the inactive slot.
+        .withNativeFunction(juce::Identifier{"abToggle"},
+            [this](const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            { processor.abToggle(); c(juce::var()); })
+        .withNativeFunction(juce::Identifier{"abCopy"},
+            [this](const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            { processor.abCopy(); c(juce::var()); })
+        // delete a user preset by name (factory presets can't be deleted)
+        .withNativeFunction(juce::Identifier{"deletePreset"},
+            [this](const juce::Array<juce::var>& a, juce::WebBrowserComponent::NativeFunctionCompletion c)
+            {
+                bool ok = false;
+                if(a.size() > 0) ok = processor.getPresetManager().deleteUserPreset(a[0].toString());
+                c(juce::var(ok));
+            })
         // The UI reports when a text field (preset search / name) is focused, so
         // the macOS key-forwarding lets those keys type instead of going to the
         // host. Everything else forwards to the host's computer-keyboard MIDI.
@@ -280,17 +305,24 @@ void JoveWebEditor::emitPresetInfo()
 {
     if(webView == nullptr) return;
     auto& pm = processor.getPresetManager();
-    const auto name = pm.currentName();
-    const int idx = pm.currentIndex();
-    const bool changed = (name != lastPresetName || idx != lastPresetIndex);
+    const auto name  = pm.currentName();
+    const int  idx   = pm.currentIndex();
+    const bool dirty = pm.currentIsDirty();
+    const bool ab    = processor.abIsB();
+    const bool changed = (name != lastPresetName || idx != lastPresetIndex
+                          || dirty != lastPresetDirty || ab != lastAbSide);
     if(!changed && presetReannounce <= 0) return;
     if(presetReannounce > 0) --presetReannounce; // keep re-emitting while the WebView loads
-    lastPresetName = name;
+    lastPresetName  = name;
     lastPresetIndex = idx;
+    lastPresetDirty = dirty;
+    lastAbSide      = ab;
     auto* o = new juce::DynamicObject();
     o->setProperty("name", name);
     o->setProperty("category", pm.currentCategory());
     o->setProperty("index", idx);
+    o->setProperty("dirty", dirty);
+    o->setProperty("ab", ab ? "B" : "A");
     webView->emitEventIfBrowserIsVisible("preset", juce::var(o));
 }
 } // namespace jove

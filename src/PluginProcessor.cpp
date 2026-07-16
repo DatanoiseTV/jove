@@ -25,11 +25,13 @@ JoveAudioProcessor::JoveAudioProcessor()
     // change. (CC123 / host all-notes-off still panic via engine.allNotesOff.)
     presetManager.setLoadCallback([this] { presetLoadPending.store(true, std::memory_order_relaxed); });
     InitDefaultPatch(patch);
+    presetManager.markClean(); // fresh instance = INIT reference, not "edited"
     apvts.addParameterListener(jID::quality, this);
 }
 
 JoveAudioProcessor::~JoveAudioProcessor()
 {
+    cancelPendingUpdate();
     apvts.removeParameterListener(jID::quality, this);
 }
 
@@ -134,6 +136,71 @@ void JoveAudioProcessor::handleMidiMessage(const juce::MidiMessage& m) noexcept
     }
     else if(m.isAftertouch())
         engine.aftertouch(m.getAfterTouchValue() / 127.0f);
+    else if(m.isProgramChange())
+    {
+        // Select from the factory bank. Loading writes every parameter through
+        // the APVTS, so it's marshalled to the message thread (the audio thread
+        // only flags it); the patch takes effect on the following block.
+        const int pc = m.getProgramChangeNumber();
+        if(pc >= 0 && pc < jove::kNumFactoryPresets)
+        {
+            pendingProgram.store(pc, std::memory_order_relaxed);
+            triggerAsyncUpdate();
+        }
+    }
+}
+
+void JoveAudioProcessor::handleAsyncUpdate()
+{
+    const int pc = pendingProgram.exchange(-1, std::memory_order_relaxed);
+    if(pc >= 0 && pc < jove::kNumFactoryPresets)
+        presetManager.loadFactory(pc);
+}
+
+int JoveAudioProcessor::getCurrentProgram()
+{
+    // Factory entries lead the catalogue 1:1; anything else (user patch, INIT,
+    // DICE) reports program 0 — hosts require a valid index.
+    const int idx = presetManager.currentIndex();
+    return (idx >= 0 && idx < jove::kNumFactoryPresets) ? idx : 0;
+}
+
+void JoveAudioProcessor::setCurrentProgram(int index)
+{
+    // Hosts may call this from any thread; reuse the async path.
+    if(index >= 0 && index < jove::kNumFactoryPresets)
+    {
+        pendingProgram.store(index, std::memory_order_relaxed);
+        triggerAsyncUpdate();
+    }
+}
+
+const juce::String JoveAudioProcessor::getProgramName(int index)
+{
+    if(index >= 0 && index < jove::kNumFactoryPresets)
+        return jove::FactoryPresetName(index);
+    return {};
+}
+
+void JoveAudioProcessor::abToggle()
+{
+    // First use: seed the inactive slot with the current state so toggling
+    // before any copy is a no-op instead of a jump to nothing.
+    auto cur = apvts.copyState().createCopy();
+    if(!abSlot.isValid())
+        abSlot = cur;
+    auto other = abSlot;
+    abSlot = cur;
+    apvts.replaceState(other.createCopy());
+    abSideB = !abSideB;
+    presetManager.resyncCurrentFromName();
+    presetManager.markClean(); // the recalled side is the reference you now hear
+    presetLoadPending.store(true, std::memory_order_relaxed); // reconcile voices
+}
+
+void JoveAudioProcessor::abCopy()
+{
+    abSlot = apvts.copyState().createCopy();
 }
 
 void JoveAudioProcessor::renderInto(float* l, float* r, int n, juce::MidiBuffer& midi,
@@ -335,7 +402,11 @@ void JoveAudioProcessor::getStateInformation(juce::MemoryBlock& dest)
 void JoveAudioProcessor::setStateInformation(const void* data, int size)
 {
     if(auto xml = getXmlFromBinary(data, size))
+    {
         apvts.replaceState(juce::ValueTree::fromXml(*xml));
+        // prev/next continue from the restored patch instead of restarting at 0
+        presetManager.resyncCurrentFromName();
+    }
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

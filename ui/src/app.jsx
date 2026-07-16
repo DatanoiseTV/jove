@@ -640,9 +640,12 @@ function DriveCurve() {
   const drv = B.useSlider("fxDrive")[0];
   const dm = B.useChoice("driveMode")[0];
   const W = 200, H = 100, N = 96, g = 1 + drv * 4, pts = [];
+  // mirror the engine's loudness-neutral makeup so the curve shows the real
+  // transfer (drive adds harmonics, not volume)
+  const mk = 0.5 / Math.max(0.05, Math.abs(jsDriveShape(0.5 * g, dm)));
   for (let i = 0; i <= N; i++) {
     const x = -1 + 2 * i / N;
-    const y = Math.max(-1, Math.min(1, jsDriveShape(x * g, dm)));
+    const y = Math.max(-1, Math.min(1, jsDriveShape(x * g, dm) * mk));
     pts.push(((i / N) * W).toFixed(1) + "," + (H / 2 - y * (H / 2 - 4)).toFixed(1));
   }
   return (
@@ -999,6 +1002,23 @@ function Patchbay() {
           ...ADSTS.map((_, d) => <ABayCell key={s + "_" + d} s={s} d={d} />),
         ]))}
       </div>
+      <div className="pb-legend">
+        <div className="pb-col">
+          <b>HOW IT WORKS</b>
+          <p>Rows are audio sources, columns are destination buses. Drag a cell up/down to set a
+          bipolar gain — <span className="lg-pos">up = positive</span>, <span className="lg-neg">down = inverted</span>.
+          Double-click clears a cell. Filter and ring outputs feed back with one sample of delay,
+          so loops are safe to patch.</p>
+        </div>
+        <div className="pb-col">
+          <b>STARTING POINTS</b>
+          <p>Classic — OSC1→FLT1, FLT1→OUT.&ensp;
+             FM — OSC2→FM1, OSC1→FLT1→OUT.&ensp;
+             Serial filters — OSC1→FLT1, FLT1→FLT2, FLT2→OUT.&ensp;
+             Ring — OSC1→RING A, OSC2→RING B, RING→OUT.&ensp;
+             Feedback scream — FLT1→FM1 (small negative amounts).</p>
+        </div>
+      </div>
     </Panel>
   );
 }
@@ -1007,17 +1027,15 @@ function ArpPanel() {
   const [on] = B.useToggle("arpOn");
   return (
     <Panel title="ARP" accent="#e07a9a">
-      <div className="row">
+      <div className="row between">
         <Switch id="arpOn" label="ON" />
         <Switch id="arpLatch" label="LATCH" />
         <Sel id="arpMode" options={ARP_MODES} label="MODE" />
-      </div>
-      <div className={"row" + (on ? "" : " dim")}>
         <Sel id="arpSyncDiv" options={DIVISIONS} label="DIV" />
+      </div>
+      <div className={"row between" + (on ? "" : " dim")}>
         <Knob id="arpGate" label="GATE" />
         <Knob id="arpSwing" label="SWING" />
-      </div>
-      <div className={"row" + (on ? "" : " dim")}>
         <IntSeg id="arpOctaves" label="OCT" min={1} max={4} />
         <IntSeg id="arpRatchet" label="RATCH" min={1} max={4} />
       </div>
@@ -1175,27 +1193,41 @@ function VoiceLeds() {
 }
 
 function TopBar() {
-  const preset = B.useEvent("preset", { name: "INIT", category: 1, index: -1 });
+  const preset = B.useEvent("preset", { name: "INIT", category: 1, index: -1, dirty: false, ab: "A" });
   const meters = B.useEvent("meters", { voices: 0, note: -1 });
   const [browse, setBrowse] = useState(false);
   const [saving, setSaving] = useState(false);
   const prev = B.nativeFn("presetPrev"), next = B.nativeFn("presetNext"), init = B.nativeFn("initPatch");
+  const load = B.nativeFn("loadPreset"), dice = B.nativeFn("randomPatch");
+  const abToggle = B.nativeFn("abToggle"), abCopy = B.nativeFn("abCopy");
   return (
     <header className="topbar">
       <div className="brand"><span className="logo">JOVE</span><span className="sub">POLYSYNTH</span></div>
       <div className="preset">
         <button className="nav" onClick={() => prev()}>{"‹"}</button>
-        <button className="pname" onClick={() => setBrowse(true)}>
+        <button className="pname" onClick={() => setBrowse(true)}
+                title={preset.dirty ? "edited since load — SAVE to keep" : "browse presets"}>
           <span className="cat">{CATEGORIES[preset.category] || ""}</span>
-          <span className="nm">{preset.name}</span>
+          <span className="nm">{preset.name}{preset.dirty ? <i className="pdirty" /> : null}</span>
         </button>
         <button className="nav" onClick={() => next()}>{"›"}</button>
       </div>
       <div className="tb-actions">
         <button className="tbtn" onClick={() => init()}>INIT</button>
+        <button className="tbtn" disabled={preset.index < 0 || !preset.dirty}
+                onClick={() => load(preset.index)} title="reload the preset, discarding edits">REVERT</button>
         <button className="tbtn" onClick={() => setSaving(true)}>SAVE</button>
         <button className="tbtn" onClick={() => setBrowse(true)}>BROWSE</button>
         <Switch id="auditionOn" label="LISTEN" />
+      </div>
+      <div className="tb-actions tb-tools">
+        <button className="tbtn" onClick={() => dice(false)} title="roll a fresh random patch">DICE</button>
+        <button className="tbtn" onClick={() => dice(true)} title="gently vary the current sound">VARY</button>
+        <button className="tbtn abbtn" onClick={() => abToggle()} title="toggle A/B compare slots">
+          <b className={preset.ab === "A" ? "cur" : ""}>A</b>/<b className={preset.ab === "B" ? "cur" : ""}>B</b>
+        </button>
+        <button className="tbtn" onClick={() => abCopy()}
+                title={"copy this sound onto the " + (preset.ab === "A" ? "B" : "A") + " slot"}>COPY</button>
       </div>
       <div className="tb-fx">
         <span className="cl">FX</span>
@@ -1221,14 +1253,21 @@ function Browser({ onClose, current }) {
   const [list, setList] = useState([]);
   const [cat, setCat] = useState(-1);
   const [q, setQ] = useState("");
-  useEffect(() => { B.nativeFn("listPresets")().then((r) => setList(r || [])); }, []);
-  const load = B.nativeFn("loadPreset");
+  const [confirmDel, setConfirmDel] = useState(null); // user-preset name armed for delete
+  const refresh = () => B.nativeFn("listPresets")().then((r) => setList(r || []));
+  useEffect(() => { refresh(); }, []);
+  const load = B.nativeFn("loadPreset"), del = B.nativeFn("deletePreset");
   const ql = q.trim().toLowerCase();
   const inCat = (e) => cat === -2 ? !e.factory : (cat < 0 || e.category === cat);
   const shown = list.filter((e) => inCat(e) && (!ql || e.name.toLowerCase().indexOf(ql) >= 0));
   const userCount = list.filter((e) => !e.factory).length;
   // factory index == MIDI program change (bank 0); shown 0-based to match the PC value
   const pc = (e) => e.factory ? String(e.index).padStart(3, "0") : "U";
+  const onDel = (ev, e) => {
+    ev.stopPropagation();
+    if (confirmDel === e.name) { del(e.name).then(refresh); setConfirmDel(null); }
+    else setConfirmDel(e.name); // first click arms; second click within the row deletes
+  };
   return (
     <div className="modal" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
@@ -1252,6 +1291,10 @@ function Browser({ onClose, current }) {
               <span className="pi-num">{pc(e)}</span>
               <span className="pi-cat">{CATEGORIES[e.category]}</span>
               <span className="pi-nm">{e.name}</span>
+              {!e.factory &&
+                <span className={"pi-del" + (confirmDel === e.name ? " arm" : "")}
+                      title={confirmDel === e.name ? "click again to delete" : "delete this user preset"}
+                      onClick={(ev) => onDel(ev, e)}>{confirmDel === e.name ? "SURE?" : "✕"}</span>}
             </button>)}
         </div>
         <div className="sheet-f">{shown.length} presets · # = MIDI program change (bank 0)</div>

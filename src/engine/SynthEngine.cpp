@@ -687,12 +687,21 @@ void SynthEngine::render(float* outL, float* outR, int n) noexcept
                 default: { const float c = x < -1.5f ? -1.5f : (x > 1.5f ? 1.5f : x); return c - (4.0f / 27.0f) * c * c * c; } // soft
             }
         };
+        // Loudness-neutral makeup: divide out the shaper's gain at a reference
+        // level so DRIVE adds harmonics instead of volume. Without this the knob
+        // is mostly a loudness control (tanh output saturates to +/-1 regardless
+        // of input), driven patches dominate the bank, and pre-drive gain trims
+        // do nothing. Referenced to the DRY level (not the g=1 response — models
+        // with internal gain like FUZZ tanh(6x) are saturated even at g=1, which
+        // would compute no compensation at all).
+        constexpr float ref = 0.5f;
+        const float mk = ref / std::max(0.05f, std::fabs(shape(ref * g)));
         for(int i = 0; i < n; ++i)
         {
             toneZL_ += 0.25f * (outL[i] - toneZL_);
             toneZR_ += 0.25f * (outR[i] - toneZR_);
-            outL[i] = shape((outL[i] + tone * (outL[i] - toneZL_)) * g);
-            outR[i] = shape((outR[i] + tone * (outR[i] - toneZR_)) * g);
+            outL[i] = shape((outL[i] + tone * (outL[i] - toneZL_)) * g) * mk;
+            outR[i] = shape((outR[i] + tone * (outR[i] - toneZR_)) * g) * mk;
         }
     }
 

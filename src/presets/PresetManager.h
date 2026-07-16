@@ -54,22 +54,43 @@ class PresetManager
     bool saveUserPreset(const juce::String& name, int category);
     bool deleteUserPreset(const juce::String& name);
 
+    // ---- randomizer ------------------------------------------------------
+    // DICE: a fresh musical patch built from a random archetype (pad / pluck /
+    // bass / lead / keys / drone) with parameters constrained to usable ranges.
+    // VARY: gently perturbs the CURRENT patch's continuous parameters, keeping
+    // its structure (waves, modes, routing) intact.
+    void randomizeDice();
+    void randomizeVary();
+
+    // After a DAW session restore, re-point `current` at the catalogue entry
+    // matching the restored preset name (prev/next continue from there).
+    void resyncCurrentFromName() { current = indexOfName(currentName()); }
+
     // ---- current state ---------------------------------------------------
     juce::String currentName() const;
     int          currentCategory() const;
     int          currentIndex() const { return current; }
-    bool         currentIsDirty() const;
+
+    // True when the parameters differ from the last loaded/saved reference.
+    // Hash-based, so undoing every edit reads clean again. Randomized patches
+    // (DICE/VARY) are born dirty — they exist nowhere on disk yet. Save clears
+    // it (the saved file IS the new reference).
+    bool currentIsDirty() const;
+    void markClean() { cleanHash = paramStateHash(); }
 
     static juce::File userPresetDir();
 
   private:
-    void applyPatch(const jove::SynthPatch& p, const juce::String& name, int category);
+    void applyPatch(const jove::SynthPatch& p, const juce::String& name, int category,
+                    bool clean = true);
     void setNameCat(const juce::String& name, int category);
     int  indexOfName(const juce::String& name) const;
+    juce::uint64 paramStateHash() const; // order-stable hash of all patch params
 
     juce::AudioProcessorValueTreeState* apvts = nullptr;
     jove::PatchBinding*                 binding = nullptr;
     std::vector<Entry>                  catalogue;
     int                                 current = -1;
+    juce::uint64                        cleanHash = 0;
     std::function<void()>               onLoad;
 };

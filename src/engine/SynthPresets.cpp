@@ -113,7 +113,7 @@ void pad_strings(SynthPatch& p)
 void pad_voices(SynthPatch& p)
 {
     setName(p, "VOX CHOIR"); p.category = 0;
-    p.width = 0.88f; p.ampGain = 0.60f; p.chorusMode = 2;
+    p.width = 0.88f; p.ampGain = 0.95f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 15; p.osc[0].wtMorph = 0.25f;  // VOCAL
     osc(p, 1, SAW, 0.08f, 1.0f);
@@ -185,7 +185,7 @@ void pad_fm(SynthPatch& p)
 void pad_air(SynthPatch& p)
 {
     setName(p, "AIR PAD"); p.category = 0;
-    p.width = 0.95f; p.ampGain = 0.64f; p.chorusMode = 2;
+    p.width = 0.95f; p.ampGain = 1.00f; p.chorusMode = 2;
     osc(p, 0, SINE, 0.0f, 1.0f);
     osc(p, 1, TRI, 0.06f, 0.8f, 3);
     p.osc[1].oscType = 1; p.osc[1].wtTable = 6; p.osc[1].wtMorph = 0.5f;  // BRIGHT air
@@ -202,7 +202,7 @@ void pad_air(SynthPatch& p)
 void pad_jp(SynthPatch& p)
 {
     setName(p, "VINTAGE BRASS"); p.category = 0;
-    p.width = 0.80f; p.ampGain = 0.68f; p.chorusMode = 2;
+    p.width = 0.80f; p.ampGain = 0.43f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 1.0f);
     osc(p, 2, PULSE, -0.08f, 0.8f); p.osc[2].pw = 0.4f;
     osc(p, 3, SAW, 0.18f, 0.5f, 1); p.subLevel = 0.12f; p.drift = 0.28f;
@@ -307,7 +307,7 @@ void lead_sync(SynthPatch& p)
 void lead_soft(SynthPatch& p)
 {
     setName(p, "SOFT LEAD"); p.category = 1;
-    p.width = 0.5f; p.ampGain = 0.80f; p.voiceMode = (int) VoiceMode::Mono;
+    p.width = 0.5f; p.ampGain = 1.00f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Always; p.glideTime = 0.08f;
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SINE, 0.03f, 0.8f);
     p.subLevel = 0.12f; p.drift = 0.12f;
@@ -322,7 +322,7 @@ void lead_soft(SynthPatch& p)
 void lead_fm(SynthPatch& p)
 {
     setName(p, "FM LEAD"); p.category = 1;
-    p.width = 0.5f; p.ampGain = 0.78f; p.voiceMode = (int) VoiceMode::Mono;
+    p.width = 0.5f; p.ampGain = 1.00f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f, 3);  // 2:1 ratio modulator
     p.fm2to1 = 0.6f; p.drift = 0.10f;
@@ -388,7 +388,7 @@ void lead_square(SynthPatch& p)
 void lead_pluck(SynthPatch& p)
 {
     setName(p, "PLUCK LEAD"); p.category = 1;
-    p.width = 0.55f; p.ampGain = 0.80f;
+    p.width = 0.55f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.06f, 0.7f); p.osc[1].pw = 0.4f;
     p.subLevel = 0.10f; p.drift = 0.16f;
     filt(p, FilterMode::LadderLP, 0.50f, 0.24f, 0.55f, 0.20f, 0.45f);
@@ -420,7 +420,7 @@ void lead_fifth(SynthPatch& p)
 void lead_dist(SynthPatch& p)
 {
     setName(p, "DIST LEAD"); p.category = 1;
-    p.width = 0.55f; p.ampGain = 0.58f; p.voiceMode = (int) VoiceMode::Mono;
+    p.width = 0.55f; p.ampGain = 0.28f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.08f, 1.0f); osc(p, 2, PULSE, -0.06f, 0.7f);
     p.subLevel = 0.14f; p.drift = 0.18f;
@@ -513,7 +513,7 @@ void bass_acid(SynthPatch& p)
 void bass_fm(SynthPatch& p)
 {
     setName(p, "FM E-BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f; p.width = 0.3f; p.ampGain = 0.80f;
+    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f; p.width = 0.3f; p.ampGain = 1.00f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f); p.fm2to1 = 0.5f;
     p.subLevel = 0.30f; p.drift = 0.08f;
     filt(p, FilterMode::SvfLP, 0.60f, 0.10f, 0.20f);
@@ -526,7 +526,7 @@ void bass_fm(SynthPatch& p)
 void bass_growl(SynthPatch& p)
 {
     setName(p, "GROWL BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.4f; p.ampGain = 0.64f;
+    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.4f; p.ampGain = 0.40f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.15f, 1.0f); osc(p, 2, PULSE, -0.12f, 0.8f);
     p.subLevel = 0.35f; p.drift = 0.18f;
     filt(p, FilterMode::LadderLP, 0.35f, 0.35f, 0.40f, 0.50f, 0.3f);
@@ -540,7 +540,7 @@ void bass_growl(SynthPatch& p)
 void bass_pluck(SynthPatch& p)
 {
     setName(p, "PLUCK BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-    p.glideMode = (int) GlideMode::Off; p.width = 0.3f; p.ampGain = 0.80f;
+    p.glideMode = (int) GlideMode::Off; p.width = 0.3f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.05f, 0.6f); p.osc[1].pw = 0.4f;
     p.subLevel = 0.30f; p.drift = 0.10f;
     filt(p, FilterMode::LadderLP, 0.40f, 0.26f, 0.55f, 0.25f, 0.3f);
@@ -569,7 +569,7 @@ void bass_square(SynthPatch& p)
 void bass_dirty(SynthPatch& p)
 {
     setName(p, "DIRTY BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f; p.width = 0.35f; p.ampGain = 0.58f;
+    p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f; p.width = 0.35f; p.ampGain = 0.30f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 0.9f); osc(p, 2, PULSE, -0.08f, 0.7f);
     p.subLevel = 0.35f; p.drift = 0.16f;
     p.filterRouting = 2;                              // parallel LP + BP for grit + body
@@ -628,7 +628,7 @@ void bass_house(SynthPatch& p)
 void bass_retro(SynthPatch& p)
 {
     setName(p, "RETRO 8-BIT"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-    p.glideMode = (int) GlideMode::Off; p.width = 0.25f; p.ampGain = 0.78f;
+    p.glideMode = (int) GlideMode::Off; p.width = 0.25f; p.ampGain = 1.00f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; p.osc[0].crush = 0.45f; p.osc[0].srReduce = 0.35f;
     osc(p, 1, PULSE, 0.0f, 0.5f, 1); p.osc[1].pw = 0.25f; p.osc[1].crush = 0.4f;
     p.subLevel = 0.25f; p.drift = 0.05f;
@@ -722,7 +722,7 @@ void arp_oct(SynthPatch& p)
 }
 void arp_house(SynthPatch& p)
 {
-    setName(p, "HOUSE ARP"); p.category = 3; p.width = 0.68f; p.ampGain = 0.70f; p.chorusMode = 2;
+    setName(p, "HOUSE ARP"); p.category = 3; p.width = 0.68f; p.ampGain = 0.38f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 0.85f);
     osc(p, 2, SINE, 0.0f, 0.5f, 3); // octave-up body
     p.subLevel = 0.14f; p.drift = 0.20f;
@@ -738,7 +738,7 @@ void arp_house(SynthPatch& p)
 }
 void arp_dark(SynthPatch& p)
 {
-    setName(p, "DARK ARP"); p.category = 3; p.width = 0.70f; p.ampGain = 0.72f;
+    setName(p, "DARK ARP"); p.category = 3; p.width = 0.70f; p.ampGain = 0.41f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, -0.08f, 0.8f);
     osc(p, 3, SAW, 0.10f, 0.45f, 1); p.subLevel = 0.30f; p.subOctave = 2; p.drift = 0.22f;
     filt(p, FilterMode::Steiner, 0.30f, 0.30f, 0.45f, 0.30f, 0.35f);
@@ -790,7 +790,7 @@ void stab_house(SynthPatch& p)
 }
 void stab_rave(SynthPatch& p)
 {
-    setName(p, "RAVE STAB"); p.category = 4; p.width = 0.82f; p.ampGain = 0.54f; p.chorusMode = 2;
+    setName(p, "RAVE STAB"); p.category = 4; p.width = 0.82f; p.ampGain = 0.34f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.18f, 0.9f); p.osc[1].pw = 0.46f;
     osc(p, 2, SAW, -0.16f, 0.85f); osc(p, 3, SAW, 0.30f, 0.6f);
     p.subLevel = 0.12f; p.drift = 0.32f;
@@ -808,7 +808,7 @@ void stab_rave(SynthPatch& p)
 }
 void stab_brass(SynthPatch& p)
 {
-    setName(p, "BRASS STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 0.68f; p.chorusMode = 1;
+    setName(p, "BRASS STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 0.32f; p.chorusMode = 1;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.08f, 1.0f); osc(p, 2, SAW, -0.06f, 0.7f);
     p.subLevel = 0.10f; p.drift = 0.20f;
     filt(p, FilterMode::LadderLP, 0.42f, 0.12f, 0.55f, 0.30f, 0.50f);
@@ -823,7 +823,7 @@ void stab_brass(SynthPatch& p)
 }
 void stab_organ(SynthPatch& p)
 {
-    setName(p, "ORGAN STAB"); p.category = 4; p.width = 0.58f; p.ampGain = 0.70f; p.chorusMode = 3;
+    setName(p, "ORGAN STAB"); p.category = 4; p.width = 0.58f; p.ampGain = 0.16f; p.chorusMode = 3;
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 7; // drawbars
     osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 2, SINE, 0.0f, 0.5f, 4);
     p.drift = 0.05f;
@@ -838,7 +838,7 @@ void stab_organ(SynthPatch& p)
 }
 void stab_chord(SynthPatch& p)
 {
-    setName(p, "CHORD HIT"); p.category = 4; p.width = 0.78f; p.ampGain = 0.58f; p.chorusMode = 2;
+    setName(p, "CHORD HIT"); p.category = 4; p.width = 0.78f; p.ampGain = 0.82f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 0.9f);
     osc(p, 3, SAW, -0.10f, 0.7f); osc(p, 4, PULSE, 0.20f, 0.5f, 1); p.osc[4].pw = 0.45f;
     p.drift = 0.25f;
@@ -851,7 +851,7 @@ void stab_chord(SynthPatch& p)
 }
 void stab_pizz(SynthPatch& p)
 {
-    setName(p, "PIZZ STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 0.74f;
+    setName(p, "PIZZ STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 14; p.osc[0].wtMorph = 0.0f; // STRING
     osc(p, 1, TRI, 0.06f, 0.5f);
     p.drift = 0.10f;
@@ -865,7 +865,7 @@ void stab_pizz(SynthPatch& p)
 }
 void stab_syn(SynthPatch& p)
 {
-    setName(p, "SYNTH STAB"); p.category = 4; p.width = 0.72f; p.ampGain = 0.64f; p.chorusMode = 1;
+    setName(p, "SYNTH STAB"); p.category = 4; p.width = 0.72f; p.ampGain = 1.00f; p.chorusMode = 1;
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 13; p.osc[0].wtMorph = 0.30f; // BRASS wt
     osc(p, 1, SINE, 0.0f, 0.8f, 3); p.fm2to1 = 0.30f; // FM bite
     osc(p, 2, SAW, -0.12f, 0.6f);
@@ -884,7 +884,7 @@ void stab_syn(SynthPatch& p)
 }
 void stab_det(SynthPatch& p)
 {
-    setName(p, "DETUNE STAB"); p.category = 4; p.width = 0.90f; p.ampGain = 0.56f; p.chorusMode = 2;
+    setName(p, "DETUNE STAB"); p.category = 4; p.width = 0.90f; p.ampGain = 1.00f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.22f, 1.0f);
     osc(p, 2, SAW, -0.20f, 0.9f); osc(p, 3, SAW, 0.40f, 0.7f); osc(p, 4, SAW, -0.38f, 0.7f);
     p.subLevel = 0.10f; p.drift = 0.35f;
@@ -944,7 +944,7 @@ void keys_dx(SynthPatch& p)
 }
 void keys_clav(SynthPatch& p)
 {
-    setName(p, "FUNK CLAV"); p.category = 5; p.width = 0.46f; p.ampGain = 0.76f;
+    setName(p, "FUNK CLAV"); p.category = 5; p.width = 0.46f; p.ampGain = 0.52f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.34f; osc(p, 1, SAW, 0.06f, 0.6f);
     p.drift = 0.08f;
     filt(p, FilterMode::LadderLP, 0.50f, 0.30f, 0.45f, 0.28f, 0.55f);
@@ -985,7 +985,7 @@ void keys_grand(SynthPatch& p)
 }
 void keys_bellkey(SynthPatch& p)
 {
-    setName(p, "BELL STACK"); p.category = 5; p.width = 0.70f; p.ampGain = 0.70f; p.chorusMode = 1;
+    setName(p, "BELL STACK"); p.category = 5; p.width = 0.70f; p.ampGain = 0.99f; p.chorusMode = 1;
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 9; p.osc[0].wtMorph = 0.20f; // FORMANT A partial
     osc(p, 1, SINE, 0.01f, 0.8f, 4); p.fm2to1 = 0.50f; p.ringMod = 0.25f;
     p.drift = 0.05f;
@@ -1014,7 +1014,7 @@ void keys_padkey(SynthPatch& p)
 }
 void keys_organ(SynthPatch& p)
 {
-    setName(p, "DRAW ORGAN"); p.category = 5; p.width = 0.60f; p.ampGain = 0.70f; p.chorusMode = 3;
+    setName(p, "DRAW ORGAN"); p.category = 5; p.width = 0.60f; p.ampGain = 0.16f; p.chorusMode = 3;
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 7; // drawbars
     osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 2, SINE, 0.0f, 0.5f, 4);
     p.drift = 0.04f;
@@ -1029,7 +1029,7 @@ void keys_organ(SynthPatch& p)
 }
 void keys_toy(SynthPatch& p)
 {
-    setName(p, "TOY PIANO"); p.category = 5; p.width = 0.55f; p.ampGain = 0.72f; p.chorusMode = 1;
+    setName(p, "TOY PIANO"); p.category = 5; p.width = 0.55f; p.ampGain = 1.00f; p.chorusMode = 1;
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 1; p.osc[0].wtMorph = 0.20f; // triangle ping
     osc(p, 1, SINE, 0.02f, 0.7f, 4); p.fm2to1 = 0.40f; p.ringMod = 0.20f;
     p.drift = 0.08f;
@@ -1150,7 +1150,7 @@ void pluck_marimba(SynthPatch& p)
 }
 void pluck_guitar(SynthPatch& p)
 {
-    setName(p, "SYNTH GTR"); p.category = 6; p.width = 0.52f; p.ampGain = 0.8f;
+    setName(p, "SYNTH GTR"); p.category = 6; p.width = 0.52f; p.ampGain = 0.50f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.03f, 0.5f); p.osc[1].pw = 0.42f; p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.22f, 0.52f, 0.22f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.4f, 0.0f, 0.3f, 0.45f};
@@ -1325,7 +1325,7 @@ void drone_dark(SynthPatch& p)
 }
 void drone_sub(SynthPatch& p)
 {
-    setName(p, "SUB DRONE"); p.category = 8; p.width = 0.6f; p.ampGain = 0.78f;
+    setName(p, "SUB DRONE"); p.category = 8; p.width = 0.6f; p.ampGain = 0.43f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.03f, 0.5f); p.subLevel = 0.6f; p.subOctave = 2; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.3f, 0.12f, 0.15f, 0.2f, 0.1f);
     p.env[0] = EnvParams{1.8f, 2.0f, 1.0f, 3.0f, 0.0f};
@@ -1480,7 +1480,7 @@ void perc_cowbell(SynthPatch& p)
 }
 void perc_808(SynthPatch& p)
 {
-    setName(p, "TRAP BOOM"); p.category = 9; p.width = 0.2f; p.ampGain = 0.9f;
+    setName(p, "TRAP BOOM"); p.category = 9; p.width = 0.2f; p.ampGain = 0.57f;
     osc(p, 0, SINE, 0.0f, 1.0f); p.subLevel = 0.3f; p.subOctave = 1; p.drift = 0.0f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.0f, 0.0f, 0.2f, 0.0f);
     p.env[0] = EnvParams{0.001f, 0.9f, 0.0f, 0.32f, 0.0f}; // long booming tail
@@ -1581,7 +1581,9 @@ void amb_shimmer(SynthPatch& p)
 }
 void amb_choir(SynthPatch& p)
 {
-    setName(p, "VOX CHOIR"); p.category = 10; p.width = 0.9f; p.ampGain = 0.5f; p.chorusMode = 2;
+    // renamed from VOX CHOIR: names must be unique (session-restore and save
+    // look presets up by name; the PAD bank already owns VOX CHOIR)
+    setName(p, "GHOST CHOIR"); p.category = 10; p.width = 0.9f; p.ampGain = 0.50f; p.chorusMode = 2;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     osc(p, 1, PULSE, 0.08f, 1.0f); p.osc[1].pw = 0.44f;
     osc(p, 3, PULSE, -0.1f, 0.7f); p.osc[3].pw = 0.52f;
@@ -1735,7 +1737,7 @@ void amb_tape(SynthPatch& p)
 }
 void amb_warmth(SynthPatch& p)
 {
-    setName(p, "WARMTH"); p.category = 10; p.width = 0.85f; p.ampGain = 0.66f; p.chorusMode = 2;
+    setName(p, "WARMTH"); p.category = 10; p.width = 0.85f; p.ampGain = 0.43f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.07f, 0.9f); osc(p, 3, TRI, -0.05f, 0.5f, 1);
     p.subLevel = 0.2f; p.drift = 0.35f;
     filt(p, FilterMode::LadderLP, 0.4f, 0.12f, 0.2f, 0.25f, 0.3f);
@@ -1795,7 +1797,7 @@ void seq_acid(SynthPatch& p)
 }
 void seq_wobble(SynthPatch& p)
 {
-    setName(p, "WOBBLE SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.66f;
+    setName(p, "WOBBLE SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.28f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.15f, 1.0f); osc(p, 2, PULSE, -0.12f, 0.8f);
     p.subLevel = 0.3f; p.fxDrive = 0.25f; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.35f, 0.4f, 0.3f, 0.4f, 0.3f);
@@ -1834,7 +1836,7 @@ void seq_blade(SynthPatch& p)
 }
 void seq_hoover(SynthPatch& p)
 {
-    setName(p, "HOOVER SEQ"); p.category = 11; p.width = 0.78f; p.ampGain = 0.6f;
+    setName(p, "HOOVER SEQ"); p.category = 11; p.width = 0.78f; p.ampGain = 0.37f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.18f, 0.9f); p.osc[1].pw = 0.4f;
     osc(p, 2, SAW, -0.16f, 0.85f); osc(p, 3, SAW, 0.3f, 0.7f); osc(p, 4, PULSE, -0.28f, 0.6f);
     p.subLevel = 0.14f; p.drift = 0.3f;
@@ -1880,7 +1882,7 @@ void seq_pulse(SynthPatch& p)
 }
 void seq_pluckseq(SynthPatch& p)
 {
-    setName(p, "PLUCK SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.8f;
+    setName(p, "PLUCK SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.08f, 0.5f); p.drift = 0.15f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.25f, 0.6f, 0.2f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.16f, 0.0f, 0.12f, 0.15f};
@@ -1898,7 +1900,7 @@ void seq_pluckseq(SynthPatch& p)
 }
 void seq_chordseq(SynthPatch& p)
 {
-    setName(p, "CHORD SEQ"); p.category = 11; p.width = 0.75f; p.ampGain = 0.6f; p.chorusMode = 2;
+    setName(p, "CHORD SEQ"); p.category = 11; p.width = 0.75f; p.ampGain = 0.88f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 0.9f); osc(p, 3, SAW, -0.1f, 0.6f);
     p.drift = 0.25f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.18f, 0.4f, 0.15f, 0.4f);
@@ -1960,7 +1962,7 @@ void seq_gate(SynthPatch& p)
 }
 void seq_arpbass(SynthPatch& p)
 {
-    setName(p, "ARP BASS"); p.category = 11; p.width = 0.4f; p.ampGain = 0.78f;
+    setName(p, "ARP BASS"); p.category = 11; p.width = 0.4f; p.ampGain = 1.00f;
     p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.4f, 1); p.subLevel = 0.25f; p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.4f, 0.28f, 0.5f, 0.25f, 0.3f);
@@ -2025,7 +2027,7 @@ void seq2_a(SynthPatch& p)
 }
 void seq2_b(SynthPatch& p)
 {
-    setName(p, "GATE RUSH"); p.category = 11; p.width = 0.85f; p.ampGain = 0.6f; p.chorusMode = 2;
+    setName(p, "GATE RUSH"); p.category = 11; p.width = 0.85f; p.ampGain = 0.36f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.14f, 1.0f); osc(p, 2, PULSE, -0.11f, 0.7f);
     osc(p, 3, SAW, 0.26f, 0.6f); p.subLevel = 0.1f; p.drift = 0.28f;
     filt(p, FilterMode::SvfLP, 0.6f, 0.18f, 0.2f, 0.0f, 0.4f);
@@ -2095,7 +2097,7 @@ void seq2_d(SynthPatch& p)
 }
 void seq2_e(SynthPatch& p)
 {
-    setName(p, "STAB RUSH"); p.category = 11; p.width = 0.78f; p.ampGain = 0.6f; p.chorusMode = 2;
+    setName(p, "STAB RUSH"); p.category = 11; p.width = 0.78f; p.ampGain = 0.88f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.13f, 0.9f); osc(p, 2, SAW, -0.1f, 0.7f);
     osc(p, 3, PULSE, 0.2f, 0.5f); p.drift = 0.26f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.2f, 0.45f, 0.15f, 0.4f);
@@ -2195,7 +2197,7 @@ void seq2_h(SynthPatch& p)
 }
 void seq2_i(SynthPatch& p)
 {
-    setName(p, "PLUCK RUN"); p.category = 11; p.width = 0.7f; p.ampGain = 0.76f;
+    setName(p, "PLUCK RUN"); p.category = 11; p.width = 0.7f; p.ampGain = 1.00f;
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.06f, 0.45f); p.drift = 0.12f;
     filt(p, FilterMode::LadderLP, 0.42f, 0.26f, 0.65f, 0.15f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.13f, 0.0f, 0.1f, 0.18f};
@@ -2243,7 +2245,7 @@ void seq2_j(SynthPatch& p)
 }
 void seq2_k(SynthPatch& p)
 {
-    setName(p, "RING STEP"); p.category = 11; p.width = 0.66f; p.ampGain = 0.64f;
+    setName(p, "RING STEP"); p.category = 11; p.width = 0.66f; p.ampGain = 1.00f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.9f); p.ringMod = 0.3f; p.drift = 0.12f;
     filt(p, FilterMode::SvfBP, 0.55f, 0.3f, 0.25f, 0.1f, 0.4f);
     p.env[0] = EnvParams{0.004f, 0.28f, 0.3f, 0.2f, 0.12f};

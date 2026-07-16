@@ -54,6 +54,8 @@ class JoveWebEditor : public juce::AudioProcessorEditor,
 
     juce::String lastPresetName;
     int          lastPresetIndex = -2;
+    bool         lastPresetDirty = false;
+    bool         lastAbSide      = false;
     // Force re-announcing the current preset for the first ~1.3 s after the editor
     // opens, so a freshly-loaded WebView (which may subscribe after the first
     // emit) gets the name instead of staying on its default "INIT".
