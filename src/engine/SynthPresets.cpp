@@ -59,7 +59,7 @@ void filt(SynthPatch& p, FilterMode m, float cut, float res, float envAmt, float
 void pad_warm(SynthPatch& p)
 {
     setName(p, "WARM ANALOG"); p.category = 0;
-                p.postGain = 0.687f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.687f; // level-match: peak momentary -> bank median
     p.width = 0.85f; p.ampGain = 0.70f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 1.0f);
     osc(p, 3, SAW, -0.08f, 0.55f); osc(p, 4, SAW, 0.16f, 0.42f, 1);
@@ -78,7 +78,7 @@ void pad_warm(SynthPatch& p)
 void pad_glass(SynthPatch& p)
 {
     setName(p, "GLASS PAD"); p.category = 0;
-                p.postGain = 0.801f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.801f; // level-match: peak momentary -> bank median
     p.width = 0.82f; p.ampGain = 0.74f; p.chorusMode = 1;
     osc(p, 0, SINE, 0.0f, 1.0f);
     osc(p, 1, SINE, 0.02f, 0.9f, 3);                 // octave-up bell partial
@@ -98,7 +98,7 @@ void pad_glass(SynthPatch& p)
 void pad_strings(SynthPatch& p)
 {
     setName(p, "STRING MACHINE"); p.category = 0;
-                p.postGain = 0.650f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.650f; // level-match: peak momentary -> bank median
     p.width = 0.92f; p.ampGain = 0.62f; p.chorusMode = 2; p.chorusRate = 1.2f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.13f, 1.0f);
     osc(p, 2, SAW, -0.11f, 0.8f); osc(p, 3, SAW, 0.22f, 0.6f); osc(p, 4, SAW, -0.20f, 0.6f);
@@ -116,7 +116,7 @@ void pad_strings(SynthPatch& p)
 void pad_voices(SynthPatch& p)
 {
     setName(p, "VOX CHOIR"); p.category = 0;
-                p.postGain = 1.495f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.495f; // level-match: peak momentary -> bank median
     p.width = 0.88f; p.ampGain = 0.95f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 15; p.osc[0].wtMorph = 0.25f;  // VOCAL
@@ -138,7 +138,7 @@ void pad_voices(SynthPatch& p)
 void pad_dark(SynthPatch& p)
 {
     setName(p, "DARK PAD"); p.category = 0;
-                p.postGain = 0.420f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.420f; // level-match: peak momentary -> bank median
     p.width = 0.78f; p.ampGain = 0.76f; p.chorusMode = 0;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, -0.07f, 0.9f);
     osc(p, 3, SAW, 0.10f, 0.5f, 1); p.subLevel = 0.30f; p.subOctave = 2; p.drift = 0.25f;
@@ -155,7 +155,7 @@ void pad_dark(SynthPatch& p)
 void pad_sweep(SynthPatch& p)
 {
     setName(p, "SWEEP PAD"); p.category = 0;
-                p.postGain = 0.604f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.604f; // level-match: peak momentary -> bank median
     p.width = 0.90f; p.ampGain = 0.66f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 1.0f); osc(p, 2, PULSE, -0.10f, 0.7f);
     p.subLevel = 0.14f; p.drift = 0.28f;
@@ -175,7 +175,7 @@ void pad_sweep(SynthPatch& p)
 void pad_fm(SynthPatch& p)
 {
     setName(p, "FM CRYSTAL"); p.category = 0;
-                p.postGain = 1.233f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.233f; // level-match: peak momentary -> bank median
     p.width = 0.84f; p.ampGain = 0.70f; p.chorusMode = 1;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f, 4);  // 4:1 high modulator
     p.fm2to1 = 0.40f; p.ringMod = 0.12f; p.drift = 0.12f;
@@ -192,7 +192,7 @@ void pad_fm(SynthPatch& p)
 void pad_air(SynthPatch& p)
 {
     setName(p, "AIR PAD"); p.category = 0;
-                p.postGain = 0.843f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.843f; // level-match: peak momentary -> bank median
     p.width = 0.95f; p.ampGain = 1.00f; p.chorusMode = 2;
     osc(p, 0, SINE, 0.0f, 1.0f);
     osc(p, 1, TRI, 0.06f, 0.8f, 3);
@@ -210,7 +210,7 @@ void pad_air(SynthPatch& p)
 void pad_jp(SynthPatch& p)
 {
     setName(p, "VINTAGE BRASS"); p.category = 0;
-                p.postGain = 0.491f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.491f; // level-match: peak momentary -> bank median
     p.width = 0.80f; p.ampGain = 0.43f; p.chorusMode = 2;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 1.0f);
     osc(p, 2, PULSE, -0.08f, 0.8f); p.osc[2].pw = 0.4f;
@@ -229,7 +229,7 @@ void pad_jp(SynthPatch& p)
 void pad_oct(SynthPatch& p)
 {
     setName(p, "OCTAVE PAD"); p.category = 0;
-                p.postGain = 0.496f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.496f; // level-match: peak momentary -> bank median
     p.width = 0.86f; p.ampGain = 0.66f; p.chorusMode = 1;
     osc(p, 0, SAW, 0.0f, 1.0f, 2); osc(p, 1, SAW, 0.10f, 0.9f, 1);  // 8' + 16'
     osc(p, 2, TRI, -0.08f, 0.7f, 3); osc(p, 3, SAW, 0.14f, 0.5f, 0); // 4' + 32'
@@ -247,7 +247,7 @@ void pad_oct(SynthPatch& p)
 void pad_wide(SynthPatch& p)
 {
     setName(p, "HYPER WIDE"); p.category = 0;
-                p.postGain = 0.199f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.199f; // level-match: peak momentary -> bank median
     p.width = 1.0f; p.ampGain = 0.58f; p.chorusMode = 3;
     p.voiceMode = (int) VoiceMode::Unison; p.unisonCount = 7; p.unisonDetune = 0.16f; p.unisonSpread = 1.0f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.08f, 1.0f); osc(p, 2, SAW, -0.07f, 0.9f);
@@ -265,7 +265,7 @@ void pad_wide(SynthPatch& p)
 void pad_mellow(SynthPatch& p)
 {
     setName(p, "MELLOW PAD"); p.category = 0;
-                p.postGain = 0.613f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.613f; // level-match: peak momentary -> bank median
     p.width = 0.80f; p.ampGain = 0.74f; p.chorusMode = 1;
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SINE, 0.05f, 0.9f);
     osc(p, 3, TRI, -0.06f, 0.5f, 1); p.subLevel = 0.20f; p.drift = 0.18f;
@@ -284,7 +284,7 @@ void pad_mellow(SynthPatch& p)
 void lead_super(SynthPatch& p)
 {
     setName(p, "SUPER STACK"); p.category = 1; p.chorusMode = 2;
-                p.postGain = 0.366f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.366f; // level-match: peak momentary -> bank median
     p.width = 0.85f; p.ampGain = 0.42f;
     p.voiceMode = (int) VoiceMode::Unison; p.unisonCount = 7; p.unisonDetune = 0.20f; p.unisonSpread = 0.9f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.04f, 1.0f);
@@ -303,7 +303,7 @@ void lead_super(SynthPatch& p)
 void lead_sync(SynthPatch& p)
 {
     setName(p, "SYNC LEAD"); p.category = 1;
-                p.postGain = 0.369f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.369f; // level-match: peak momentary -> bank median
     p.width = 0.55f; p.ampGain = 0.68f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.0f, 1.0f);
@@ -321,7 +321,7 @@ void lead_sync(SynthPatch& p)
 void lead_soft(SynthPatch& p)
 {
     setName(p, "SOFT LEAD"); p.category = 1;
-                p.postGain = 0.637f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.637f; // level-match: peak momentary -> bank median
     p.width = 0.5f; p.ampGain = 1.00f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Always; p.glideTime = 0.08f;
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SINE, 0.03f, 0.8f);
@@ -337,7 +337,7 @@ void lead_soft(SynthPatch& p)
 void lead_fm(SynthPatch& p)
 {
     setName(p, "FM LEAD"); p.category = 1;
-                p.postGain = 0.916f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.916f; // level-match: peak momentary -> bank median
     p.width = 0.5f; p.ampGain = 1.00f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f, 3);  // 2:1 ratio modulator
@@ -353,7 +353,7 @@ void lead_fm(SynthPatch& p)
 void lead_pwm(SynthPatch& p)
 {
     setName(p, "PWM LEAD"); p.category = 1;
-                p.postGain = 0.498f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.496f; // level-match: peak momentary -> bank median
     p.width = 0.6f; p.ampGain = 0.72f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
@@ -371,7 +371,7 @@ void lead_pwm(SynthPatch& p)
 void lead_saw(SynthPatch& p)
 {
     setName(p, "SAW LEAD"); p.category = 1;
-                p.postGain = 0.478f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.478f; // level-match: peak momentary -> bank median
     p.width = 0.5f; p.ampGain = 0.72f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.07f, 0.9f);
@@ -389,7 +389,7 @@ void lead_saw(SynthPatch& p)
 void lead_square(SynthPatch& p)
 {
     setName(p, "SQUARE LEAD"); p.category = 1;
-                p.postGain = 0.492f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.493f; // level-match: peak momentary -> bank median
     p.width = 0.5f; p.ampGain = 0.74f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
@@ -407,7 +407,7 @@ void lead_square(SynthPatch& p)
 void lead_pluck(SynthPatch& p)
 {
     setName(p, "PLUCK LEAD"); p.category = 1;
-                p.postGain = 0.787f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.787f; // level-match: peak momentary -> bank median
     p.width = 0.55f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.06f, 0.7f); p.osc[1].pw = 0.4f;
     p.subLevel = 0.10f; p.drift = 0.16f;
@@ -423,7 +423,7 @@ void lead_pluck(SynthPatch& p)
 void lead_fifth(SynthPatch& p)
 {
     setName(p, "POWER FIFTH"); p.category = 1;
-                p.postGain = 0.466f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.466f; // level-match: peak momentary -> bank median
     p.width = 0.55f; p.ampGain = 0.66f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.0f, 0.9f);
@@ -441,7 +441,7 @@ void lead_fifth(SynthPatch& p)
 void lead_dist(SynthPatch& p)
 {
     setName(p, "DIST LEAD"); p.category = 1;
-                p.postGain = 0.238f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.238f; // level-match: peak momentary -> bank median
     p.width = 0.55f; p.ampGain = 0.28f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.08f, 1.0f); osc(p, 2, PULSE, -0.06f, 0.7f);
@@ -461,7 +461,7 @@ void lead_dist(SynthPatch& p)
 void lead_whistle(SynthPatch& p)
 {
     setName(p, "WHISTLE LEAD"); p.category = 1;
-                p.postGain = 0.865f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.865f; // level-match: peak momentary -> bank median
     p.width = 0.45f; p.ampGain = 0.82f; p.voiceMode = (int) VoiceMode::Mono;
     p.glideMode = (int) GlideMode::Always; p.glideTime = 0.06f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.2f, 3);  // faint octave sparkle
@@ -477,7 +477,7 @@ void lead_whistle(SynthPatch& p)
 void lead_uni(SynthPatch& p)
 {
     setName(p, "UNISON LEAD"); p.category = 1;
-                p.postGain = 0.207f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.207f; // level-match: peak momentary -> bank median
     p.width = 0.7f; p.ampGain = 0.50f;
     p.voiceMode = (int) VoiceMode::Unison; p.unisonCount = 5; p.unisonDetune = 0.14f; p.unisonSpread = 0.7f;
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
@@ -497,7 +497,7 @@ void lead_uni(SynthPatch& p)
 void bass_reese(SynthPatch& p)
 {
     setName(p, "REESE"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.599f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.599f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.06f; p.width = 0.45f; p.ampGain = 0.70f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.22f, 1.0f); osc(p, 2, SAW, -0.20f, 0.9f);
     osc(p, 3, SAW, 0.40f, 0.7f); p.subLevel = 0.40f; p.drift = 0.20f;
@@ -512,7 +512,7 @@ void bass_reese(SynthPatch& p)
 void bass_sub(SynthPatch& p)
 {
     setName(p, "DEEP SUB"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.517f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.517f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f; p.width = 0.2f; p.ampGain = 0.88f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.4f); p.subLevel = 0.50f; p.drift = 0.05f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.05f, 0.25f, 0.20f, 0.2f);
@@ -525,7 +525,7 @@ void bass_sub(SynthPatch& p)
 void bass_acid(SynthPatch& p)
 {
     setName(p, "ACID SQUELCH"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.811f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.811f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.25f; p.ampGain = 0.74f;
     osc(p, 0, SAW, 0.0f, 1.0f); p.drift = 0.10f;
     filt(p, FilterMode::LadderLP, 0.24f, 0.44f, 0.60f, 0.45f, 0.2f);  // squelch
@@ -540,7 +540,7 @@ void bass_acid(SynthPatch& p)
 void bass_fm(SynthPatch& p)
 {
     setName(p, "FM E-BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.960f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.960f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f; p.width = 0.3f; p.ampGain = 1.00f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f); p.fm2to1 = 0.5f;
     p.subLevel = 0.30f; p.drift = 0.08f;
@@ -554,7 +554,7 @@ void bass_fm(SynthPatch& p)
 void bass_growl(SynthPatch& p)
 {
     setName(p, "GROWL BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.327f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.327f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.4f; p.ampGain = 0.40f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.15f, 1.0f); osc(p, 2, PULSE, -0.12f, 0.8f);
     p.subLevel = 0.35f; p.drift = 0.18f;
@@ -569,7 +569,7 @@ void bass_growl(SynthPatch& p)
 void bass_pluck(SynthPatch& p)
 {
     setName(p, "PLUCK BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 1.464f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.464f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Off; p.width = 0.3f; p.ampGain = 1.00f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.05f, 0.6f); p.osc[1].pw = 0.4f;
     p.subLevel = 0.30f; p.drift = 0.10f;
@@ -583,7 +583,7 @@ void bass_pluck(SynthPatch& p)
 void bass_square(SynthPatch& p)
 {
     setName(p, "SQUARE BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.678f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.680f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f; p.width = 0.3f; p.ampGain = 0.78f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     osc(p, 1, PULSE, 0.0f, 0.6f, 1); p.osc[1].pw = 0.5f;  // octave-down body
@@ -600,7 +600,7 @@ void bass_square(SynthPatch& p)
 void bass_dirty(SynthPatch& p)
 {
     setName(p, "DIRTY BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.350f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.350f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f; p.width = 0.35f; p.ampGain = 0.30f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 0.9f); osc(p, 2, PULSE, -0.08f, 0.7f);
     p.subLevel = 0.35f; p.drift = 0.16f;
@@ -618,7 +618,7 @@ void bass_dirty(SynthPatch& p)
 void bass_wobble(SynthPatch& p)
 {
     setName(p, "WOBBLE BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.398f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.398f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.4f; p.ampGain = 0.62f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.16f, 1.0f); osc(p, 2, SAW, -0.14f, 0.9f);
     p.subLevel = 0.40f; p.drift = 0.18f;
@@ -634,7 +634,7 @@ void bass_wobble(SynthPatch& p)
 void bass_deep(SynthPatch& p)
 {
     setName(p, "DEEP HOUSE"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.600f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.600f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f; p.width = 0.3f; p.ampGain = 0.80f;
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.04f, 0.6f); p.subLevel = 0.45f; p.drift = 0.08f;
     filt(p, FilterMode::LadderLP, 0.40f, 0.10f, 0.28f, 0.18f, 0.25f);
@@ -648,7 +648,7 @@ void bass_deep(SynthPatch& p)
 void bass_house(SynthPatch& p)
 {
     setName(p, "ORGAN BASS"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 0.637f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.638f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Off; p.width = 0.35f; p.ampGain = 0.76f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     osc(p, 1, SINE, 0.0f, 0.6f, 1);                  // sub octave organ tone
@@ -663,7 +663,7 @@ void bass_house(SynthPatch& p)
 void bass_retro(SynthPatch& p)
 {
     setName(p, "RETRO 8-BIT"); p.category = 2; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 1.329f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.329f; // level-match: peak momentary -> bank median
     p.glideMode = (int) GlideMode::Off; p.width = 0.25f; p.ampGain = 1.00f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; p.osc[0].crush = 0.45f; p.osc[0].srReduce = 0.35f;
     osc(p, 1, PULSE, 0.0f, 0.5f, 1); p.osc[1].pw = 0.25f; p.osc[1].crush = 0.4f;
@@ -681,7 +681,7 @@ void bass_retro(SynthPatch& p)
 void arp_pluck(SynthPatch& p)
 {
     setName(p, "ARP PLUCK"); p.category = 3; p.width = 0.62f; p.ampGain = 0.78f;
-                p.postGain = 1.581f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.581f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.09f, 0.7f); p.osc[1].pw = 0.42f;
     p.subLevel = 0.12f; p.drift = 0.20f;
     filt(p, FilterMode::LadderLP, 0.46f, 0.26f, 0.55f, 0.18f, 0.45f);
@@ -698,7 +698,7 @@ void arp_pluck(SynthPatch& p)
 void arp_bell(SynthPatch& p)
 {
     setName(p, "BELL ARP"); p.category = 3; p.width = 0.72f; p.ampGain = 0.72f;
-                p.postGain = 2.246f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.246f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.01f, 0.85f, 4); // 2' modulator
     p.fm2to1 = 0.45f; p.ringMod = 0.22f; p.drift = 0.05f;
     filt(p, FilterMode::SvfLP, 0.74f, 0.06f, 0.16f, 0.0f, 0.5f);
@@ -714,7 +714,7 @@ void arp_bell(SynthPatch& p)
 void arp_saw(SynthPatch& p)
 {
     setName(p, "SAW ARP"); p.category = 3; p.width = 0.72f; p.ampGain = 0.64f; p.chorusMode = 2;
-                p.postGain = 1.590f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.590f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.13f, 1.0f); osc(p, 3, SAW, -0.11f, 0.6f);
     p.subLevel = 0.12f; p.drift = 0.26f;
     filt(p, FilterMode::LadderLP, 0.50f, 0.20f, 0.42f, 0.15f, 0.40f);
@@ -731,7 +731,7 @@ void arp_saw(SynthPatch& p)
 void arp_pwm(SynthPatch& p)
 {
     setName(p, "PULSE ARP"); p.category = 3; p.width = 0.66f; p.ampGain = 0.76f;
-                p.postGain = 0.812f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.812f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     osc(p, 1, PULSE, 0.07f, 0.8f); p.osc[1].pw = 0.5f;
     p.subLevel = 0.10f; p.drift = 0.20f;
@@ -749,7 +749,7 @@ void arp_pwm(SynthPatch& p)
 void arp_oct(SynthPatch& p)
 {
     setName(p, "OCTAVE ARP"); p.category = 3; p.width = 0.60f; p.ampGain = 0.78f;
-                p.postGain = 2.160f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.160f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.0f, 0.6f, 1); p.osc[1].pw = 0.45f;
     p.subLevel = 0.18f; p.drift = 0.16f;
     filt(p, FilterMode::LadderLP, 0.50f, 0.22f, 0.50f, 0.20f, 0.50f);
@@ -764,7 +764,7 @@ void arp_oct(SynthPatch& p)
 void arp_house(SynthPatch& p)
 {
     setName(p, "HOUSE ARP"); p.category = 3; p.width = 0.68f; p.ampGain = 0.38f; p.chorusMode = 2;
-                p.postGain = 1.016f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.016f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.10f, 0.85f);
     osc(p, 2, SINE, 0.0f, 0.5f, 3); // octave-up body
     p.subLevel = 0.14f; p.drift = 0.20f;
@@ -781,7 +781,7 @@ void arp_house(SynthPatch& p)
 void arp_dark(SynthPatch& p)
 {
     setName(p, "DARK ARP"); p.category = 3; p.width = 0.70f; p.ampGain = 0.41f;
-                p.postGain = 1.683f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.683f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, -0.08f, 0.8f);
     osc(p, 3, SAW, 0.10f, 0.45f, 1); p.subLevel = 0.30f; p.subOctave = 2; p.drift = 0.22f;
     filt(p, FilterMode::Steiner, 0.30f, 0.30f, 0.45f, 0.30f, 0.35f);
@@ -799,7 +799,7 @@ void arp_dark(SynthPatch& p)
 void arp_trance(SynthPatch& p)
 {
     setName(p, "TRANCE ARP"); p.category = 3; p.width = 0.85f; p.ampGain = 0.60f; p.chorusMode = 2;
-                p.postGain = 2.155f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.155f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.14f, 1.0f);
     osc(p, 2, SAW, -0.12f, 0.85f); osc(p, 3, SAW, 0.28f, 0.6f);
     p.subLevel = 0.10f; p.drift = 0.30f;
@@ -821,7 +821,7 @@ void arp_trance(SynthPatch& p)
 void stab_house(SynthPatch& p)
 {
     setName(p, "HOUSE STAB"); p.category = 4; p.width = 0.72f; p.ampGain = 0.68f; p.chorusMode = 2;
-                p.postGain = 0.751f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.751f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.10f, 0.8f); p.osc[1].pw = 0.40f;
     osc(p, 2, SINE, 0.0f, 0.5f, 3); p.osc[2].oscType = 1; p.osc[2].wtTable = 7; // ORGAN drawbar body
     p.drift = 0.20f;
@@ -836,7 +836,7 @@ void stab_house(SynthPatch& p)
 void stab_rave(SynthPatch& p)
 {
     setName(p, "RAVE STAB"); p.category = 4; p.width = 0.82f; p.ampGain = 0.34f; p.chorusMode = 2;
-                p.postGain = 1.068f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.068f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.18f, 0.9f); p.osc[1].pw = 0.46f;
     osc(p, 2, SAW, -0.16f, 0.85f); osc(p, 3, SAW, 0.30f, 0.6f);
     p.subLevel = 0.12f; p.drift = 0.32f;
@@ -855,7 +855,7 @@ void stab_rave(SynthPatch& p)
 void stab_brass(SynthPatch& p)
 {
     setName(p, "BRASS STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 0.32f; p.chorusMode = 1;
-                p.postGain = 0.493f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.494f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.08f, 1.0f); osc(p, 2, SAW, -0.06f, 0.7f);
     p.subLevel = 0.10f; p.drift = 0.20f;
     filt(p, FilterMode::LadderLP, 0.42f, 0.12f, 0.55f, 0.30f, 0.50f);
@@ -871,7 +871,7 @@ void stab_brass(SynthPatch& p)
 void stab_organ(SynthPatch& p)
 {
     setName(p, "ORGAN STAB"); p.category = 4; p.width = 0.58f; p.ampGain = 0.16f; p.chorusMode = 3;
-                p.postGain = 0.670f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.670f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 7; // drawbars
     osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 2, SINE, 0.0f, 0.5f, 4);
     p.drift = 0.05f;
@@ -887,7 +887,7 @@ void stab_organ(SynthPatch& p)
 void stab_chord(SynthPatch& p)
 {
     setName(p, "CHORD HIT"); p.category = 4; p.width = 0.78f; p.ampGain = 0.82f; p.chorusMode = 2;
-                p.postGain = 1.084f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.084f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 0.9f);
     osc(p, 3, SAW, -0.10f, 0.7f); osc(p, 4, PULSE, 0.20f, 0.5f, 1); p.osc[4].pw = 0.45f;
     p.drift = 0.25f;
@@ -901,7 +901,7 @@ void stab_chord(SynthPatch& p)
 void stab_pizz(SynthPatch& p)
 {
     setName(p, "PIZZ STAB"); p.category = 4; p.width = 0.60f; p.ampGain = 1.00f;
-                p.postGain = 1.172f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.172f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 14; p.osc[0].wtMorph = 0.0f; // STRING
     osc(p, 1, TRI, 0.06f, 0.5f);
     p.drift = 0.10f;
@@ -916,7 +916,7 @@ void stab_pizz(SynthPatch& p)
 void stab_syn(SynthPatch& p)
 {
     setName(p, "SYNTH STAB"); p.category = 4; p.width = 0.72f; p.ampGain = 1.00f; p.chorusMode = 1;
-                p.postGain = 1.440f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.440f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 13; p.osc[0].wtMorph = 0.30f; // BRASS wt
     osc(p, 1, SINE, 0.0f, 0.8f, 3); p.fm2to1 = 0.30f; // FM bite
     osc(p, 2, SAW, -0.12f, 0.6f);
@@ -936,7 +936,7 @@ void stab_syn(SynthPatch& p)
 void stab_det(SynthPatch& p)
 {
     setName(p, "DETUNE STAB"); p.category = 4; p.width = 0.90f; p.ampGain = 1.00f; p.chorusMode = 2;
-                p.postGain = 2.221f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.221f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.22f, 1.0f);
     osc(p, 2, SAW, -0.20f, 0.9f); osc(p, 3, SAW, 0.40f, 0.7f); osc(p, 4, SAW, -0.38f, 0.7f);
     p.subLevel = 0.10f; p.drift = 0.35f;
@@ -956,7 +956,7 @@ void stab_det(SynthPatch& p)
 void keys_rhodes(SynthPatch& p)
 {
     setName(p, "TINE KEYS"); p.category = 5; p.width = 0.56f; p.ampGain = 0.78f; p.chorusMode = 1;
-                p.postGain = 0.895f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.895f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.9f, 4); p.fm2to1 = 0.30f; // tine bark
     p.drift = 0.06f;
     filt(p, FilterMode::SvfLP, 0.70f, 0.05f, 0.20f, 0.0f, 0.50f);
@@ -970,7 +970,7 @@ void keys_rhodes(SynthPatch& p)
 void keys_wurli(SynthPatch& p)
 {
     setName(p, "REED EP"); p.category = 5; p.width = 0.50f; p.ampGain = 0.78f; p.chorusMode = 0;
-                p.postGain = 0.672f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.672f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.7f, 4); p.fm2to1 = 0.45f;
     p.drift = 0.06f;
     filt(p, FilterMode::SvfLP, 0.66f, 0.06f, 0.20f, 0.0f, 0.50f);
@@ -985,7 +985,7 @@ void keys_wurli(SynthPatch& p)
 void keys_dx(SynthPatch& p)
 {
     setName(p, "CRYSTAL EP"); p.category = 5; p.width = 0.62f; p.ampGain = 0.74f; p.chorusMode = 1;
-                p.postGain = 1.034f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.034f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 0; p.osc[0].wtMorph = 0.15f;
     osc(p, 1, SINE, 0.0f, 0.9f, 3); p.fm2to1 = 0.42f; p.ringMod = 0.12f;
     p.drift = 0.05f;
@@ -1000,7 +1000,7 @@ void keys_dx(SynthPatch& p)
 void keys_clav(SynthPatch& p)
 {
     setName(p, "FUNK CLAV"); p.category = 5; p.width = 0.46f; p.ampGain = 0.52f;
-                p.postGain = 0.763f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.763f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.34f; osc(p, 1, SAW, 0.06f, 0.6f);
     p.drift = 0.08f;
     filt(p, FilterMode::LadderLP, 0.50f, 0.30f, 0.45f, 0.28f, 0.55f);
@@ -1014,7 +1014,7 @@ void keys_clav(SynthPatch& p)
 void keys_poly(SynthPatch& p)
 {
     setName(p, "POLY KEYS"); p.category = 5; p.width = 0.72f; p.ampGain = 0.70f; p.chorusMode = 2;
-                p.postGain = 0.661f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.661f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.07f, 0.7f); p.osc[1].pw = 0.40f;
     osc(p, 3, SAW, -0.08f, 0.5f); p.subLevel = 0.10f; p.drift = 0.18f;
     filt(p, FilterMode::LadderLP, 0.55f, 0.12f, 0.35f, 0.15f, 0.45f);
@@ -1029,7 +1029,7 @@ void keys_poly(SynthPatch& p)
 void keys_grand(SynthPatch& p)
 {
     setName(p, "GRAND PIANO"); p.category = 5; p.width = 0.62f; p.ampGain = 0.74f; p.chorusMode = 0;
-                p.postGain = 0.811f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.811f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 14; p.osc[0].wtMorph = 0.10f; // string body
     osc(p, 1, SINE, 0.04f, 0.7f); osc(p, 3, SINE, -0.04f, 0.5f, 3); // octave shimmer
     p.drift = 0.07f;
@@ -1044,7 +1044,7 @@ void keys_grand(SynthPatch& p)
 void keys_bellkey(SynthPatch& p)
 {
     setName(p, "BELL STACK"); p.category = 5; p.width = 0.70f; p.ampGain = 0.99f; p.chorusMode = 1;
-                p.postGain = 1.022f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.022f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 9; p.osc[0].wtMorph = 0.20f; // FORMANT A partial
     osc(p, 1, SINE, 0.01f, 0.8f, 4); p.fm2to1 = 0.50f; p.ringMod = 0.25f;
     p.drift = 0.05f;
@@ -1059,7 +1059,7 @@ void keys_bellkey(SynthPatch& p)
 void keys_padkey(SynthPatch& p)
 {
     setName(p, "PAD KEYS"); p.category = 5; p.width = 0.80f; p.ampGain = 0.68f; p.chorusMode = 2;
-                p.postGain = 0.723f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.725f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.08f, 0.8f); p.osc[1].pw = 0.45f;
     osc(p, 3, SAW, -0.10f, 0.5f); p.subLevel = 0.10f; p.drift = 0.20f;
     filt(p, FilterMode::SvfLP, 0.60f, 0.10f, 0.30f, 0.0f, 0.45f);
@@ -1075,7 +1075,7 @@ void keys_padkey(SynthPatch& p)
 void keys_organ(SynthPatch& p)
 {
     setName(p, "DRAW ORGAN"); p.category = 5; p.width = 0.60f; p.ampGain = 0.16f; p.chorusMode = 3;
-                p.postGain = 0.628f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.628f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 7; // drawbars
     osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 2, SINE, 0.0f, 0.5f, 4);
     p.drift = 0.04f;
@@ -1091,7 +1091,7 @@ void keys_organ(SynthPatch& p)
 void keys_toy(SynthPatch& p)
 {
     setName(p, "TOY PIANO"); p.category = 5; p.width = 0.55f; p.ampGain = 1.00f; p.chorusMode = 1;
-                p.postGain = 1.710f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.710f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 1; p.osc[0].wtMorph = 0.20f; // triangle ping
     osc(p, 1, SINE, 0.02f, 0.7f, 4); p.fm2to1 = 0.40f; p.ringMod = 0.20f;
     p.drift = 0.08f;
@@ -1106,7 +1106,7 @@ void keys_toy(SynthPatch& p)
 void keys_fmclassic(SynthPatch& p)
 {
     setName(p, "FM KEYS"); p.category = 5; p.width = 0.60f; p.ampGain = 0.74f; p.chorusMode = 1;
-                p.postGain = 0.754f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.754f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 1.0f, 3); p.fm2to1 = 0.50f;
     p.drift = 0.05f;
     filt(p, FilterMode::SvfLP, 0.78f, 0.04f, 0.12f, 0.0f, 0.55f);
@@ -1121,7 +1121,7 @@ void keys_fmclassic(SynthPatch& p)
 void keys_softkey(SynthPatch& p)
 {
     setName(p, "SOFT KEYS"); p.category = 5; p.width = 0.58f; p.ampGain = 0.76f; p.chorusMode = 1;
-                p.postGain = 1.063f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.063f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SINE, 0.03f, 0.8f); p.subLevel = 0.08f;
     p.drift = 0.08f;
     filt(p, FilterMode::SvfLP, 0.62f, 0.06f, 0.22f, 0.0f, 0.45f);
@@ -1137,7 +1137,7 @@ void keys_softkey(SynthPatch& p)
 void pluck_synth(SynthPatch& p)
 {
     setName(p, "SYNTH PLUCK"); p.category = 6; p.width = 0.62f; p.ampGain = 0.8f;
-                p.postGain = 1.327f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.327f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.1f, 0.55f); p.osc[1].pw = 0.4f;
     p.subLevel = 0.14f; p.noiseLevel = 0.1f; p.drift = 0.16f;
     filt(p, FilterMode::LadderLP, 0.46f, 0.26f, 0.62f, 0.18f, 0.5f);
@@ -1153,7 +1153,7 @@ void pluck_synth(SynthPatch& p)
 void pluck_koto(SynthPatch& p)
 {
     setName(p, "KOTO"); p.category = 6; p.width = 0.5f; p.ampGain = 0.8f;
-                p.postGain = 3.177f; // level-match: peak momentary -> bank median
+                    p.postGain = 3.177f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.0f, 0.38f); p.ringMod = 0.12f; p.drift = 0.1f;
     filt(p, FilterMode::SvfLP, 0.58f, 0.2f, 0.5f, 0.0f, 0.55f);
     p.env[0] = EnvParams{0.002f, 0.42f, 0.0f, 0.32f, 0.35f};
@@ -1167,7 +1167,7 @@ void pluck_koto(SynthPatch& p)
 void pluck_bell(SynthPatch& p)
 {
     setName(p, "BELL PLUCK"); p.category = 6; p.width = 0.66f; p.ampGain = 0.72f;
-                p.postGain = 2.429f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.429f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 8; p.osc[0].wtMorph = 0.3f;   // ODD -> inharmonic bell partials
     osc(p, 1, SINE, 0.0f, 0.85f, 4); p.fm2to1 = 0.45f; p.ringMod = 0.28f;
@@ -1182,7 +1182,7 @@ void pluck_bell(SynthPatch& p)
 void pluck_mallet(SynthPatch& p)
 {
     setName(p, "MALLET"); p.category = 6; p.width = 0.5f; p.ampGain = 0.78f;
-                p.postGain = 2.760f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.760f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.45f, 4); p.noiseLevel = 0.08f; p.drift = 0.05f;
     filt(p, FilterMode::Lpg, 0.85f, 0.06f, 0.6f);   // vactrol low-pass gate
     p.env[0] = EnvParams{0.001f, 0.3f, 0.0f, 0.24f, 0.4f};
@@ -1196,7 +1196,7 @@ void pluck_mallet(SynthPatch& p)
 void pluck_harp(SynthPatch& p)
 {
     setName(p, "HARP"); p.category = 6; p.width = 0.6f; p.ampGain = 0.76f; p.chorusMode = 1;
-                p.postGain = 1.975f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.975f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SINE, 0.04f, 0.65f); p.drift = 0.08f;
     filt(p, FilterMode::SvfLP, 0.66f, 0.1f, 0.42f, 0.0f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.55f, 0.0f, 0.45f, 0.4f};
@@ -1208,7 +1208,7 @@ void pluck_harp(SynthPatch& p)
 void pluck_marimba(SynthPatch& p)
 {
     setName(p, "MARIMBA"); p.category = 6; p.width = 0.5f; p.ampGain = 0.8f;
-                p.postGain = 2.477f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.477f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.4f, 4); p.noiseLevel = 0.06f; p.drift = 0.04f;
     filt(p, FilterMode::SvfLP, 0.64f, 0.06f, 0.3f);
     p.env[0] = EnvParams{0.001f, 0.32f, 0.0f, 0.28f, 0.4f};
@@ -1221,7 +1221,7 @@ void pluck_marimba(SynthPatch& p)
 void pluck_guitar(SynthPatch& p)
 {
     setName(p, "SYNTH GTR"); p.category = 6; p.width = 0.52f; p.ampGain = 0.50f;
-                p.postGain = 1.531f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.531f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.03f, 0.5f); p.osc[1].pw = 0.42f; p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.22f, 0.52f, 0.22f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.4f, 0.0f, 0.3f, 0.45f};
@@ -1234,7 +1234,7 @@ void pluck_guitar(SynthPatch& p)
 void pluck_glass(SynthPatch& p)
 {
     setName(p, "GLASS PLUCK"); p.category = 6; p.width = 0.62f; p.ampGain = 0.72f;
-                p.postGain = 2.262f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.262f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 6; p.osc[0].wtMorph = 0.4f;   // BRIGHT wavetable
     osc(p, 1, SINE, 0.01f, 0.8f, 3); p.fm2to1 = 0.3f; p.ringMod = 0.2f;
@@ -1248,7 +1248,7 @@ void pluck_glass(SynthPatch& p)
 void pluck_pizz(SynthPatch& p)
 {
     setName(p, "PIZZICATO"); p.category = 6; p.width = 0.46f; p.ampGain = 0.82f;
-                p.postGain = 3.908f; // level-match: peak momentary -> bank median
+                    p.postGain = 3.908f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.05f, 0.4f); p.noiseLevel = 0.1f; p.drift = 0.1f;
     filt(p, FilterMode::SvfLP, 0.5f, 0.22f, 0.55f, 0.0f, 0.5f);
     p.env[0] = EnvParams{0.001f, 0.16f, 0.0f, 0.12f, 0.45f};
@@ -1262,7 +1262,7 @@ void pluck_pizz(SynthPatch& p)
 void pluck_musicbox(SynthPatch& p)
 {
     setName(p, "MUSIC BOX"); p.category = 6; p.width = 0.6f; p.ampGain = 0.72f; p.chorusMode = 1;
-                p.postGain = 2.193f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.193f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 8; p.osc[0].wtMorph = 0.2f;   // ODD -> tine sparkle
     osc(p, 1, SINE, 0.0f, 0.55f, 4); p.ringMod = 0.22f;
@@ -1278,7 +1278,7 @@ void pluck_musicbox(SynthPatch& p)
 void fx_riser(SynthPatch& p)
 {
     setName(p, "RISER"); p.category = 7; p.width = 0.92f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 2.051f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.051f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.22f, 1.0f); p.noiseLevel = 0.22f; p.drift = 0.4f;
     filt(p, FilterMode::SvfBP, 0.28f, 0.45f, 0.1f);
     p.env[0] = EnvParams{2.5f, 1.0f, 1.0f, 0.4f, 0.0f};
@@ -1294,7 +1294,7 @@ void fx_riser(SynthPatch& p)
 void fx_noise(SynthPatch& p)
 {
     setName(p, "NOISE SWEEP"); p.category = 7; p.width = 0.92f; p.ampGain = 0.55f;
-                p.postGain = 1.581f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.581f; // level-match: peak momentary -> bank median
     p.noiseLevel = 0.85f; p.osc[0].on = false; p.osc[1].on = false; p.drift = 0.0f;
     filt(p, FilterMode::SvfBP, 0.3f, 0.5f, 0.0f);
     p.env[0] = EnvParams{0.6f, 1.0f, 0.85f, 1.0f, 0.0f};
@@ -1308,7 +1308,7 @@ void fx_noise(SynthPatch& p)
 void fx_siren(SynthPatch& p)
 {
     setName(p, "SIREN"); p.category = 7; p.width = 0.7f; p.ampGain = 0.68f; p.voiceMode = (int) VoiceMode::Mono;
-                p.postGain = 1.549f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.549f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.0f, 0.6f); p.drift = 0.1f;
     filt(p, FilterMode::SvfBP, 0.5f, 0.32f, 0.1f);
     p.env[0] = EnvParams{0.05f, 0.5f, 1.0f, 0.3f, 0.0f};
@@ -1322,7 +1322,7 @@ void fx_siren(SynthPatch& p)
 void fx_zap(SynthPatch& p)
 {
     setName(p, "ZAP"); p.category = 7; p.width = 0.5f; p.ampGain = 0.78f;
-                p.postGain = 3.802f; // level-match: peak momentary -> bank median
+                    p.postGain = 3.802f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].crush = 0.2f; p.noiseLevel = 0.1f; p.drift = 0.0f;
     filt(p, FilterMode::SvfHP, 0.4f, 0.3f, 0.0f);
     p.env[0] = EnvParams{0.001f, 0.12f, 0.0f, 0.08f, 0.0f};
@@ -1335,7 +1335,7 @@ void fx_zap(SynthPatch& p)
 void fx_drop(SynthPatch& p)
 {
     setName(p, "DOWNLIFTER"); p.category = 7; p.width = 0.92f; p.ampGain = 0.6f;
-                p.postGain = 1.677f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.677f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.3f, 0.8f); p.noiseLevel = 0.18f; p.drift = 0.5f;
     filt(p, FilterMode::SvfLP, 0.6f, 0.22f, 0.0f);
     p.env[0] = EnvParams{0.01f, 3.5f, 0.0f, 0.5f, 0.0f};
@@ -1350,7 +1350,7 @@ void fx_drop(SynthPatch& p)
 void fx_impact(SynthPatch& p)
 {
     setName(p, "IMPACT"); p.category = 7; p.width = 0.7f; p.ampGain = 0.78f; p.fxDrive = 0.3f; p.driveMode = 1;
-                p.postGain = 1.406f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.406f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.noiseLevel = 0.45f; p.drift = 0.0f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.12f, 0.0f, 0.2f, 0.0f);
     p.env[0] = EnvParams{0.001f, 0.65f, 0.0f, 0.4f, 0.0f};
@@ -1363,7 +1363,7 @@ void fx_impact(SynthPatch& p)
 void fx_wind(SynthPatch& p)
 {
     setName(p, "WIND"); p.category = 7; p.width = 0.95f; p.ampGain = 0.5f;
-                p.postGain = 4.949f; // level-match: peak momentary -> bank median
+                    p.postGain = 4.949f; // level-match: peak momentary -> bank median
     p.osc[0].on = false; p.osc[1].on = false; p.noiseLevel = 0.9f; p.drift = 0.0f;
     filt(p, FilterMode::SvfBP, 0.4f, 0.35f, 0.0f);
     p.env[0] = EnvParams{1.2f, 1.0f, 0.9f, 1.6f, 0.0f};
@@ -1377,7 +1377,7 @@ void fx_wind(SynthPatch& p)
 void fx_alien(SynthPatch& p)
 {
     setName(p, "ALIEN"); p.category = 7; p.width = 0.8f; p.ampGain = 0.6f;
-                p.postGain = 0.988f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.988f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.0f, 1.0f); p.ringMod = 0.5f; p.fm2to1 = 0.3f; p.drift = 0.3f;
     p.osc[0].srReduce = 0.3f;
     filt(p, FilterMode::SvfBP, 0.5f, 0.42f, 0.1f);
@@ -1394,7 +1394,7 @@ void fx_alien(SynthPatch& p)
 void drone_dark(SynthPatch& p)
 {
     setName(p, "DARK DRONE"); p.category = 8; p.width = 0.86f; p.ampGain = 0.68f;
-                p.postGain = 0.537f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.538f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.04f, 0.9f, 1); osc(p, 3, TRI, -0.05f, 0.6f, 1);
     p.subLevel = 0.4f; p.subOctave = 2; p.drift = 0.4f;
     filt(p, FilterMode::LadderLP, 0.24f, 0.22f, 0.2f, 0.3f, 0.2f);
@@ -1409,7 +1409,7 @@ void drone_dark(SynthPatch& p)
 void drone_sub(SynthPatch& p)
 {
     setName(p, "SUB DRONE"); p.category = 8; p.width = 0.6f; p.ampGain = 0.43f;
-                p.postGain = 1.202f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.202f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.03f, 0.5f); p.subLevel = 0.6f; p.subOctave = 2; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.3f, 0.12f, 0.15f, 0.2f, 0.1f);
     p.env[0] = EnvParams{1.8f, 2.0f, 1.0f, 3.0f, 0.0f};
@@ -1422,7 +1422,7 @@ void drone_sub(SynthPatch& p)
 void drone_harm(SynthPatch& p)
 {
     setName(p, "HARMONIC"); p.category = 8; p.width = 0.86f; p.ampGain = 0.64f; p.chorusMode = 2;
-                p.postGain = 0.629f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.629f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 2, SINE, 0.0f, 0.5f, 4);
     osc(p, 3, SINE, 0.02f, 0.4f, 1); p.drift = 0.15f;
     filt(p, FilterMode::SvfLP, 0.6f, 0.06f, 0.1f);
@@ -1437,7 +1437,7 @@ void drone_harm(SynthPatch& p)
 void drone_metal(SynthPatch& p)
 {
     setName(p, "METAL DRONE"); p.category = 8; p.width = 0.8f; p.ampGain = 0.58f;
-                p.postGain = 1.570f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.570f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.0f, 1.0f); p.ringMod = 0.4f; p.fm2to1 = 0.2f; p.drift = 0.3f;
     filt(p, FilterMode::SvfBP, 0.5f, 0.42f, 0.1f);
     p.env[0] = EnvParams{1.8f, 2.0f, 1.0f, 3.0f, 0.0f};
@@ -1451,7 +1451,7 @@ void drone_metal(SynthPatch& p)
 void drone_evolve(SynthPatch& p)
 {
     setName(p, "EVOLVING"); p.category = 8; p.width = 0.92f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 0.819f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.819f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f);
     p.osc[0].oscType = 1; p.osc[0].wtTable = 14; p.osc[0].wtMorph = 0.3f;  // STRING wavetable
     osc(p, 1, SAW, 0.06f, 0.9f);
@@ -1470,7 +1470,7 @@ void drone_evolve(SynthPatch& p)
 void drone_choir(SynthPatch& p)
 {
     setName(p, "DRONE CHOIR"); p.category = 8; p.width = 0.9f; p.ampGain = 0.5f; p.chorusMode = 2;
-                p.postGain = 0.831f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.831f; // level-match: peak momentary -> bank median
     p.voiceMode = (int) VoiceMode::Unison; p.unisonCount = 6; p.unisonDetune = 0.16f; p.unisonSpread = 0.85f;
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     p.osc[0].oscType = 1; p.osc[0].wtTable = 15; p.osc[0].wtMorph = 0.3f;  // VOCAL wavetable
@@ -1487,7 +1487,7 @@ void drone_choir(SynthPatch& p)
 void drone_warm(SynthPatch& p)
 {
     setName(p, "WARM DRONE"); p.category = 8; p.width = 0.86f; p.ampGain = 0.7f; p.chorusMode = 2;
-                p.postGain = 0.450f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.452f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.06f, 0.9f); osc(p, 3, TRI, -0.05f, 0.5f, 1);
     p.subLevel = 0.3f; p.drift = 0.35f;
     filt(p, FilterMode::LadderLP, 0.32f, 0.16f, 0.2f, 0.3f, 0.2f);
@@ -1501,7 +1501,7 @@ void drone_warm(SynthPatch& p)
 void drone_noise(SynthPatch& p)
 {
     setName(p, "NOISE DRONE"); p.category = 8; p.width = 0.9f; p.ampGain = 0.58f;
-                p.postGain = 1.498f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.498f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 0.6f); p.noiseLevel = 0.5f; p.drift = 0.2f;
     filt(p, FilterMode::SvfBP, 0.4f, 0.32f, 0.1f);
     p.env[0] = EnvParams{1.8f, 2.0f, 1.0f, 3.0f, 0.0f};
@@ -1515,41 +1515,47 @@ void drone_noise(SynthPatch& p)
 // ================================ PERC (9) ================================
 void perc_kick(SynthPatch& p)
 {
-    // 909-style kick: ~55 Hz fundamental at C1, deep fast pitch drop, slightly
-    // soft attack (the 909's click is a separate transient — a whisper of noise
-    // here), dry. Drive TUBE for the punchy mid knock.
-    setName(p, "SUB KICK"); p.category = 9; p.width = 0.15f; p.ampGain = 0.95f;
-            p.postGain = 2.682f; // level-match: peak momentary -> bank median
-    osc(p, 0, SINE, 0.0f, 1.0f); p.drift = 0.0f;
-    p.noiseLevel = 0.035f;                                   // attack tick
-    filt(p, FilterMode::SvfLP, 0.55f, 0.0f, 0.0f, 0.1f, 1.0f);
-    p.env[0] = EnvParams{0.002f, 0.30f, 0.0f, 0.08f, 0.15f};
-    p.env[2] = EnvParams{0.001f, 0.045f, 0.0f, 0.03f, 0.0f}; // pitch transient
-    mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 1.9f);      // ~+23 semi drop
+    // 909-style kick, take 2. The "plastic laser" failure mode is a deep slow
+    // pitch chirp on a clean sine: drop is now FAST (25 ms) and moderate
+    // (+14 semis), the LP sits low and fixed (no key track) to bury the chirp,
+    // and tube drive supplies the knock harmonics a bare sine lacks. No noise
+    // tick — the 1 ms attack edge is the click. Dry.
+    setName(p, "SUB KICK"); p.category = 9; p.width = 0.12f; p.ampGain = 0.95f;
+        p.postGain = 1.029f; // level-match: peak momentary -> bank median
+    osc(p, 0, SINE, -2.0f, 1.0f); p.drift = 0.0f;            // sits ~58 Hz at C2
+    filt(p, FilterMode::SvfLP, 0.42f, 0.0f, 0.0f, 0.0f, 0.0f);
+    p.env[0] = EnvParams{0.001f, 0.32f, 0.0f, 0.09f, 0.15f};
+    p.env[2] = EnvParams{0.001f, 0.025f, 0.0f, 0.02f, 0.0f};
+    mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 1.15f);     // ~+14 semi, fast
     mod(p, 1, ModSource::Velocity, ModDest::Amp, 0.35f);
-    p.fxDrive = 0.2f; p.driveMode = 1; p.driveTone = -0.15f;
+    p.fxDrive = 0.32f; p.driveMode = 1; p.driveTone = -0.25f;
     p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.0f; p.fxPhaser = 0.0f;
 }
 void perc_snare(SynthPatch& p)
 {
-    // 909-style snare: two detuned tones (body ~180/330 Hz region at the played
-    // note) + bright noise, LP wide open so the noise keeps its snap. Dry.
-    setName(p, "SNAP SNARE"); p.category = 9; p.width = 0.3f; p.ampGain = 0.9f;
-            p.postGain = 1.305f; // level-match: peak momentary -> bank median
-    osc(p, 0, SINE, 0.0f, 0.9f); osc(p, 1, SINE, 10.0f, 0.5f);
-    p.noiseLevel = 0.95f; p.drift = 0.0f;
-    filt(p, FilterMode::SvfLP, 0.82f, 0.06f, 0.0f, 0.0f, 0.3f);
-    p.env[0] = EnvParams{0.001f, 0.15f, 0.0f, 0.09f, 0.25f};
-    p.env[2] = EnvParams{0.001f, 0.025f, 0.0f, 0.02f, 0.0f};
-    mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 0.9f);
+    // Snare, take 2: the hiss came from wide-open white noise. Serial LP -> HP
+    // shapes the noise into the 1-6 kHz snap band while a gentle HP floor
+    // (~180 Hz) keeps the two-tone body but cuts rumble. Dry.
+    setName(p, "SNAP SNARE"); p.category = 9; p.width = 0.28f; p.ampGain = 0.9f;
+        p.postGain = 2.948f; // level-match: peak momentary -> bank median
+    osc(p, 0, SINE, 0.0f, 0.9f); osc(p, 1, SINE, 10.0f, 0.45f);
+    p.noiseLevel = 0.8f; p.drift = 0.0f;
+    p.filterRouting = 1;
+    filt(p, FilterMode::SvfLP, 0.76f, 0.1f, 0.0f, 0.0f, 0.3f);
+    p.filter2Mode = (int) FilterMode::SvfHP; p.filter2Cutoff = 0.32f;
+    p.filter2Reso = 0.0f; p.filter2Drive = 0.0f; p.filter2EnvAmt = 0.0f;
+    p.env[0] = EnvParams{0.001f, 0.14f, 0.0f, 0.08f, 0.25f};
+    p.env[2] = EnvParams{0.001f, 0.02f, 0.0f, 0.015f, 0.0f};
+    mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 0.7f);
     mod(p, 1, ModSource::Velocity, ModDest::Amp, 0.35f);
-    p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.05f; p.fxPhaser = 0.0f;
+    p.fxDrive = 0.1f; p.driveMode = 0;
+    p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.04f; p.fxPhaser = 0.0f;
 }
 void perc_tom(SynthPatch& p)
 {
     // Analog tom: sine with a moderate pitch drop and a round 300 ms body. Dry.
     setName(p, "FLOOR TOM"); p.category = 9; p.width = 0.35f; p.ampGain = 0.9f;
-            p.postGain = 3.570f; // level-match (single-pass corrected)
+                p.postGain = 3.554f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.noiseLevel = 0.05f; p.drift = 0.0f;
     filt(p, FilterMode::SvfLP, 0.62f, 0.05f, 0.0f, 0.0f, 0.9f);
     p.env[0] = EnvParams{0.001f, 0.3f, 0.0f, 0.12f, 0.25f};
@@ -1561,30 +1567,31 @@ void perc_tom(SynthPatch& p)
 }
 void perc_clap(SynthPatch& p)
 {
-    // 808-style clap: band-passed noise burst; the hand "spread" comes from a
-    // short room (reverb), not an amp stutter — the old 55 Hz LFO gate buzzed
-    // through the whole tail. Dry-ish otherwise.
-    setName(p, "HAND CLAP"); p.category = 9; p.width = 0.45f; p.ampGain = 0.85f;
-            p.postGain = 2.502f; // level-match: peak momentary -> bank median
+    // Clap: serial BP -> BP narrows the burst into the 1-2 kHz clap band
+    // instead of broadband splash; short room supplies the spread.
+    setName(p, "HAND CLAP"); p.category = 9; p.width = 0.4f; p.ampGain = 0.85f;
+        p.postGain = 4.981f; // level-match: peak momentary -> bank median
     p.osc[0].on = false; p.noiseLevel = 1.0f; p.drift = 0.0f;
-    filt(p, FilterMode::SvfBP, 0.6f, 0.42f, 0.0f, 0.0f, 0.0f);
-    p.env[0] = EnvParams{0.001f, 0.1f, 0.08f, 0.13f, 0.3f};
+    p.filterRouting = 1;
+    filt(p, FilterMode::SvfBP, 0.62f, 0.4f, 0.0f, 0.0f, 0.0f);
+    p.filter2Mode = (int) FilterMode::SvfBP; p.filter2Cutoff = 0.63f;
+    p.filter2Reso = 0.3f; p.filter2Drive = 0.0f; p.filter2EnvAmt = 0.0f;
+    p.env[0] = EnvParams{0.001f, 0.09f, 0.07f, 0.12f, 0.3f};
     mod(p, 0, ModSource::Velocity, ModDest::Amp, 0.35f);
-    p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.22f; p.reverbSize = 0.25f;
-    p.reverbTone = 0.5f; p.fxPhaser = 0.0f;
+    p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.2f; p.reverbSize = 0.22f;
+    p.reverbTone = 0.55f; p.fxPhaser = 0.0f;
 }
 void perc_cowbell(SynthPatch& p)
 {
-    // 808 cowbell: the classic 540 + 800 Hz square pair (about 6.8 semitones
-    // apart), band-passed, quick knock. Footage puts the pair in the right
-    // octave at C5. Dry.
-    setName(p, "COWBELL"); p.category = 9; p.width = 0.3f; p.ampGain = 0.8f;
-            p.postGain = 1.94f; // level-match
+    // Cowbell: the pair IS the sound but ring mod is now a hint, and the BP is
+    // tighter so it knocks instead of clangs.
+    setName(p, "COWBELL"); p.category = 9; p.width = 0.25f; p.ampGain = 0.8f;
+        p.postGain = 2.238f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f, 3); p.osc[0].pw = 0.5f;
-    osc(p, 1, PULSE, 6.8f, 0.85f, 3); p.osc[1].pw = 0.5f;
-    p.drift = 0.0f;
-    filt(p, FilterMode::SvfBP, 0.66f, 0.32f, 0.0f, 0.0f, 0.6f);
-    p.env[0] = EnvParams{0.001f, 0.19f, 0.0f, 0.1f, 0.25f};
+    osc(p, 1, PULSE, 6.8f, 0.8f, 3); p.osc[1].pw = 0.5f;
+    p.ringMod = 0.1f; p.drift = 0.0f;
+    filt(p, FilterMode::SvfBP, 0.64f, 0.4f, 0.0f, 0.0f, 0.6f);
+    p.env[0] = EnvParams{0.001f, 0.16f, 0.0f, 0.09f, 0.25f};
     mod(p, 0, ModSource::Velocity, ModDest::Amp, 0.3f);
     p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.04f; p.fxPhaser = 0.0f;
 }
@@ -1593,7 +1600,7 @@ void perc_808(SynthPatch& p)
     // 808-style boom: longer bridged-T-ish sine tail, small pitch drop, gentle
     // saturation. Dry.
     setName(p, "TRAP BOOM"); p.category = 9; p.width = 0.12f; p.ampGain = 0.85f;
-            p.postGain = 1.942f; // level-match: peak momentary -> bank median
+                p.postGain = 1.350f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); p.drift = 0.0f;
     filt(p, FilterMode::SvfLP, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f);
     p.env[0] = EnvParams{0.002f, 0.85f, 0.0f, 0.25f, 0.2f};
@@ -1605,35 +1612,37 @@ void perc_808(SynthPatch& p)
 }
 void perc_hat(SynthPatch& p)
 {
-    // 808-style closed hat: a five-square-oscillator inharmonic cluster (the
-    // hardware uses six around 540/800 Hz) ring-modulated for extra metal, then
-    // high-passed hard (~7 kHz on the real unit). Tiny noise floor. Bone dry.
-    setName(p, "CLOSED HAT"); p.category = 9; p.width = 0.2f; p.ampGain = 0.7f;
-            p.postGain = 8.000f; // level-match: peak momentary -> bank median
-    osc(p, 0, PULSE, 0.0f,  0.8f, 3); p.osc[0].pw = 0.5f;    // 540 area at C5
-    osc(p, 1, PULSE, 6.8f,  0.8f, 3); p.osc[1].pw = 0.5f;    // ~800 (x1.48)
-    osc(p, 2, PULSE, 2.3f,  0.65f, 3); p.osc[2].pw = 0.45f;
-    osc(p, 3, PULSE, 4.1f,  0.65f, 3); p.osc[3].pw = 0.55f;
-    osc(p, 4, PULSE, 9.2f,  0.55f, 3); p.osc[4].pw = 0.5f;
-    p.ringMod = 0.35f; p.noiseLevel = 0.15f; p.drift = 0.0f;
-    filt(p, FilterMode::SvfHP, 0.885f, 0.1f, 0.0f, 0.0f, 0.2f);
-    p.env[0] = EnvParams{0.001f, 0.05f, 0.0f, 0.028f, 0.3f};
+    // Closed hat, take 2. The metallic failure mode was five loud pulses whose
+    // fundamentals leaked through one gentle 12 dB high-pass, plus heavy ring
+    // mod. Now: noise carries the hat, the oscillator pair is quiet colour
+    // only, ring mod is a whisper, and SERIAL dual filters (BP high into HP
+    // high) give the steep rejection the 808 gets from its filter chain. Dry.
+    setName(p, "CLOSED HAT"); p.category = 9; p.width = 0.18f; p.ampGain = 0.7f;
+        p.postGain = 2.900f; // level-match: peak momentary -> bank median
+    osc(p, 0, PULSE, 0.0f, 0.22f, 3); p.osc[0].pw = 0.5f;
+    osc(p, 1, PULSE, 6.8f, 0.22f, 3); p.osc[1].pw = 0.5f;
+    p.ringMod = 0.12f; p.noiseLevel = 0.9f; p.drift = 0.0f;
+    p.filterRouting = 1;                                     // serial: BP -> HP
+    filt(p, FilterMode::SvfBP, 0.84f, 0.25f, 0.0f, 0.0f, 0.0f);
+    p.filter2Mode = (int) FilterMode::SvfHP; p.filter2Cutoff = 0.8f;
+    p.filter2Reso = 0.1f; p.filter2Drive = 0.0f; p.filter2EnvAmt = 0.0f;
+    p.env[0] = EnvParams{0.001f, 0.042f, 0.0f, 0.025f, 0.3f};
     mod(p, 0, ModSource::Velocity, ModDest::Amp, 0.45f);
     p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.0f; p.fxPhaser = 0.0f;
 }
 void perc_openhat(SynthPatch& p)
 {
-    // Open variant of the cluster hat: same metal, longer sizzle.
-    setName(p, "OPEN HAT"); p.category = 9; p.width = 0.25f; p.ampGain = 0.62f;
-            p.postGain = 3.226f; // level-match (single-pass corrected)
-    osc(p, 0, PULSE, 0.0f,  0.8f, 3); p.osc[0].pw = 0.5f;
-    osc(p, 1, PULSE, 6.8f,  0.8f, 3); p.osc[1].pw = 0.5f;
-    osc(p, 2, PULSE, 2.3f,  0.65f, 3); p.osc[2].pw = 0.45f;
-    osc(p, 3, PULSE, 4.1f,  0.65f, 3); p.osc[3].pw = 0.55f;
-    osc(p, 4, PULSE, 9.2f,  0.55f, 3); p.osc[4].pw = 0.5f;
-    p.ringMod = 0.35f; p.noiseLevel = 0.18f; p.drift = 0.0f;
-    filt(p, FilterMode::SvfHP, 0.87f, 0.1f, 0.0f, 0.0f, 0.2f);
-    p.env[0] = EnvParams{0.001f, 0.38f, 0.0f, 0.3f, 0.3f};
+    // Open hat: same noise-forward voicing, longer sizzle.
+    setName(p, "OPEN HAT"); p.category = 9; p.width = 0.22f; p.ampGain = 0.62f;
+        p.postGain = 1.218f; // level-match: peak momentary -> bank median
+    osc(p, 0, PULSE, 0.0f, 0.2f, 3); p.osc[0].pw = 0.5f;
+    osc(p, 1, PULSE, 6.8f, 0.2f, 3); p.osc[1].pw = 0.5f;
+    p.ringMod = 0.12f; p.noiseLevel = 0.92f; p.drift = 0.0f;
+    p.filterRouting = 1;
+    filt(p, FilterMode::SvfBP, 0.83f, 0.22f, 0.0f, 0.0f, 0.0f);
+    p.filter2Mode = (int) FilterMode::SvfHP; p.filter2Cutoff = 0.78f;
+    p.filter2Reso = 0.1f; p.filter2Drive = 0.0f; p.filter2EnvAmt = 0.0f;
+    p.env[0] = EnvParams{0.001f, 0.34f, 0.0f, 0.26f, 0.3f};
     mod(p, 0, ModSource::Velocity, ModDest::Amp, 0.4f);
     p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.04f; p.fxPhaser = 0.0f;
 }
@@ -1642,7 +1651,7 @@ void perc_rim(SynthPatch& p)
     // Rimshot: short resonant ping — narrow BP with real resonance on a pulse,
     // hair of noise, done in ~60 ms. Dry.
     setName(p, "RIMSHOT"); p.category = 9; p.width = 0.2f; p.ampGain = 1.0f;
-            p.postGain = 7.041f; // level-match: peak momentary -> bank median
+                p.postGain = 7.213f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f, 3); p.osc[0].pw = 0.35f;
     p.noiseLevel = 0.15f; p.drift = 0.0f;
     filt(p, FilterMode::SvfBP, 0.72f, 0.55f, 0.0f, 0.0f, 0.5f);
@@ -1653,7 +1662,7 @@ void perc_clave(SynthPatch& p)
 {
     // Clave: high resonant BP ping on a sine — almost a filter blip. Dry.
     setName(p, "CLAVE"); p.category = 9; p.width = 0.2f; p.ampGain = 1.0f;
-            p.postGain = 8.000f; // level-match: peak momentary -> bank median
+                p.postGain = 8.000f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f, 3); p.drift = 0.0f;
     filt(p, FilterMode::SvfBP, 0.78f, 0.62f, 0.0f, 0.0f, 0.8f);
     p.env[0] = EnvParams{0.001f, 0.06f, 0.0f, 0.04f, 0.2f};
@@ -1665,7 +1674,7 @@ void perc_conga(SynthPatch& p)
 {
     // Conga: tighter, higher tom — quick slap, small drop. Dry.
     setName(p, "CONGA"); p.category = 9; p.width = 0.3f; p.ampGain = 0.9f;
-            p.postGain = 5.388f; // level-match: peak momentary -> bank median
+                p.postGain = 3.584f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f, 3); p.drift = 0.0f;
     filt(p, FilterMode::SvfBP, 0.6f, 0.25f, 0.0f, 0.0f, 0.8f);
     p.env[0] = EnvParams{0.001f, 0.12f, 0.0f, 0.07f, 0.3f};
@@ -1679,7 +1688,7 @@ void perc_zap(SynthPatch& p)
     // Zap: big fast pitch dive on a square — classic electro fx hit. A touch of
     // delay is the point here, but no chorus.
     setName(p, "LASER ZAP"); p.category = 9; p.width = 0.4f; p.ampGain = 0.85f;
-            p.postGain = 1.73f; // level-match
+                p.postGain = 1.728f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f, 3); p.osc[0].pw = 0.45f; p.drift = 0.0f;
     filt(p, FilterMode::SvfLP, 0.8f, 0.2f, 0.0f, 0.0f, 0.6f);
     p.env[0] = EnvParams{0.001f, 0.18f, 0.0f, 0.1f, 0.2f};
@@ -1693,7 +1702,7 @@ void perc_zap(SynthPatch& p)
 void amb_glacier(SynthPatch& p)
 {
     setName(p, "GLACIER"); p.category = 10; p.width = 0.92f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 1.211f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.211f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.08f, 0.9f); osc(p, 3, SAW, -0.12f, 0.5f, 3);
     p.drift = 0.5f;
     filt(p, FilterMode::SvfLP, 0.45f, 0.15f, 0.15f);
@@ -1708,7 +1717,7 @@ void amb_glacier(SynthPatch& p)
 void amb_shimmer(SynthPatch& p)
 {
     setName(p, "SHIMMER"); p.category = 10; p.width = 0.92f; p.ampGain = 0.58f; p.chorusMode = 2;
-                p.postGain = 1.251f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.251f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.7f, 3); osc(p, 3, TRI, 0.05f, 0.4f, 4);
     p.fm2to1 = 0.15f; p.drift = 0.3f;
     filt(p, FilterMode::SvfLP, 0.6f, 0.1f, 0.15f);
@@ -1724,7 +1733,7 @@ void amb_choir(SynthPatch& p)
     // renamed from VOX CHOIR: names must be unique (session-restore and save
     // look presets up by name; the PAD bank already owns VOX CHOIR)
     setName(p, "GHOST CHOIR"); p.category = 10; p.width = 0.9f; p.ampGain = 0.50f; p.chorusMode = 2;
-                p.postGain = 1.663f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.663f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f;
     osc(p, 1, PULSE, 0.08f, 1.0f); p.osc[1].pw = 0.44f;
     osc(p, 3, PULSE, -0.1f, 0.7f); p.osc[3].pw = 0.52f;
@@ -1742,7 +1751,7 @@ void amb_choir(SynthPatch& p)
 void amb_deep(SynthPatch& p)
 {
     setName(p, "DEEP SPACE"); p.category = 10; p.width = 0.95f; p.ampGain = 0.56f; p.chorusMode = 2;
-                p.postGain = 1.269f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.269f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SAW, 0.1f, 0.5f, 1); osc(p, 3, SINE, -0.06f, 0.4f, 4);
     p.subLevel = 0.2f; p.ringMod = 0.12f; p.drift = 0.45f;
     filt(p, FilterMode::SvfLP, 0.4f, 0.2f, 0.12f);
@@ -1757,7 +1766,7 @@ void amb_deep(SynthPatch& p)
 void amb_aurora(SynthPatch& p)
 {
     setName(p, "AURORA"); p.category = 10; p.width = 0.92f; p.ampGain = 0.58f; p.chorusMode = 2;
-                p.postGain = 1.165f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.165f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 0.8f); osc(p, 3, SAW, -0.14f, 0.5f);
     osc(p, 4, SINE, 0.06f, 0.4f, 3); p.drift = 0.4f;
     filt(p, FilterMode::SvfLP, 0.5f, 0.16f, 0.18f);
@@ -1772,7 +1781,7 @@ void amb_aurora(SynthPatch& p)
 void amb_drift(SynthPatch& p)
 {
     setName(p, "DRIFT"); p.category = 10; p.width = 0.92f; p.ampGain = 0.58f; p.chorusMode = 2;
-                p.postGain = 1.258f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.258f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.1f, 0.8f); osc(p, 3, SINE, -0.08f, 0.4f, 3);
     p.drift = 0.5f;
     filt(p, FilterMode::SvfLP, 0.45f, 0.15f, 0.15f);
@@ -1787,7 +1796,7 @@ void amb_drift(SynthPatch& p)
 void amb_underwater(SynthPatch& p)
 {
     setName(p, "UNDERWATER"); p.category = 10; p.width = 0.9f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 1.036f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.036f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.06f, 0.7f); p.subLevel = 0.15f; p.drift = 0.4f;
     filt(p, FilterMode::SvfLP, 0.32f, 0.3f, 0.12f);
     p.env[0] = EnvParams{1.6f, 2.0f, 0.9f, 3.0f, 0.1f};
@@ -1800,7 +1809,7 @@ void amb_underwater(SynthPatch& p)
 void amb_meadow(SynthPatch& p)
 {
     setName(p, "MEADOW"); p.category = 10; p.width = 0.92f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 1.000f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.000f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.1f, 0.7f); osc(p, 3, SINE, 0.05f, 0.4f, 3);
     p.noiseLevel = 0.05f; p.drift = 0.4f;
     filt(p, FilterMode::SvfLP, 0.55f, 0.12f, 0.18f);
@@ -1814,7 +1823,7 @@ void amb_meadow(SynthPatch& p)
 void amb_dust(SynthPatch& p)
 {
     setName(p, "STARDUST"); p.category = 10; p.width = 0.95f; p.ampGain = 0.56f; p.chorusMode = 2;
-                p.postGain = 2.383f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.378f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f, 3); osc(p, 1, SINE, 0.03f, 0.6f, 4);
     p.ringMod = 0.15f; p.noiseLevel = 0.04f; p.drift = 0.35f;
     filt(p, FilterMode::SvfHP, 0.4f, 0.1f, 0.1f);
@@ -1828,7 +1837,7 @@ void amb_dust(SynthPatch& p)
 void amb_breath(SynthPatch& p)
 {
     setName(p, "BREATH"); p.category = 10; p.width = 0.9f; p.ampGain = 0.56f; p.chorusMode = 2;
-                p.postGain = 1.795f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.795f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; osc(p, 1, PULSE, 0.07f, 0.8f);
     p.noiseLevel = 0.1f; p.drift = 0.3f;
     filt(p, FilterMode::SvfBP, 0.5f, 0.35f, 0.12f);
@@ -1842,7 +1851,7 @@ void amb_breath(SynthPatch& p)
 void amb_crystal(SynthPatch& p)
 {
     setName(p, "CRYSTAL"); p.category = 10; p.width = 0.9f; p.ampGain = 0.6f; p.chorusMode = 2;
-                p.postGain = 2.509f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.509f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.01f, 0.8f, 4);
     p.osc[1].oscType = 1; p.osc[1].wtTable = 8; p.osc[1].wtMorph = 0.3f; // glassy WT layer
     p.fm2to1 = 0.2f; p.ringMod = 0.2f; p.drift = 0.2f;
@@ -1858,7 +1867,7 @@ void amb_crystal(SynthPatch& p)
 void amb_nebula(SynthPatch& p)
 {
     setName(p, "NEBULA"); p.category = 10; p.width = 0.95f; p.ampGain = 0.56f; p.chorusMode = 2;
-                p.postGain = 0.466f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.468f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.16f, 0.8f); osc(p, 2, PULSE, -0.14f, 0.6f);
     osc(p, 3, SINE, 0.08f, 0.4f, 1); p.drift = 0.5f;
     filt(p, FilterMode::SvfLP, 0.42f, 0.2f, 0.15f);
@@ -1874,7 +1883,7 @@ void amb_nebula(SynthPatch& p)
 void amb_tape(SynthPatch& p)
 {
     setName(p, "TAPE PAD"); p.category = 10; p.width = 0.85f; p.ampGain = 0.62f; p.chorusMode = 2;
-                p.postGain = 1.188f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.188f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.08f, 0.8f);
     p.osc[0].crush = 0.12f; p.osc[0].srReduce = 0.15f; // gentle tape grain
     p.subLevel = 0.12f; p.drift = 0.45f;               // heavy drift = tape wow
@@ -1889,7 +1898,7 @@ void amb_tape(SynthPatch& p)
 void amb_warmth(SynthPatch& p)
 {
     setName(p, "WARMTH"); p.category = 10; p.width = 0.85f; p.ampGain = 0.43f; p.chorusMode = 2;
-                p.postGain = 0.903f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.903f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.07f, 0.9f); osc(p, 3, TRI, -0.05f, 0.5f, 1);
     p.subLevel = 0.2f; p.drift = 0.35f;
     filt(p, FilterMode::LadderLP, 0.4f, 0.12f, 0.2f, 0.25f, 0.3f);
@@ -1905,7 +1914,7 @@ void amb_warmth(SynthPatch& p)
 void seq_trance(SynthPatch& p)
 {
     setName(p, "TRANCE GATE"); p.category = 11; p.width = 0.8f; p.ampGain = 0.62f; p.chorusMode = 2;
-                p.postGain = 0.439f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.437f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 1.0f); osc(p, 3, SAW, -0.1f, 0.6f);
     p.subLevel = 0.12f; p.drift = 0.25f;
     filt(p, FilterMode::LadderLP, 0.55f, 0.15f, 0.2f, 0.15f, 0.4f);
@@ -1925,7 +1934,7 @@ void seq_trance(SynthPatch& p)
 void seq_acid(SynthPatch& p)
 {
     setName(p, "ACID LINE"); p.category = 11; p.width = 0.4f; p.ampGain = 0.74f;
-                p.postGain = 1.201f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.201f; // level-match: peak momentary -> bank median
     p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.05f;
     osc(p, 0, SAW, 0.0f, 1.0f); p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.3f, 0.45f, 0.5f, 0.4f, 0.3f);
@@ -1952,7 +1961,7 @@ void seq_acid(SynthPatch& p)
 void seq_wobble(SynthPatch& p)
 {
     setName(p, "WOBBLE SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.28f;
-                p.postGain = 0.478f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.478f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.15f, 1.0f); osc(p, 2, PULSE, -0.12f, 0.8f);
     p.subLevel = 0.3f; p.fxDrive = 0.25f; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.35f, 0.4f, 0.3f, 0.4f, 0.3f);
@@ -1971,7 +1980,7 @@ void seq_wobble(SynthPatch& p)
 void seq_blade(SynthPatch& p)
 {
     setName(p, "BLADE SEQ"); p.category = 11; p.width = 0.9f; p.ampGain = 0.56f; p.chorusMode = 2;
-                p.postGain = 0.962f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.962f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; osc(p, 1, SAW, 0.12f, 1.0f);
     osc(p, 2, SAW, -0.1f, 0.8f); osc(p, 3, SAW, 0.22f, 0.6f); osc(p, 4, SAW, -0.05f, 0.5f, 1);
     p.subLevel = 0.1f; p.drift = 0.3f;
@@ -1993,7 +2002,7 @@ void seq_blade(SynthPatch& p)
 void seq_hoover(SynthPatch& p)
 {
     setName(p, "HOOVER SEQ"); p.category = 11; p.width = 0.78f; p.ampGain = 0.37f;
-                p.postGain = 0.593f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.593f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.18f, 0.9f); p.osc[1].pw = 0.4f;
     osc(p, 2, SAW, -0.16f, 0.85f); osc(p, 3, SAW, 0.3f, 0.7f); osc(p, 4, PULSE, -0.28f, 0.6f);
     p.subLevel = 0.14f; p.drift = 0.3f;
@@ -2015,7 +2024,7 @@ void seq_hoover(SynthPatch& p)
 void seq_pulse(SynthPatch& p)
 {
     setName(p, "PULSE SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.72f;
-                p.postGain = 0.908f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.908f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; osc(p, 1, PULSE, 0.06f, 0.7f);
     p.subLevel = 0.12f; p.drift = 0.15f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.2f, 0.4f, 0.15f, 0.4f);
@@ -2041,7 +2050,7 @@ void seq_pulse(SynthPatch& p)
 void seq_pluckseq(SynthPatch& p)
 {
     setName(p, "PLUCK SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 1.00f;
-                p.postGain = 1.561f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.561f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.08f, 0.5f); p.drift = 0.15f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.25f, 0.6f, 0.2f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.16f, 0.0f, 0.12f, 0.15f};
@@ -2060,7 +2069,7 @@ void seq_pluckseq(SynthPatch& p)
 void seq_chordseq(SynthPatch& p)
 {
     setName(p, "CHORD SEQ"); p.category = 11; p.width = 0.75f; p.ampGain = 0.88f; p.chorusMode = 2;
-                p.postGain = 0.788f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.788f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 0.9f); osc(p, 3, SAW, -0.1f, 0.6f);
     p.drift = 0.25f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.18f, 0.4f, 0.15f, 0.4f);
@@ -2086,7 +2095,7 @@ void seq_chordseq(SynthPatch& p)
 void seq_sh(SynthPatch& p)
 {
     setName(p, "S&H SEQ"); p.category = 11; p.width = 0.6f; p.ampGain = 0.74f;
-                p.postGain = 0.802f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.802f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.08f, 0.7f); p.subLevel = 0.12f; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.28f, 0.4f, 0.2f, 0.4f);
     p.env[0] = EnvParams{0.004f, 0.3f, 0.4f, 0.2f, 0.1f};
@@ -2105,7 +2114,7 @@ void seq_sh(SynthPatch& p)
 void seq_gate(SynthPatch& p)
 {
     setName(p, "GATE SEQ"); p.category = 11; p.width = 0.8f; p.ampGain = 0.62f; p.chorusMode = 2;
-                p.postGain = 0.412f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.412f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.12f, 1.0f); osc(p, 3, SAW, -0.1f, 0.6f);
     p.drift = 0.25f;
     filt(p, FilterMode::LadderLP, 0.55f, 0.15f, 0.2f, 0.15f, 0.4f);
@@ -2125,7 +2134,7 @@ void seq_gate(SynthPatch& p)
 void seq_arpbass(SynthPatch& p)
 {
     setName(p, "ARP BASS"); p.category = 11; p.width = 0.4f; p.ampGain = 1.00f;
-                p.postGain = 2.131f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.131f; // level-match: peak momentary -> bank median
     p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.4f, 1); p.subLevel = 0.25f; p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.4f, 0.28f, 0.5f, 0.25f, 0.3f);
@@ -2145,7 +2154,7 @@ void seq_arpbass(SynthPatch& p)
 void seq_8bit(SynthPatch& p)
 {
     setName(p, "CHIPTUNE"); p.category = 11; p.width = 0.5f; p.ampGain = 0.72f;
-                p.postGain = 1.134f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.134f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.5f; p.osc[0].crush = 0.55f; p.osc[0].srReduce = 0.4f;
     p.drift = 0.0f;
     filt(p, FilterMode::SvfLP, 0.85f, 0.05f, 0.05f);
@@ -2166,7 +2175,7 @@ void seq_8bit(SynthPatch& p)
 void seq2_a(SynthPatch& p)
 {
     setName(p, "SUB STEPPER"); p.category = 11; p.width = 0.35f; p.ampGain = 0.74f;
-                p.postGain = 1.038f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.038f; // level-match: peak momentary -> bank median
     p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.04f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.5f, 1); p.subLevel = 0.35f; p.drift = 0.12f;
     filt(p, FilterMode::LadderLP, 0.32f, 0.34f, 0.5f, 0.3f, 0.3f);
@@ -2193,7 +2202,7 @@ void seq2_a(SynthPatch& p)
 void seq2_b(SynthPatch& p)
 {
     setName(p, "GATE RUSH"); p.category = 11; p.width = 0.85f; p.ampGain = 0.36f; p.chorusMode = 2;
-                p.postGain = 0.427f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.427f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.14f, 1.0f); osc(p, 2, PULSE, -0.11f, 0.7f);
     osc(p, 3, SAW, 0.26f, 0.6f); p.subLevel = 0.1f; p.drift = 0.28f;
     filt(p, FilterMode::SvfLP, 0.6f, 0.18f, 0.2f, 0.0f, 0.4f);
@@ -2218,7 +2227,7 @@ void seq2_b(SynthPatch& p)
 void seq2_c(SynthPatch& p)
 {
     setName(p, "POLY DRIFT"); p.category = 11; p.width = 0.7f; p.ampGain = 0.66f; p.chorusMode = 2;
-                p.postGain = 0.962f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.962f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.1f, 0.8f); p.osc[1].pw = 0.45f; p.drift = 0.22f;
     filt(p, FilterMode::LadderLP, 0.45f, 0.26f, 0.35f, 0.15f, 0.4f);
     p.env[0] = EnvParams{0.006f, 0.3f, 0.45f, 0.2f, 0.1f};
@@ -2242,7 +2251,7 @@ void seq2_c(SynthPatch& p)
 void seq2_d(SynthPatch& p)
 {
     setName(p, "CHANCE SEQ"); p.category = 11; p.width = 0.65f; p.ampGain = 0.68f;
-                p.postGain = 0.947f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.947f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.07f, 0.6f); p.subLevel = 0.14f; p.drift = 0.2f;
     filt(p, FilterMode::Steiner, 0.42f, 0.3f, 0.4f, 0.2f, 0.4f);
     p.env[0] = EnvParams{0.004f, 0.26f, 0.35f, 0.18f, 0.12f};
@@ -2266,7 +2275,7 @@ void seq2_d(SynthPatch& p)
 void seq2_e(SynthPatch& p)
 {
     setName(p, "STAB RUSH"); p.category = 11; p.width = 0.78f; p.ampGain = 0.88f; p.chorusMode = 2;
-                p.postGain = 0.762f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.762f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, SAW, 0.13f, 0.9f); osc(p, 2, SAW, -0.1f, 0.7f);
     osc(p, 3, PULSE, 0.2f, 0.5f); p.drift = 0.26f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.2f, 0.45f, 0.15f, 0.4f);
@@ -2293,7 +2302,7 @@ void seq2_e(SynthPatch& p)
 void seq2_f(SynthPatch& p)
 {
     setName(p, "CROSSWIRE"); p.category = 11; p.width = 0.72f; p.ampGain = 0.66f;
-                p.postGain = 0.767f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.769f; // level-match: peak momentary -> bank median
     osc(p, 0, PULSE, 0.0f, 1.0f); p.osc[0].pw = 0.45f; osc(p, 1, SAW, 0.1f, 0.85f);
     p.subLevel = 0.12f; p.drift = 0.2f;
     filt(p, FilterMode::LadderLP, 0.46f, 0.3f, 0.35f, 0.2f, 0.4f);
@@ -2318,7 +2327,7 @@ void seq2_f(SynthPatch& p)
 void seq2_g(SynthPatch& p)
 {
     setName(p, "WT SCANNER"); p.category = 11; p.width = 0.68f; p.ampGain = 0.64f; p.chorusMode = 2;
-                p.postGain = 0.827f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.827f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); p.osc[0].oscType = 1; p.osc[0].wtTable = 6; p.osc[0].wtMorph = 0.3f;
     osc(p, 1, SAW, 0.08f, 0.6f); p.osc[1].oscType = 1; p.osc[1].wtTable = 18; p.drift = 0.18f;
     filt(p, FilterMode::SvfLP, 0.55f, 0.2f, 0.3f, 0.1f, 0.4f);
@@ -2343,7 +2352,7 @@ void seq2_g(SynthPatch& p)
 void seq2_h(SynthPatch& p)
 {
     setName(p, "FOLD STEP"); p.category = 11; p.width = 0.55f; p.ampGain = 0.62f;
-                p.postGain = 0.658f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.660f; // level-match: peak momentary -> bank median
     p.voiceMode = (int) VoiceMode::Mono; p.glideMode = (int) GlideMode::Legato; p.glideTime = 0.03f;
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.7f); p.subLevel = 0.18f; p.drift = 0.12f;
     filt(p, FilterMode::LadderLP, 0.5f, 0.22f, 0.4f, 0.3f, 0.3f);
@@ -2370,7 +2379,7 @@ void seq2_h(SynthPatch& p)
 void seq2_i(SynthPatch& p)
 {
     setName(p, "PLUCK RUN"); p.category = 11; p.width = 0.7f; p.ampGain = 1.00f;
-                p.postGain = 3.133f; // level-match: peak momentary -> bank median
+                    p.postGain = 3.133f; // level-match: peak momentary -> bank median
     osc(p, 0, TRI, 0.0f, 1.0f); osc(p, 1, SAW, 0.06f, 0.45f); p.drift = 0.12f;
     filt(p, FilterMode::LadderLP, 0.42f, 0.26f, 0.65f, 0.15f, 0.5f);
     p.env[0] = EnvParams{0.002f, 0.13f, 0.0f, 0.1f, 0.18f};
@@ -2396,7 +2405,7 @@ void seq2_i(SynthPatch& p)
 void seq2_j(SynthPatch& p)
 {
     setName(p, "FM STEPPER"); p.category = 11; p.width = 0.6f; p.ampGain = 0.66f;
-                p.postGain = 1.538f; // level-match: peak momentary -> bank median
+                    p.postGain = 1.538f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, SINE, 0.0f, 0.8f); p.fm2to1 = 0.4f; p.drift = 0.1f;
     filt(p, FilterMode::LadderLP, 0.6f, 0.14f, 0.3f, 0.1f, 0.5f);
     p.env[0] = EnvParams{0.003f, 0.3f, 0.3f, 0.18f, 0.12f};
@@ -2420,7 +2429,7 @@ void seq2_j(SynthPatch& p)
 void seq2_k(SynthPatch& p)
 {
     setName(p, "RING STEP"); p.category = 11; p.width = 0.66f; p.ampGain = 1.00f;
-                p.postGain = 2.661f; // level-match: peak momentary -> bank median
+                    p.postGain = 2.661f; // level-match: peak momentary -> bank median
     osc(p, 0, SINE, 0.0f, 1.0f); osc(p, 1, TRI, 0.0f, 0.9f); p.ringMod = 0.3f; p.drift = 0.12f;
     filt(p, FilterMode::SvfBP, 0.55f, 0.3f, 0.25f, 0.1f, 0.4f);
     p.env[0] = EnvParams{0.004f, 0.28f, 0.3f, 0.2f, 0.12f};
@@ -2444,7 +2453,7 @@ void seq2_k(SynthPatch& p)
 void seq2_l(SynthPatch& p)
 {
     setName(p, "TRIPLE MOD"); p.category = 11; p.width = 0.8f; p.ampGain = 0.62f; p.chorusMode = 2;
-                p.postGain = 0.631f; // level-match: peak momentary -> bank median
+                    p.postGain = 0.630f; // level-match: peak momentary -> bank median
     osc(p, 0, SAW, 0.0f, 1.0f); osc(p, 1, PULSE, 0.1f, 0.8f); p.osc[1].pw = 0.4f;
     osc(p, 2, SAW, -0.12f, 0.6f); p.subLevel = 0.1f; p.drift = 0.24f;
     filt(p, FilterMode::LadderLP, 0.48f, 0.24f, 0.3f, 0.15f, 0.4f);
