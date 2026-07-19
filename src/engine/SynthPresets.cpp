@@ -1528,7 +1528,7 @@ void perc_kick(SynthPatch& p)
     p.env[2] = EnvParams{0.001f, 0.025f, 0.0f, 0.02f, 0.0f};
     mod(p, 0, ModSource::EnvAux, ModDest::Pitch, 1.15f);     // ~+14 semi, fast
     mod(p, 1, ModSource::Velocity, ModDest::Amp, 0.35f);
-    p.fxDrive = 0.32f; p.driveMode = 1; p.driveTone = -0.25f;
+    p.fxDrive = 0.42f; p.driveMode = 1; p.driveTone = -0.05f;
     p.fxChorus = 0.0f; p.fxDelay = 0.0f; p.fxReverb = 0.0f; p.fxPhaser = 0.0f;
 }
 void perc_snare(SynthPatch& p)
