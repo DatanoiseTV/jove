@@ -8,13 +8,13 @@
 <meta property="og:title" content="Jove — analog-inspired polysynth">
 <meta property="og:description" content="Free, open-source polysynth: five morphing oscillators, dual filters, mod matrix, and a patchbay that rewires the voice. AU / VST3 / Standalone.">
 <meta property="og:image" content="https://datanoisetv.github.io/jove/img/voice.png">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230d0e10'/><text x='16' y='22' font-family='Helvetica' font-weight='800' font-size='16' fill='%234d9bff' text-anchor='middle'>J</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230d0e10'/><text x='16' y='22' font-family='Helvetica' font-weight='800' font-size='16' fill='%23f0f1f3' text-anchor='middle'>J</text></svg>">
 <style>
 :root{
-  --bg:#0d0e10; --panel:#16171b; --panel2:#1c1e23; --sunk:#0f1013;
-  --line:#25272d; --line2:#34373f;
-  --ink:#e9eaed; --ink2:#8d909a; --ink3:#595c65;
-  --accent:#4d9bff; --accent-dim:#2c4a73; --good:#46d08a; --hot:#ff6b6b;
+  --bg:#0a0a0b; --panel:#131315; --panel2:#1a1a1d; --sunk:#0e0e10;
+  --line:#242427; --line2:#343438;
+  --ink:#f0f1f3; --ink2:#8f9095; --ink3:#5a5b60;
+  --accent:#f0f1f3; --accent-dim:#4a4b50; --good:#c9cacd; --hot:#9a9ba0;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -27,7 +27,7 @@ section{padding:72px 0}
 h2{font-size:13px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
 h3{font-size:30px;font-weight:750;letter-spacing:-.4px;margin-bottom:14px}
 p.lead{color:var(--ink2);max-width:640px}
-.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:2px 7px}
 
 /* ---- nav ---- */
 nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
@@ -37,7 +37,7 @@ nav .wrap{display:flex;align-items:center;gap:26px;height:58px}
 nav a.nl{color:var(--ink2);font-size:13px;letter-spacing:1px}
 nav a.nl:hover{color:var(--ink);text-decoration:none}
 nav .spacer{flex:1}
-.btn{display:inline-block;background:var(--accent);color:#06080c;font-weight:700;font-size:14px;letter-spacing:.5px;padding:10px 20px;border-radius:9px;border:0;cursor:pointer}
+.btn{display:inline-block;background:var(--accent);color:#06080c;font-weight:700;font-size:14px;letter-spacing:.5px;padding:10px 20px;border-radius:3px;border:0;cursor:pointer}
 .btn:hover{filter:brightness(1.12);text-decoration:none}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
 .btn.ghost:hover{border-color:var(--accent)}
@@ -51,14 +51,14 @@ nav .spacer{flex:1}
 .hero .sub{color:var(--ink3);font-size:13.5px;letter-spacing:1px}
 .hero .cta{margin:30px 0 14px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
-.badge{font-size:11.5px;letter-spacing:1px;color:var(--ink2);border:1px solid var(--line);border-radius:99px;padding:4px 12px;background:var(--panel)}
-.shot{margin-top:44px;border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(77,155,255,.06)}
+.badge{font-size:11.5px;letter-spacing:1px;color:var(--ink2);border:1px solid var(--line);border-radius:3px;padding:4px 12px;background:var(--panel)}
+.shot{margin-top:44px;border:1px solid var(--line2);border-radius:3px;overflow:hidden;box-shadow:0 40px 90px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(240,241,243,.05)}
 .shot img{width:100%}
 
 /* ---- demos / player ---- */
 .demos{background:var(--sunk);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:30px}
-.dcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;transition:border-color .15s}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px;transition:border-color .15s}
 .dcard:hover{border-color:var(--line2)}
 .dcard.playing{border-color:var(--accent)}
 .dtop{display:flex;align-items:center;gap:12px}
@@ -78,7 +78,7 @@ nav .spacer{flex:1}
 /* ---- tabs / features ---- */
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;margin-top:56px}
 .feat:nth-child(even) .fimg{order:2}
-.feat .fimg{border:1px solid var(--line2);border-radius:12px;overflow:hidden;box-shadow:0 26px 60px -24px rgba(0,0,0,.8)}
+.feat .fimg{border:1px solid var(--line2);border-radius:4px;overflow:hidden;box-shadow:0 26px 60px -24px rgba(0,0,0,.8)}
 .feat h4{font-size:22px;font-weight:700;margin-bottom:10px}
 .feat h4 i{font-style:normal;color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:13px;letter-spacing:2px;display:block;margin-bottom:6px}
 .feat p{color:var(--ink2);font-size:15px}
@@ -88,26 +88,44 @@ nav .spacer{flex:1}
 
 /* ---- architecture ---- */
 .arch{background:var(--sunk);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.diagram{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px;margin-top:28px;overflow-x:auto}
-.diagram svg{display:block;min-width:820px;width:100%;height:auto}
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:26px;margin-top:28px;overflow-x:auto}
+
 .diagram figcaption{margin-top:14px;color:var(--ink3);font-size:13px}
-.dg-label{fill:var(--ink);font:600 12.5px -apple-system,'Segoe UI',sans-serif}
-.dg-sub{fill:var(--ink3);font:500 9.5px -apple-system,'Segoe UI',sans-serif;letter-spacing:.4px}
-.dg-cat{fill:var(--accent);font:700 10px ui-monospace,Menlo,monospace;letter-spacing:2.5px}
-.dg-box{fill:var(--panel2);stroke:var(--line2);rx:8}
-.dg-box.hot{stroke:var(--accent)}
-.dg-group{fill:none;stroke:var(--line);stroke-dasharray:5 4;rx:12}
-.dg-wire{stroke:var(--accent-dim);stroke-width:1.6;fill:none}
-.dg-wire.hi{stroke:var(--accent)}
+.dgtitle{font:700 10px ui-monospace,Menlo,monospace;letter-spacing:2.5px;color:var(--ink2);margin:4px 0 12px;text-align:center}
+.crow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.fstack{display:flex;flex-direction:column;gap:8px}
+.fbox{background:var(--panel2);border:1px solid var(--line2);border-radius:4px;padding:7px 11px;text-align:center;white-space:nowrap}
+.fbox b{display:block;font:600 12.5px/1.35 -apple-system,'Segoe UI',sans-serif;color:var(--ink)}
+.fbox span{display:block;font:500 9.5px/1.4 -apple-system,'Segoe UI',sans-serif;letter-spacing:.4px;color:var(--ink3)}
+.fbox.hot{border-color:var(--ink2)}
+.fbox.dash{border-style:dashed}
+.fbox.pb{margin:16px auto 0;width:max-content;max-width:100%}
+.fbox.big{padding:16px 24px}
+.fbox.big b{font-size:15px}
+.ar{color:var(--ink3);font-size:15px;line-height:1;user-select:none}
+.ar.big{font-size:24px;color:var(--ink2)}
+.sumline{font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:2px;color:var(--ink2);text-align:center;margin:16px 0}
+.fgrp{border:1px dashed var(--line);border-radius:5px;padding:14px 16px}
+.fgrp h5{font:700 10px ui-monospace,Menlo,monospace;letter-spacing:2.5px;color:var(--ink2);margin:0 0 10px}
+.fpair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fbox.wide{margin-top:8px}
+.fnote{font:500 9.5px -apple-system,'Segoe UI',sans-serif;letter-spacing:.4px;color:var(--ink3)}
+.fnote.center{text-align:center;margin-top:12px}
+.fout{font:700 13px -apple-system,'Segoe UI',sans-serif;color:var(--ink);letter-spacing:1px;border:1px solid var(--ink2);border-radius:4px;padding:9px 14px}
+.crow.wideg{gap:22px}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap;max-width:110px;margin-left:auto;margin-right:auto}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--accent-dim)}
+.dots i.a{background:var(--ink)}
+.dots i.h{background:var(--ink3)}
 
 /* ---- specs ---- */
 .specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:30px}
-.spec{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.spec{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
 .spec b{display:block;font-size:13px;letter-spacing:1px;color:var(--accent);margin-bottom:6px;text-transform:uppercase}
 .spec span{color:var(--ink2);font-size:14px}
 
 /* ---- get / footer ---- */
-.get pre{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:16px 18px;overflow-x:auto;font:13px/1.6 ui-monospace,Menlo,monospace;color:var(--ink2);margin-top:16px}
+.get pre{background:var(--sunk);border:1px solid var(--line);border-radius:4px;padding:16px 18px;overflow-x:auto;font:13px/1.6 ui-monospace,Menlo,monospace;color:var(--ink2);margin-top:16px}
 .get pre b{color:var(--ink)}
 footer{border-top:1px solid var(--line);padding:34px 0;color:var(--ink3);font-size:13px}
 footer .wrap{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
@@ -231,166 +249,81 @@ footer .spacer{flex:1}
   <p class="lead">The full voice path runs at 1&times;, 2&times; or 4&times; oversampling. Gain staging is
      designed so the output limiter almost never engages — it protects, it doesn’t colour.</p>
 
-  <figure class="diagram">
-    <svg viewBox="0 0 1060 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jove voice signal flow diagram">
-      <defs>
-        <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0 L8 4 L0 8 z" fill="#2c4a73"/>
-        </marker>
-        <marker id="arrh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M0 0 L8 4 L0 8 z" fill="#4d9bff"/>
-        </marker>
-      </defs>
-
-      <text x="30" y="28" class="dg-cat">PER VOICE &#215;16</text>
-      <rect x="22" y="38" width="472" height="238" class="dg-group"/>
-
-      <!-- sources -->
-      <rect x="38" y="52" width="120" height="34" class="dg-box"/>
-      <text x="98" y="68" text-anchor="middle" class="dg-label">OSC 1&#8211;5</text>
-      <text x="98" y="80" text-anchor="middle" class="dg-sub">BLEP morph / wavetable</text>
-      <rect x="38" y="96" width="120" height="30" class="dg-box"/>
-      <text x="98" y="111" text-anchor="middle" class="dg-label">SUB &middot; NOISE</text>
-      <text x="98" y="121" text-anchor="middle" class="dg-sub">-1/-2 oct &middot; white</text>
-      <rect x="38" y="136" width="120" height="30" class="dg-box"/>
-      <text x="98" y="151" text-anchor="middle" class="dg-label">RING &middot; FM</text>
-      <text x="98" y="161" text-anchor="middle" class="dg-sub">cross-mod &middot; sync</text>
-
-      <!-- mixer -->
-      <rect x="196" y="88" width="84" height="52" class="dg-box"/>
-      <text x="238" y="112" text-anchor="middle" class="dg-label">MIXER</text>
-      <text x="238" y="124" text-anchor="middle" class="dg-sub">levels &middot; balance</text>
-      <path class="dg-wire" d="M158 69 C180 69 178 100 196 104" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M158 111 H196" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M158 151 C180 151 178 126 196 122" marker-end="url(#arr)"/>
-
-      <!-- filters -->
-      <rect x="318" y="60" width="104" height="44" class="dg-box hot"/>
-      <text x="370" y="79" text-anchor="middle" class="dg-label">FILTER 1</text>
-      <text x="370" y="92" text-anchor="middle" class="dg-sub">ladder &middot; SVF &middot; LPG &middot; Steiner</text>
-      <rect x="318" y="124" width="104" height="44" class="dg-box"/>
-      <text x="370" y="143" text-anchor="middle" class="dg-label">FILTER 2</text>
-      <text x="370" y="156" text-anchor="middle" class="dg-sub">single / serial / parallel</text>
-      <path class="dg-wire" d="M280 106 C300 104 300 84 318 82" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M280 118 C300 120 300 144 318 146" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M370 104 V124" marker-end="url(#arr)"/>
-
-      <!-- VCA -->
-      <rect x="398" y="212" width="76" height="42" class="dg-box"/>
-      <text x="436" y="231" text-anchor="middle" class="dg-label">VCA</text>
-      <text x="436" y="244" text-anchor="middle" class="dg-sub">amp env &middot; velocity</text>
-      <path class="dg-wire" d="M422 82 C466 86 436 160 436 212" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M422 146 C446 152 436 180 436 212"/>
-
-      <!-- patchbay overlay -->
-      <rect x="196" y="196" width="150" height="58" class="dg-box" stroke-dasharray="4 3"/>
-      <text x="271" y="217" text-anchor="middle" class="dg-label">PATCHBAY</text>
-      <text x="271" y="230" text-anchor="middle" class="dg-sub">11&#215;11 rewires this path</text>
-      <text x="271" y="242" text-anchor="middle" class="dg-sub">FM &middot; filters &middot; ring &middot; feedback</text>
-
-      <!-- FX chain -->
-      <text x="530" y="28" class="dg-cat">SUM &rarr; FX CHAIN</text>
-      <rect x="522" y="38" width="416" height="238" class="dg-group"/>
-      <g>
-        <rect x="538" y="60" width="88" height="40" class="dg-box hot"/>
-        <text x="582" y="78" text-anchor="middle" class="dg-label">DRIVE</text>
-        <text x="582" y="91" text-anchor="middle" class="dg-sub">5 models &middot; gain-comp</text>
-        <rect x="642" y="60" width="88" height="40" class="dg-box"/>
-        <text x="686" y="78" text-anchor="middle" class="dg-label">MB SAT</text>
-        <text x="686" y="91" text-anchor="middle" class="dg-sub">3-band</text>
-        <rect x="746" y="60" width="88" height="40" class="dg-box"/>
-        <text x="790" y="78" text-anchor="middle" class="dg-label">CHORUS</text>
-        <text x="790" y="91" text-anchor="middle" class="dg-sub">I &middot; II &middot; ensemble</text>
-        <rect x="850" y="60" width="72" height="40" class="dg-box"/>
-        <text x="886" y="78" text-anchor="middle" class="dg-label">PHASER</text>
-        <text x="886" y="91" text-anchor="middle" class="dg-sub">6-stage</text>
-      </g>
-      <g>
-        <rect x="538" y="150" width="88" height="40" class="dg-box"/>
-        <text x="582" y="168" text-anchor="middle" class="dg-label">DELAY</text>
-        <text x="582" y="181" text-anchor="middle" class="dg-sub">digi &middot; BBD &middot; tape</text>
-        <rect x="642" y="150" width="88" height="40" class="dg-box"/>
-        <text x="686" y="168" text-anchor="middle" class="dg-label">REVERB</text>
-        <text x="686" y="181" text-anchor="middle" class="dg-sub">pitch-stable</text>
-        <rect x="746" y="150" width="88" height="40" class="dg-box"/>
-        <text x="790" y="168" text-anchor="middle" class="dg-label">WIDTH &middot; TRIM</text>
-        <text x="790" y="181" text-anchor="middle" class="dg-sub">mid/side &middot; preset level</text>
-        <rect x="850" y="150" width="72" height="40" class="dg-box hot"/>
-        <text x="886" y="168" text-anchor="middle" class="dg-label">LIMITER</text>
-        <text x="886" y="181" text-anchor="middle" class="dg-sub">0.92 ceiling</text>
-      </g>
-      <path class="dg-wire hi" d="M474 233 C506 233 502 80 538 80" marker-end="url(#arrh)"/>
-      <path class="dg-wire" d="M626 80 H642" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M730 80 H746" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M834 80 H850" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M922 80 C948 84 948 128 922 146 H626 C600 146 600 166 626 170 H642" transform="translate(-104 0)"/>
-      <path class="dg-wire" d="M626 170 H642" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M730 170 H746" marker-end="url(#arr)"/>
-      <path class="dg-wire" d="M834 170 H850" marker-end="url(#arr)"/>
-      <path class="dg-wire hi" d="M886 190 V232 H938" marker-end="url(#arrh)"/>
-      <text x="946" y="236" class="dg-label" fill="#4d9bff">OUT</text>
-      <text x="530" y="266" class="dg-sub">whole voice path runs at 1&#215; / 2&#215; / 4&#215; (Eco &middot; HQ &middot; Ultra), half-band decimated back</text>
-    </svg>
-    <figcaption>The voice path. When the patchbay is on, the fixed osc &rarr; filter &rarr; VCA wiring is replaced
-    by an 11&times;11 bipolar gain matrix with one-sample-delayed feedback.</figcaption>
+  <figure class="diagram" id="dg-flow">
+    <div class="dgtitle">PER VOICE &#215;16</div>
+    <div class="crow">
+      <div class="fstack">
+        <div class="fbox"><b>OSC 1&#8211;5</b><span>BLEP morph / wavetable</span></div>
+        <div class="fbox"><b>SUB &middot; NOISE</b><span>-1/-2 oct &middot; white</span></div>
+        <div class="fbox"><b>RING &middot; FM</b><span>cross-mod &middot; sync</span></div>
+      </div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>MIXER</b><span>levels &middot; balance</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fstack">
+        <div class="fbox hot"><b>FILTER 1</b><span>ladder &middot; SVF &middot; LPG &middot; Steiner</span></div>
+        <div class="fbox"><b>FILTER 2</b><span>single / serial / parallel</span></div>
+      </div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>VCA</b><span>amp env &middot; velocity</span></div>
+    </div>
+    <div class="fbox dash pb"><b>PATCHBAY</b><span>when on, an 11&#215;11 bipolar matrix replaces the wiring above &mdash; FM &middot; filters &middot; ring &middot; feedback</span></div>
+    <div class="sumline">all 16 voices sum &#8595;</div>
+    <div class="dgtitle">FX CHAIN</div>
+    <div class="crow">
+      <div class="fbox hot"><b>DRIVE</b><span>5 models</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>MB SAT</b><span>3-band</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>CHORUS</b><span>I &middot; II &middot; ens</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>PHASER</b><span>6-stage</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>DELAY</b><span>digi &middot; BBD &middot; tape</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>REVERB</b><span>pitch-stable</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox"><b>WIDTH &middot; TRIM</b><span>m/s &middot; level</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fbox hot"><b>LIMITER</b><span>0.92 ceiling</span></div>
+      <span class="ar">&#8594;</span>
+      <div class="fout">OUT</div>
+    </div>
+    <div class="fnote center">whole voice path runs at 1&#215; / 2&#215; / 4&#215; (Eco &middot; HQ &middot; Ultra), half-band decimated back</div>
+    <figcaption>The voice path. Drive is gain-compensated; the limiter is the last stage and rarely engages.</figcaption>
   </figure>
 
-  <figure class="diagram">
-    <svg viewBox="0 0 1060 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jove modulation architecture diagram">
-      <text x="30" y="28" class="dg-cat">SOURCES</text>
-      <rect x="22" y="38" width="240" height="188" class="dg-group"/>
-      <rect x="38" y="52" width="100" height="32" class="dg-box"/>
-      <text x="88" y="68" text-anchor="middle" class="dg-label">3 &#215; ENV</text>
-      <text x="88" y="79" text-anchor="middle" class="dg-sub">amp &middot; filter &middot; aux</text>
-      <rect x="150" y="52" width="96" height="32" class="dg-box"/>
-      <text x="198" y="68" text-anchor="middle" class="dg-label">3 &#215; LFO</text>
-      <text x="198" y="79" text-anchor="middle" class="dg-sub">sync &middot; per-voice</text>
-      <rect x="38" y="96" width="100" height="32" class="dg-box"/>
-      <text x="88" y="112" text-anchor="middle" class="dg-label">4 &#215; SEQ</text>
-      <text x="88" y="123" text-anchor="middle" class="dg-sub">16-step lanes</text>
-      <rect x="150" y="96" width="96" height="32" class="dg-box"/>
-      <text x="198" y="112" text-anchor="middle" class="dg-label">MPE</text>
-      <text x="198" y="123" text-anchor="middle" class="dg-sub">press &middot; timbre &middot; bend</text>
-      <rect x="38" y="140" width="208" height="32" class="dg-box"/>
-      <text x="142" y="156" text-anchor="middle" class="dg-label">VEL &middot; KEY &middot; WHEEL &middot; AT &middot; BEND &middot; RAND</text>
-      <text x="142" y="167" text-anchor="middle" class="dg-sub">performance</text>
-      <text x="38" y="204" class="dg-sub">every source is live-metered in the UI</text>
-
-      <!-- matrix -->
-      <rect x="392" y="62" width="180" height="130" class="dg-box hot"/>
-      <text x="482" y="98" text-anchor="middle" class="dg-label" font-size="16">32-SLOT MATRIX</text>
-      <text x="482" y="116" text-anchor="middle" class="dg-sub">bipolar depth per route</text>
-      <g fill="#2c4a73">
-        <circle cx="437" cy="146" r="4"/><circle cx="460" cy="146" r="4" fill="#4d9bff"/><circle cx="483" cy="146" r="4"/><circle cx="506" cy="146" r="4" fill="#4d9bff"/><circle cx="529" cy="146" r="4"/>
-        <circle cx="437" cy="164" r="4" fill="#4d9bff"/><circle cx="460" cy="164" r="4"/><circle cx="483" cy="164" r="4" fill="#ff6b6b"/><circle cx="506" cy="164" r="4"/><circle cx="529" cy="164" r="4"/>
-      </g>
-      <path class="dg-wire hi" d="M262 122 H392" marker-end="url(#arrh)"/>
-
-      <!-- destinations -->
-      <text x="702" y="28" class="dg-cat">DESTINATIONS</text>
-      <rect x="694" y="38" width="344" height="188" class="dg-group"/>
-      <rect x="710" y="52" width="150" height="32" class="dg-box"/>
-      <text x="785" y="68" text-anchor="middle" class="dg-label">PITCH &middot; MORPH &middot; PW</text>
-      <text x="785" y="79" text-anchor="middle" class="dg-sub">global + per-oscillator</text>
-      <rect x="872" y="52" width="150" height="32" class="dg-box"/>
-      <text x="947" y="68" text-anchor="middle" class="dg-label">CUTOFF &middot; RESO &middot; DRIVE</text>
-      <text x="947" y="79" text-anchor="middle" class="dg-sub">both filters</text>
-      <rect x="710" y="96" width="150" height="32" class="dg-box"/>
-      <text x="785" y="112" text-anchor="middle" class="dg-label">AMP &middot; PAN &middot; MIX</text>
-      <text x="785" y="123" text-anchor="middle" class="dg-sub">tremolo &middot; autopan</text>
-      <rect x="872" y="96" width="150" height="32" class="dg-box"/>
-      <text x="947" y="112" text-anchor="middle" class="dg-label">LFO RATE / DEPTH</text>
-      <text x="947" y="123" text-anchor="middle" class="dg-sub">modulate the modulators</text>
-      <rect x="710" y="140" width="150" height="32" class="dg-box"/>
-      <text x="785" y="156" text-anchor="middle" class="dg-label">FM &middot; RING &middot; SUB</text>
-      <text x="785" y="167" text-anchor="middle" class="dg-sub">mix motion</text>
-      <rect x="872" y="140" width="150" height="32" class="dg-box"/>
-      <text x="947" y="156" text-anchor="middle" class="dg-label">ENV TIMES &middot; FX</text>
-      <text x="947" y="167" text-anchor="middle" class="dg-sub">attack/decay/release &middot; sends</text>
-      <path class="dg-wire hi" d="M572 122 H694" marker-end="url(#arrh)"/>
-      <text x="710" y="204" class="dg-sub">routes paint range arcs + live dots on the destination knobs</text>
-    </svg>
-    <figcaption>The modulation graph: 21 sources, 32 simultaneous routes, 35 destinations.</figcaption>
+  <figure class="diagram" id="dg-mod">
+    <div class="crow wideg">
+      <div class="fgrp">
+        <h5>SOURCES</h5>
+        <div class="fpair">
+          <div class="fbox"><b>3 &#215; ENV</b><span>amp &middot; filter &middot; aux</span></div>
+          <div class="fbox"><b>3 &#215; LFO</b><span>sync &middot; per-voice</span></div>
+          <div class="fbox"><b>4 &#215; SEQ</b><span>16-step lanes</span></div>
+          <div class="fbox"><b>MPE</b><span>pressure &middot; timbre &middot; bend</span></div>
+        </div>
+        <div class="fbox wide"><b>VEL &middot; KEY &middot; WHEEL &middot; AT &middot; BEND &middot; RAND</b><span>performance</span></div>
+      </div>
+      <span class="ar big">&#8594;</span>
+      <div class="fbox hot big"><b>32-SLOT MATRIX</b><span>bipolar depth per route</span>
+        <div class="dots"><i></i><i class="a"></i><i></i><i class="a"></i><i></i><i class="a"></i><i></i><i class="h"></i><i></i><i></i></div>
+      </div>
+      <span class="ar big">&#8594;</span>
+      <div class="fgrp">
+        <h5>DESTINATIONS</h5>
+        <div class="fpair">
+          <div class="fbox"><b>PITCH &middot; MORPH &middot; PW</b><span>global + per-oscillator</span></div>
+          <div class="fbox"><b>CUTOFF &middot; RESO &middot; DRIVE</b><span>both filters</span></div>
+          <div class="fbox"><b>AMP &middot; PAN &middot; MIX</b><span>tremolo &middot; autopan</span></div>
+          <div class="fbox"><b>LFO RATE / DEPTH</b><span>modulate the modulators</span></div>
+          <div class="fbox"><b>FM &middot; RING &middot; SUB</b><span>mix motion</span></div>
+          <div class="fbox"><b>ENV TIMES &middot; FX</b><span>envelope times &middot; sends</span></div>
+        </div>
+      </div>
+    </div>
+    <figcaption>The modulation graph: 21 sources, 32 simultaneous routes, 35 destinations. Every route
+    is painted on its destination knob as a range arc with a live dot.</figcaption>
   </figure>
 </div></section>
 
@@ -475,7 +408,7 @@ function drawWave(cv, id, progress) {
     const v = pk ? pk[i] : 0.06;
     const bh = Math.max(2, v * (h - 4));
     const played = (i / n) < progress;
-    ctx.fillStyle = played ? "#4d9bff" : "#2a2d34";
+    ctx.fillStyle = played ? "#e6e7ea" : "#3b3c41";
     ctx.fillRect(i*bw + 0.5, (h - bh) / 2, Math.max(1, bw - 1.6), bh);
   }
 }
@@ -534,5 +467,7 @@ setInterval(() => {
 }, 100);
 window.addEventListener("resize", drawAll);
 </script>
+
+
 </body>
 </html>
