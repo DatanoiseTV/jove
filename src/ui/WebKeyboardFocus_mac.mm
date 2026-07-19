@@ -143,13 +143,5 @@ void disableHostKeyForwarding()
 
 #pragma clang diagnostic pop
 
-#else // ---- non-macOS: no WKWebView, nothing to do -------------------------
-
-namespace jove
-{
-bool installHostKeyForwarding(juce::Component&) { return true; }
-void setUiTextEditing(bool) {}
-void disableHostKeyForwarding() {}
-} // namespace jove
-
-#endif
+#endif // JUCE_MAC — non-mac stubs are header-only inlines in WebKeyboardFocus.h
+       // (this file is only compiled on APPLE; see CMakeLists)

@@ -20,17 +20,27 @@
 // whether an HTML text field is being edited, so typing preset names still works.
 namespace jove
 {
+#if JUCE_MAC
 // Install key-forwarding on the WKWebView found under `editorTopLevel`'s peer.
-// Returns true once the native view was found and swizzled (call again until it
-// succeeds — the WKWebView may not exist on the first paint). No-op off macOS.
+// Returns true once the native view was found and hooked (call again until it
+// succeeds — the WKWebView may not exist on the first paint).
 bool installHostKeyForwarding(juce::Component& editorTopLevel);
 
 // The UI calls this (via a native function) when a text input gains/loses focus.
 // While true, keys go to the WebView (typing); while false, they forward to the
-// host (musical typing). No-op off macOS.
+// host (musical typing).
 void setUiTextEditing(bool editing);
 
 // Stop forwarding (keys fall back to the WebView's default handling). Call on
-// editor teardown so a late key event can't touch freed state. No-op off macOS.
+// editor teardown so a late key event can't touch freed state.
 void disableHostKeyForwarding();
+#else
+// Non-mac: header-only no-op stubs. The implementation file is ObjC++
+// (WebKeyboardFocus_mac.mm) and is only compiled on APPLE, so the stubs MUST
+// live here — an unimplemented declaration links fine on macOS and then fails
+// only on the Linux CI leg (undefined reference at Jove.so link).
+inline bool installHostKeyForwarding(juce::Component&) { return true; }
+inline void setUiTextEditing(bool) {}
+inline void disableHostKeyForwarding() {}
+#endif
 } // namespace jove
