@@ -4,6 +4,17 @@ All notable changes to Jove are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [semver](https://semver.org/).
 
+## [1.1.1] - 2026-07-19
+
+### Added
+- CI (macOS + Linux build/test matrix) and a release pipeline: rolling
+  nightly prerelease from `main`, versioned releases from tags, with
+  downloadable macOS (universal, unsigned zip) and Linux artifacts
+
+### Fixed
+- Linux build: ObjC++ keyboard-forwarding glue is macOS-only now; non-mac
+  builds use header-only stubs (undefined references at link, caught by CI)
+
 ## [1.1.0] - 2026-07-07
 
 ### Added
