@@ -61,6 +61,8 @@ nav .spacer{flex:1}
 .dcard{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px;transition:border-color .15s}
 .dcard:hover{border-color:var(--line2)}
 .dcard.playing{border-color:var(--accent)}
+.dcard.feature{grid-column:1/-1}
+.dcard.feature .wave{height:72px}
 .dtop{display:flex;align-items:center;gap:12px}
 .pbtn{width:40px;height:40px;flex:0 0 40px;border-radius:50%;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;display:grid;place-items:center;transition:all .15s}
 .pbtn:hover{border-color:var(--accent)}
@@ -168,8 +170,9 @@ footer .spacer{flex:1}
 <section class="demos" id="demos"><div class="wrap">
   <h2>Sound</h2>
   <h3>Hear it.</h3>
-  <p class="lead">Eight factory presets playing short phrases, rendered offline through the
-     plugin’s own DSP. No external processing, no mastering — what you hear is what ships.</p>
+  <p class="lead">Sixteen short demos and one full track. Every sound in all of them is Jove,
+     rendered offline through the plugin’s DSP — no other instruments, no external
+     processing, no mastering.</p>
   <div class="dgrid" id="dgrid"></div>
 </div></section>
 
@@ -375,14 +378,23 @@ cd jove &amp;&amp; cmake -B build -DCMAKE_BUILD_TYPE=Release &amp;&amp; cmake --
 
 <script>
 const DEMOS = [
-  { id:"pad-warm-analog",  name:"Warm Analog",  cat:"PAD",   note:"slow chords, wide chorus + reverb" },
-  { id:"bass-growl",       name:"Growl Bass",   cat:"BASS",  note:"ladder filter + diode drive" },
-  { id:"arp-trance",       name:"Trance Arp",   cat:"ARP",   note:"latched chord, host-synced arp" },
-  { id:"lead-unison",      name:"Unison Lead",  cat:"LEAD",  note:"7-voice supersaw stack" },
-  { id:"pluck-bell",       name:"Bell Pluck",   cat:"PLUCK", note:"wavetable bells into ping-pong delay" },
-  { id:"seq-wobble",       name:"Wobble Seq",   cat:"SEQ",   note:"mod sequencer driving the cutoff" },
-  { id:"keys-clav",        name:"Funk Clav",    cat:"KEYS",  note:"tight envelope, LPG snap" },
-  { id:"amb-ghost-choir",  name:"Ghost Choir",  cat:"AMB",   note:"formant pulses, long tails" },
+  { id:"night-drive",  name:"Night Drive",  cat:"FULL TRACK", note:"33 bars, 13 layers — drums, bass, arp, pads and lead are all Jove", feature:true },
+  { id:"first-light",  name:"First Light",  cat:"PAD",   note:"four chords, filter opens across the phrase" },
+  { id:"growler",      name:"Growler",      cat:"BASS",  note:"swung line, ghost notes, filter ride" },
+  { id:"rush",         name:"Rush",         cat:"ARP",   note:"host-synced arp, brightness swell" },
+  { id:"neon-skyline", name:"Neon Skyline", cat:"LAYERED", note:"pad + sub bass + pluck answers" },
+  { id:"anthem",       name:"Anthem",       cat:"LEAD",  note:"7-voice supersaw, call and response" },
+  { id:"glass-garden", name:"Glass Garden", cat:"PLUCK", note:"bells written around the dotted delay" },
+  { id:"low-tide",     name:"Low Tide",     cat:"SEQ",   note:"mod sequencer stabs over moving roots" },
+  { id:"clav-machine", name:"Clav Machine", cat:"KEYS",  note:"swung sixteenths, ghost notes" },
+  { id:"vespers",      name:"Vespers",      cat:"AMB",   note:"choir swells from fifths to add9" },
+  { id:"machine",      name:"Machine",      cat:"PERC",  note:"a beat built from the percussion presets" },
+  { id:"patched",      name:"Patched",      cat:"PATCHBAY", note:"FM depth swells through the patchbay" },
+  { id:"waveshift",    name:"Waveshift",    cat:"WAVETABLE", note:"one oscillator scanned across 64 tables" },
+  { id:"corrosion",    name:"Corrosion",    cat:"BASS",  note:"driven sixteenths, chromatic approaches" },
+  { id:"warehouse",    name:"Warehouse",    cat:"STAB",  note:"rave stabs, pitch jumps, delay throws" },
+  { id:"drift",        name:"Drift",        cat:"DRONE", note:"low fifth, harmonics bloom, slow filter arc" },
+  { id:"transit",      name:"Transit",      cat:"LAYERED", note:"a compact arrangement in sixteen bars" },
 ];
 
 const grid = document.getElementById("dgrid");
@@ -416,7 +428,7 @@ function drawAll(){ document.querySelectorAll(".wave").forEach(cv => drawWave(cv
 
 DEMOS.forEach(d => {
   const card = document.createElement("div");
-  card.className = "dcard";
+  card.className = "dcard" + (d.feature ? " feature" : "");
   card.innerHTML = `
     <div class="dtop">
       <button class="pbtn" aria-label="play ${d.name}">
