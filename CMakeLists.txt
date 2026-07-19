@@ -62,10 +62,12 @@ set_target_properties(JoveUI PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 target_sources(Jove PRIVATE
     src/PluginProcessor.cpp
     src/ui/WebEditor.cpp
-    src/ui/WebKeyboardFocus_mac.mm
     src/engine/SynthEngine.cpp
     src/engine/SynthPresets.cpp
     src/presets/PresetManager.cpp)
+if(APPLE) # ObjC++ host-key-forwarding glue; non-mac uses the header's stubs
+    target_sources(Jove PRIVATE src/ui/WebKeyboardFocus_mac.mm)
+endif()
 
 target_include_directories(Jove PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -130,16 +132,21 @@ if(JOVE_TESTS)
     enable_testing()
 
     # APVTS <-> patch round-trip (needs JUCE: constructs the real processor).
+    # Apple/Windows only: on Linux the WebView subprocess-helper header from
+    # juceaide is generated for plugin targets, not console apps.
+    if(APPLE OR WIN32)
     juce_add_console_app(jove_param_roundtrip PRODUCT_NAME "jove_param_roundtrip")
     juce_generate_juce_header(jove_param_roundtrip)
     target_sources(jove_param_roundtrip PRIVATE
         tests/param_roundtrip.cpp
         src/PluginProcessor.cpp
         src/ui/WebEditor.cpp
-        src/ui/WebKeyboardFocus_mac.mm
         src/engine/SynthEngine.cpp
         src/engine/SynthPresets.cpp
         src/presets/PresetManager.cpp)
+    if(APPLE)
+        target_sources(jove_param_roundtrip PRIVATE src/ui/WebKeyboardFocus_mac.mm)
+    endif()
     target_include_directories(jove_param_roundtrip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_compile_definitions(jove_param_roundtrip PRIVATE
         JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
@@ -156,16 +163,19 @@ if(JOVE_TESTS)
         tests/preset_dump.cpp
         src/PluginProcessor.cpp
         src/ui/WebEditor.cpp
-        src/ui/WebKeyboardFocus_mac.mm
         src/engine/SynthEngine.cpp
         src/engine/SynthPresets.cpp
         src/presets/PresetManager.cpp)
+    if(APPLE)
+        target_sources(jove_preset_dump PRIVATE src/ui/WebKeyboardFocus_mac.mm)
+    endif()
     target_include_directories(jove_preset_dump PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_compile_definitions(jove_preset_dump PRIVATE
         JUCE_WEB_BROWSER=1 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
     target_link_libraries(jove_preset_dump PRIVATE
         JoveUI juce::juce_audio_utils juce::juce_dsp juce::juce_gui_extra
         juce::juce_recommended_config_flags juce::juce_recommended_warning_flags)
+    endif() # APPLE OR WIN32
 
     # JUCE-free engine + preset audit (no NaN/clip/silence/stuck-voice).
     add_executable(jove_engine_audit tests/engine_audit.cpp
